@@ -7,6 +7,7 @@ Holiday hosting/guest matching platform for Lithuania.
 ## Phase 1: Core Matching Flow (Priority: High) - COMPLETE
 
 ### Flow 3: Host/Guest Matching
+
 - [x] **Invitations UI** - Display pending invitations in Dashboard/Matches page
 - [x] **Accept/Decline UI** - Buttons to respond to invitations
 - [x] **Match confirmation** - Success state when both parties agree
@@ -14,6 +15,7 @@ Holiday hosting/guest matching platform for Lithuania.
 - [x] **Date picker in invite** - User selects date from profile's available dates
 
 ### Flow 4: Identity Verification
+
 - [x] **Verification UI** - Add "Verify Identity" button to Dashboard
 - [x] **Upload component** - ID photo + selfie capture/upload
 - [x] **Connect to face service** - Call `/api/face/verify` endpoint
@@ -25,6 +27,7 @@ Holiday hosting/guest matching platform for Lithuania.
 ## Phase 2: Communication (Priority: Medium) - COMPLETE
 
 ### Flow 5: Messaging
+
 - [x] **Chat UI component** - Real-time message thread in Dashboard
 - [x] **Message list** - Conversations in sidebar + dedicated MessagesPage
 - [x] **Unread indicators** - Badge count in nav + TopBar
@@ -35,6 +38,7 @@ Holiday hosting/guest matching platform for Lithuania.
 ## Phase 3: UX Improvements (Priority: Medium) - IN PROGRESS
 
 ### Browse Enhancements
+
 - [x] **Shadcn Select dropdowns** - Full clickable area for filters
 - [x] **Tab switch optimization** - No "0 found" flash when switching host/guest
 - [ ] **Map view** - Show hosts on interactive map
@@ -42,12 +46,15 @@ Holiday hosting/guest matching platform for Lithuania.
 - [ ] **Compatibility score** - Calculate match based on vibes/dates/languages
 
 ### Navigation & Layout
+
 - [x] **Sidebar redesign** - AppSidebar with proper nav items
 - [x] **TopBar** - Search + notifications + Clerk UserButton
 - [x] **Dashboard overview** - Stats cards + quick actions
 - [x] **Settings page** - Profile editing + account settings in tabs
+- [x] **Toast notifications** - Sonner toasts for user feedback
 
 ### Registration Improvements
+
 - [x] **Photo upload** - ~~Add during registration (currently only in edit)~~ Fixed `generateUploadUrl` to work during registration
 - [ ] **Contact info** - Phone number collection
 - [ ] **Interests/hobbies** - Beyond just "vibes"
@@ -55,32 +62,43 @@ Holiday hosting/guest matching platform for Lithuania.
 - [ ] **Onboarding tour** - Tooltips for first-time users
 
 ### Profile Enhancements
+
 - [x] **Photo gallery** - Multiple photos per profile (up to 5, with main photo selection)
 - [ ] **Last active** - Show when user was last online
 - [ ] **Response rate** - Track invitation response speed
 
 ### Localization (NEW - from znote.md)
+
 - [x] **i18n setup** - 4 languages (LT, EN, UA, RU) in single TypeScript file
 - [x] **LanguageSelector** - Navbar component to switch languages
 - [x] **EDITING.md** - Guide for non-technical content editing
 - [x] **Wire up translations** - LandingPage now uses `useLocale()` for all text
+
+### Data Sync
+
+- [x] **Clerk → Convex webhook** - Auto-sync user creation/updates/deletions
+- [x] **Convex → Clerk delete** - `deleteUser` action removes from both systems
+- [x] **Cascading deletes** - User deletion removes all related data (profile, messages, etc.)
 
 ---
 
 ## Phase 4: Production Readiness (Priority: Low)
 
 ### Infrastructure
+
 - [ ] **Error boundaries** - Graceful error handling in React
 - [ ] **Analytics** - Track user flows and conversions
 - [ ] **SEO** - Meta tags, OpenGraph, sitemap
 - [ ] **PWA** - Installable app with offline support
 
 ### Security
+
 - [ ] **Rate limiting** - Prevent spam invitations
 - [ ] **Report user** - Flag inappropriate profiles
 - [ ] **Block user** - Prevent contact from specific users
 
 ### Legal
+
 - [ ] **Terms of Service** - Complete the /terms page
 - [ ] **Privacy Policy** - GDPR compliance
 - [ ] **Cookie consent** - Banner for EU users
@@ -118,6 +136,11 @@ Holiday hosting/guest matching platform for Lithuania.
 - [x] Multi-user test fixtures (hostPage, guestPage, guest2Page)
 - [x] Clerk test users created via API script
 - [x] Face verification API response format fix
+- [x] Migrated to Next.js 16 App Router
+- [x] Switched from Convex Auth to Clerk
+- [x] Clerk ↔ Convex bi-directional sync (webhooks)
+- [x] Toast notifications (Sonner)
+- [x] DevPanel for development testing
 
 ---
 
@@ -126,3 +149,4 @@ Holiday hosting/guest matching platform for Lithuania.
 - [ ] Update root CLAUDE.md to mention vitest for Convex tests
 - [ ] Consider migrating some tests to bun test for speed
 - [ ] Remove unused dependencies from package.json
+- [ ] Clean up old Bun server files (src/ folder)

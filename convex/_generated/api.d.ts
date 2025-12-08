@@ -11,11 +11,13 @@
 import type * as email from "../email.js";
 import type * as events from "../events.js";
 import type * as files from "../files.js";
+import type * as http from "../http.js";
 import type * as invitations from "../invitations.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as messages from "../messages.js";
 import type * as profiles from "../profiles.js";
 import type * as seed from "../seed.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -27,11 +29,13 @@ declare const fullApi: ApiFromModules<{
   email: typeof email;
   events: typeof events;
   files: typeof files;
+  http: typeof http;
   invitations: typeof invitations;
   "lib/auth": typeof lib_auth;
   messages: typeof messages;
   profiles: typeof profiles;
   seed: typeof seed;
+  users: typeof users;
 }>;
 
 /**

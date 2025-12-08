@@ -11,18 +11,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Clerk ↔ Convex bi-directional sync** via webhooks
+  - `convex/http.ts` - HTTP endpoint for Clerk webhooks at `/clerk-users-webhook`
+  - `convex/users.ts` - User sync handlers (upsert/delete)
+  - Cascading deletes: when user deleted in Clerk, removes profile, conversations, messages, invitations, events
+  - `deleteUser` action to delete from app (calls Clerk API, triggers webhook)
+- Sonner toast notifications for better UI feedback
+- DevPanel component for development testing
+
+### Changed
+
+- Migrated from Bun server to **Next.js 16 App Router**
+- Switched auth from Convex Auth to **Clerk**
+- Face verification now uses client-side `@vladmandic/face-api` instead of Python service
+- Updated to React 19, Tailwind CSS 4
+
+### Technical
+
+- Added `svix` for webhook signature verification
+- Added `@clerk/backend` for Clerk API calls
+- Convex environment variables: `CLERK_WEBHOOK_SECRET`, `CLERK_SECRET_KEY`
+
+---
+
+## [0.2.0] - 2024-12-07
+
+### Added
+
 - Face verification API with EdgeFace-XXS + YuNet ONNX models
 - Bun routes for `/api/face/health`, `/api/face/detect`, `/api/face/verify`
 - Concurrently dev script to run Bun + Python face service together
 - TODO.md for tracking features across phases
 - CHANGELOG.md for release tracking
 - Organized docs folder for documentation files
+- E2E testing with Stagehand v3 + Gemini 2.5 Flash
+- Multi-user test fixtures (hostPage, guestPage, guest2Page)
 
 ### Changed
 
 - Moved documentation files to `docs/` folder
 - Removed redundant `biome.jsonc` (keeping `biome.json`)
-- Bun server now runs on port 3001 (configurable via PORT env)
 
 ### Technical
 
@@ -64,7 +92,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History
 
-| Version | Date | Summary |
-|---------|------|---------|
-| 0.1.0 | 2024-12-03 | Initial release - auth, profiles, browse, invitations |
-| Unreleased | - | Face verification, docs organization |
+| Version    | Date       | Summary                                              |
+| ---------- | ---------- | ---------------------------------------------------- |
+| 0.1.0      | 2024-12-03 | Initial release - auth, profiles, browse, invitations |
+| 0.2.0      | 2024-12-07 | Face verification, E2E testing, docs organization    |
+| Unreleased | -          | Next.js App Router, Clerk auth, bi-directional sync  |

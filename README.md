@@ -25,6 +25,7 @@ Nešvęsk Vienas helps people find companions for holiday celebrations. Hosts ca
 - **Face Verification** - Optional photo verification for trust
 - **Event Management** - Create and manage holiday events
 - **Multi-language** - Lithuanian, English, Ukrainian, Russian
+- **Bi-directional Sync** - Clerk ↔ Convex user data stays in sync via webhooks
 
 ## Getting Started
 
@@ -52,20 +53,36 @@ Create a `.env.local` file with the following:
 
 ```env
 # Convex
-CONVEX_DEPLOYMENT=
-NEXT_PUBLIC_CONVEX_URL=
+CONVEX_DEPLOYMENT=dev:your-deployment-name
+NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
 
 # Clerk
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
-CLERK_SECRET_KEY=
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
 
 # Resend (for emails)
-RESEND_API_KEY=
+RESEND_API_KEY=re_...
 ```
+
+Also set these in your **Convex Dashboard** (Settings → Environment Variables):
+
+```env
+CLERK_WEBHOOK_SECRET=whsec_...   # From Clerk webhook endpoint
+CLERK_SECRET_KEY=sk_test_...     # Same as above
+```
+
+### Clerk Webhook Setup
+
+To enable bi-directional sync between Clerk and Convex:
+
+1. Go to **Clerk Dashboard** → **Webhooks** → **+ Add Endpoint**
+2. Set **Endpoint URL**: `https://YOUR-DEPLOYMENT.convex.site/clerk-users-webhook`
+3. Select events: `user.created`, `user.updated`, `user.deleted`
+4. Copy the **Signing Secret** and set it as `CLERK_WEBHOOK_SECRET` in Convex
 
 ## Project Structure
 
-```
+```text
 app/                    # Next.js App Router pages
   (landing)/           # Landing page
   (dashboard)/         # Authenticated pages
@@ -87,6 +104,8 @@ convex/                # Convex backend
   messages.ts          # Messaging logic
   events.ts            # Event management
   invitations.ts       # Invitation system
+  users.ts             # User sync (Clerk webhooks)
+  http.ts              # HTTP endpoints (webhooks)
 contexts/              # React contexts
 hooks/                 # Custom hooks
 lib/                   # Utilities
@@ -100,7 +119,9 @@ bun dev:next     # Start only Next.js
 bun dev:convex   # Start only Convex
 bun build        # Production build
 bun start        # Start production server
-bun lint         # Run ESLint
+bun lint         # Run Biome linter
+bun lint:fix     # Fix lint issues
+bun typecheck    # Run TypeScript check
 ```
 
 ## Code Quality
@@ -122,6 +143,7 @@ See the [docs](./docs) folder for additional documentation:
 - [Planning Document](./docs/holiday-platform-planning-2.md) - Full project specification
 - [Changelog](./docs/CHANGELOG.md) - Version history
 - [TODO](./docs/TODO.md) - Upcoming tasks
+- [Editing Guide](./docs/EDITING.md) - For non-technical content editors
 
 ## License
 
