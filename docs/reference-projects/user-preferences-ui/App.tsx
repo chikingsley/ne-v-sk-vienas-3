@@ -1,6 +1,6 @@
 import type React from "react";
 import { useState } from "react";
-import PreferenceCard from "./components/PreferenceCard";
+import PreferenceCard from "./components/preference-card";
 import type { PreferenceOption } from "./types";
 
 // Define the data for the cards
