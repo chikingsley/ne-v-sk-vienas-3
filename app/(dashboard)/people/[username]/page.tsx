@@ -20,11 +20,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 
-type ConnectionStatus = {
-  status: string;
-  date?: string;
-  invitationId?: Id<"invitations">;
-} | null;
+type ConnectionStatus =
+  | {
+      status: string;
+      date?: string;
+      invitationId?: Id<"invitations">;
+    }
+  | null
+  | undefined;
 
 // Connection card component
 function ConnectionCard({

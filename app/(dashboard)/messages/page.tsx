@@ -65,6 +65,10 @@ type EventCard = {
   note?: string;
 };
 
+// Type for conversation from getConversations query
+type ConversationsResult = typeof api.messages.getConversations._returnType;
+type ConversationSummary = NonNullable<ConversationsResult>[number];
+
 // Utility functions
 function formatTime(timestamp: number): string {
   const date = new Date(timestamp);
@@ -575,9 +579,7 @@ function ConversationView({
   onShareEventDetails,
   isSendingCard,
 }: {
-  conversation: NonNullable<
-    ReturnType<typeof useQuery<typeof api.messages.getConversations>>[number]
-  >;
+  conversation: ConversationSummary;
   messages:
     | ReturnType<typeof useQuery<typeof api.messages.getConversationMessages>>
     | undefined;
@@ -711,9 +713,7 @@ function MainContentArea({
   isSendingCard,
 }: {
   activeRequest: Extract<SidebarItem, { type: "request" }> | null;
-  activeConversation:
-    | ReturnType<typeof useQuery<typeof api.messages.getConversations>>[number]
-    | null;
+  activeConversation: ConversationSummary | null | undefined;
   activeRequestProfile: unknown;
   isResponding: boolean;
   onRespond: (accept: boolean) => void;
