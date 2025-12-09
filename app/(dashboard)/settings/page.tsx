@@ -30,10 +30,12 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { useLocale } from "@/contexts/locale-context";
 import { api } from "@/convex/_generated/api";
 import { CITIES, HOLIDAY_DATES, LANGUAGES } from "@/lib/types";
 
 export default function SettingsPage() {
+  const { t } = useLocale();
   const { user } = useUser();
   const profile = useQuery(api.profiles.getMyProfile);
   const upsertProfile = useMutation(api.profiles.upsertProfile);

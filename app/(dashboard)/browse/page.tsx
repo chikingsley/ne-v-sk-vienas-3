@@ -23,11 +23,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useLocale } from "@/contexts/locale-context";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { CITIES, HOLIDAY_DATES, LANGUAGES } from "@/lib/types";
 
 export default function BrowsePage() {
+  const { t } = useLocale();
   const [activeTab, setActiveTab] = useState<"host" | "guest">("host");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
@@ -57,13 +59,13 @@ export default function BrowsePage() {
         toUserId: userId,
         date: "24 Dec", // TODO: Let user pick date
       });
-      toast.success("Request sent!");
+      toast.success(t.requestSent);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       if (message.includes("already sent")) {
-        toast.error("You've already sent a request to this person!");
+        toast.error(t.alreadySentRequest);
       } else {
-        toast.error(`Failed to send request: ${message}`);
+        toast.error(`${t.failedToSendRequest}: ${message}`);
       }
     }
   };
