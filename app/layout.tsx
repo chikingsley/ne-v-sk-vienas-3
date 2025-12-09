@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import {
   Courier_Prime,
@@ -68,6 +69,7 @@ export default function RootLayout({
           <LocaleProvider>{children}</LocaleProvider>
           <DevPanel />
           <Toaster />
+          <Analytics />
         </ConvexClientProvider>
       </body>
     </html>
