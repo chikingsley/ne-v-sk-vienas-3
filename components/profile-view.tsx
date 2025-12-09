@@ -126,12 +126,12 @@ function PhotoCarousel({
             <ChevronRight className="h-6 w-6" />
           </button>
           <div className="-translate-x-1/2 absolute bottom-4 left-1/2 flex gap-1.5">
-            {photos.map((_, index) => (
+            {photos.map((photo, index) => (
               <button
                 className={`h-2 w-2 rounded-full transition-colors ${
                   index === currentIndex ? "bg-white" : "bg-white/50"
                 }`}
-                key={`photo-${index}`}
+                key={photo}
                 onClick={() => onSelect(index)}
                 type="button"
               />

@@ -70,10 +70,17 @@ const language = v.union(
   v.literal("Russian")
 );
 const holidayDate = v.union(
+  v.literal("23 Dec"),
   v.literal("24 Dec"),
   v.literal("25 Dec"),
   v.literal("26 Dec"),
-  v.literal("31 Dec")
+  v.literal("27 Dec"),
+  v.literal("28 Dec"),
+  v.literal("29 Dec"),
+  v.literal("30 Dec"),
+  v.literal("31 Dec"),
+  v.literal("1 Jan"),
+  v.literal("2 Jan")
 );
 const concept = v.union(
   v.literal("Party"),

@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
+import { useConvexAuth } from "convex/react";
 import {
   ArrowRight,
   Calendar,
@@ -15,7 +15,7 @@ import { Navbar } from "@/components/navbar";
 import { useLocale } from "@/contexts/locale-context";
 
 export default function LandingPage() {
-  const { isSignedIn } = useAuth();
+  const { isAuthenticated: isSignedIn } = useConvexAuth();
   const { t } = useLocale();
 
   return (

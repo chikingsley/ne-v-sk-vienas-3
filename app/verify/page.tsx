@@ -451,6 +451,30 @@ export default function VerifyPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="mx-auto max-w-2xl px-4">
+        {/* Back/Skip link at top */}
+        <div className="mb-6">
+          <Link
+            className="inline-flex items-center gap-1 text-gray-600 text-sm hover:text-gray-900"
+            href="/browse"
+          >
+            <svg
+              aria-hidden="true"
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M15 19l-7-7 7-7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Back to Browse
+          </Link>
+        </div>
+
         <div className="mb-8 text-center">
           <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
             <ShieldCheck className="h-8 w-8 text-blue-600" />
@@ -534,18 +558,25 @@ export default function VerifyPage() {
           </div>
         )}
 
-        <div className="mt-8 flex justify-center gap-4">
-          {state === "failed" && (
-            <Button onClick={handleReset} variant="outline">
-              Try Again
+        <div className="mt-8 flex flex-col items-center gap-4">
+          <div className="flex gap-4">
+            {state === "failed" && (
+              <Button onClick={handleReset} variant="outline">
+                Try Again
+              </Button>
+            )}
+            <VerifyButton
+              disabled={!(idPhoto && selfie) || isVerifying || !modelsLoaded}
+              isVerifying={isVerifying}
+              modelsLoaded={modelsLoaded}
+              onClick={handleVerify}
+            />
+          </div>
+          <Link href="/browse">
+            <Button className="text-gray-500" variant="ghost">
+              Skip for now
             </Button>
-          )}
-          <VerifyButton
-            disabled={!(idPhoto && selfie) || isVerifying || !modelsLoaded}
-            isVerifying={isVerifying}
-            modelsLoaded={modelsLoaded}
-            onClick={handleVerify}
-          />
+          </Link>
         </div>
 
         <p className="mt-6 text-center text-gray-500 text-xs">

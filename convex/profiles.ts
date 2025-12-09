@@ -5,6 +5,9 @@ import { getCurrentUserId } from "./lib/auth";
 type Language = "Lithuanian" | "English" | "Ukrainian" | "Russian";
 type HolidayDate = "24 Dec" | "25 Dec" | "26 Dec" | "31 Dec";
 
+// Top-level regex for username validation
+const USERNAME_REGEX = /^[a-z0-9-]+$/;
+
 // Get current user's profile
 export const getMyProfile = query({
   args: {},
@@ -255,10 +258,17 @@ export const upsertProfile = mutation({
     ),
     availableDates: v.array(
       v.union(
+        v.literal("23 Dec"),
         v.literal("24 Dec"),
         v.literal("25 Dec"),
         v.literal("26 Dec"),
-        v.literal("31 Dec")
+        v.literal("27 Dec"),
+        v.literal("28 Dec"),
+        v.literal("29 Dec"),
+        v.literal("30 Dec"),
+        v.literal("31 Dec"),
+        v.literal("1 Jan"),
+        v.literal("2 Jan")
       )
     ),
     dietaryInfo: v.array(v.string()),
@@ -407,7 +417,7 @@ function isValidUsernameFormat(username: string): boolean {
   if (normalized.length < 3 || normalized.length > 30) {
     return false;
   }
-  if (!/^[a-z0-9-]+$/.test(normalized)) {
+  if (!USERNAME_REGEX.test(normalized)) {
     return false;
   }
   if (normalized.startsWith("-") || normalized.endsWith("-")) {

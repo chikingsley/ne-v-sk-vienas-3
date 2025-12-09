@@ -6,10 +6,10 @@ export default function Landing2Type() {
     <div className="relative min-h-screen w-full overflow-hidden bg-[#0a2342] text-white selection:bg-amber-500/30">
       {/* CSS Snow Effect */}
       <div className="absolute inset-0 z-0 opacity-50">
-        {[...new Array(50)].map((_, i) => (
+        {Array.from({ length: 50 }, (_, i) => `snow-${i}`).map((id) => (
           <div
             className="absolute animate-pulse rounded-full bg-white"
-            key={`snow-${i}`}
+            key={id}
             style={{
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,

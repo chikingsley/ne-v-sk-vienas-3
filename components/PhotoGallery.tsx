@@ -193,10 +193,10 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
                 {slot.type === "photo" && uploadingIndex !== index && (
                   <div className="absolute inset-0 flex items-center justify-center gap-1 rounded-lg bg-black/0 opacity-0 transition-all group-hover:bg-black/40 group-hover:opacity-100">
                     {/* Set as main button */}
-                    {slot.url !== mainPhoto && (
+                    {slot.url !== mainPhoto && slot.url && (
                       <button
                         className="rounded-full bg-white/90 p-1.5 text-amber-600 shadow-sm transition-colors hover:bg-white"
-                        onClick={() => handleSetMain(slot.url!)}
+                        onClick={() => handleSetMain(slot.url)}
                         title="Set as main photo"
                         type="button"
                       >
@@ -204,14 +204,16 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
                       </button>
                     )}
                     {/* Delete button */}
-                    <button
-                      className="rounded-full bg-white/90 p-1.5 text-red-600 shadow-sm transition-colors hover:bg-white"
-                      onClick={() => handleRemovePhoto(slot.url!)}
-                      title="Remove photo"
-                      type="button"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
+                    {slot.url && (
+                      <button
+                        className="rounded-full bg-white/90 p-1.5 text-red-600 shadow-sm transition-colors hover:bg-white"
+                        onClick={() => handleRemovePhoto(slot.url)}
+                        title="Remove photo"
+                        type="button"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
                 )}
 

@@ -60,7 +60,18 @@ export type City =
 
 export type Language = "Lithuanian" | "English" | "Ukrainian" | "Russian";
 
-export type HolidayDate = "24 Dec" | "25 Dec" | "26 Dec" | "31 Dec";
+export type HolidayDate =
+  | "23 Dec"
+  | "24 Dec"
+  | "25 Dec"
+  | "26 Dec"
+  | "27 Dec"
+  | "28 Dec"
+  | "29 Dec"
+  | "30 Dec"
+  | "31 Dec"
+  | "1 Jan"
+  | "2 Jan";
 
 export type Concept = "Party" | "Dinner" | "Hangout";
 
@@ -131,10 +142,17 @@ export const LANGUAGES: Language[] = [
 ];
 
 export const HOLIDAY_DATES: HolidayDate[] = [
+  "23 Dec",
   "24 Dec",
   "25 Dec",
   "26 Dec",
+  "27 Dec",
+  "28 Dec",
+  "29 Dec",
+  "30 Dec",
   "31 Dec",
+  "1 Jan",
+  "2 Jan",
 ];
 
 export const CONCEPTS: Concept[] = ["Party", "Dinner", "Hangout"];

@@ -85,10 +85,12 @@ Holiday hosting/guest matching platform for Lithuania.
 
 ### Navigation Redesign
 
-- [ ] **Switch from sidebar to top bar navigation** - More screen real estate
-  - Reference: `docs/couchsurfing-reimagined/components/Navbar.tsx`
-  - Items: Dashboard | Inbox | Profile | Settings
-  - Keep inbox badge count
+- [x] **Switch from sidebar to top bar navigation** - More screen real estate
+  - Created `components/dashboard-navbar.tsx` - Top navbar with logo, nav items, language selector, user button
+  - Updated `app/(dashboard)/layout.tsx` - Removed sidebar, uses full-width top navbar
+  - Items: Home | Messages | Profile | Settings (with badge count on Messages)
+  - Mobile responsive with hamburger menu
+  - Old `components/app-sidebar.tsx` and `components/top-bar.tsx` can be removed (kept for reference)
 
 ### Username Routing
 
@@ -126,8 +128,11 @@ Holiday hosting/guest matching platform for Lithuania.
 
 ### Onboarding Improvements
 
-- [ ] **Extended date range** - Dec 23 to Jan 2 (currently only 24, 25, 26, 31)
-- [ ] **Inline date selection in preference cards** - Dates should expand within/below the selected preference card itself (not in a separate colored box). When user selects "Can Host" or "Looking for Host", the date picker should feel like part of that card's expanded state - more cohesive single-choice experience
+- [x] **Extended date range** - Dec 23 to Jan 2 (was only 24, 25, 26, 31)
+- [x] **Inline date selection in preference cards** - Dates expand within the selected preference card with Framer Motion animations
+  - [x] **Prototype built** - See `/preference-cards` experiment
+  - [x] **Color coding** - Green (yes), Amber (maybe), Red (no)
+  - [x] **Applied to real onboarding** - Updated `app/onboarding/page.tsx`
 - [ ] **Typeahead city search** - Instead of dropdown, autocomplete Lithuanian cities
 - [ ] **Profile completion indicator** - "You're 80% done!" encouragement UI
 - [ ] **State persistence** - Auto-save each step to Convex (no data loss on refresh)
@@ -183,6 +188,10 @@ Holiday hosting/guest matching platform for Lithuania.
 
 ### Verification Enhancements
 
+- [x] **Exit/skip option on verify page** - "Back to Browse" link + "Skip for now" button
+- [ ] **ID photo scanning guide** - Rectangle overlay on camera to help align ID card, optional edge detection
+  - Simple: Static rectangle guide (user aligns manually)
+  - Advanced: OpenCV.js or TensorFlow.js for auto edge detection
 - [ ] **Phone verification** - Via SMS or authenticator app (Clerk supports this)
 - [ ] **Email verification badge** - Show if email is verified
 - [ ] **Photo verification badge** - Current face verification

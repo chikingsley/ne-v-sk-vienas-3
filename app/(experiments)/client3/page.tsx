@@ -52,11 +52,8 @@ export default function ClientLanding3() {
 
             {/* Scalloped edge divider */}
             <div className="mx-auto mb-6 flex w-48 justify-between">
-              {[...new Array(12)].map((_, i) => (
-                <div
-                  className="h-2 w-2 rounded-full bg-sage/40"
-                  key={`dot-${i}`}
-                />
+              {Array.from({ length: 12 }, (_, i) => `dot-${i}`).map((id) => (
+                <div className="h-2 w-2 rounded-full bg-sage/40" key={id} />
               ))}
             </div>
 

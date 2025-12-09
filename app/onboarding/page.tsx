@@ -1,17 +1,20 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { useMutation, useQuery } from "convex/react";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  HelpCircle,
+  Loader2,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { PhotoGallery } from "@/components/PhotoGallery";
-import {
-  GUEST_OPTIONS,
-  HOSTING_OPTIONS,
-  PreferenceCard,
-} from "@/components/preference-card";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,11 +27,275 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/convex/_generated/api";
+import type { HolidayDate } from "@/lib/types";
 import { CITIES, HOLIDAY_DATES, LANGUAGES } from "@/lib/types";
 
 type Step = 1 | 2 | 3 | 4;
 
-// Step 1: Preferences
+type IconType = "check" | "question" | "x";
+type ColorType = "green" | "amber" | "red";
+
+type PreferenceOption = {
+  id: string;
+  title: string;
+  description: string;
+  iconType: IconType;
+  colorType: ColorType;
+  showDates: boolean;
+};
+
+const HOSTING_OPTIONS: PreferenceOption[] = [
+  {
+    id: "can-host",
+    title: "I Can Host",
+    description: "I'm eager to welcome guests",
+    iconType: "check",
+    colorType: "green",
+    showDates: true,
+  },
+  {
+    id: "may-host",
+    title: "Maybe",
+    description: "Depending on circumstances",
+    iconType: "question",
+    colorType: "amber",
+    showDates: true,
+  },
+  {
+    id: "cant-host",
+    title: "Not Hosting",
+    description: "Not able to host this season",
+    iconType: "x",
+    colorType: "red",
+    showDates: false,
+  },
+];
+
+const GUEST_OPTIONS: PreferenceOption[] = [
+  {
+    id: "looking",
+    title: "Looking for Host",
+    description: "Looking for somewhere to celebrate",
+    iconType: "check",
+    colorType: "green",
+    showDates: true,
+  },
+  {
+    id: "maybe-guest",
+    title: "Open to It",
+    description: "Might be interested",
+    iconType: "question",
+    colorType: "amber",
+    showDates: true,
+  },
+  {
+    id: "not-looking",
+    title: "Not Looking",
+    description: "Not looking for a host",
+    iconType: "x",
+    colorType: "red",
+    showDates: false,
+  },
+];
+
+const COLOR_SCHEMES = {
+  green: {
+    border: "border-green-500",
+    bg: "bg-green-50",
+    iconBg: "bg-green-600",
+    title: "text-green-900",
+    desc: "text-green-700",
+    dateSelected: "bg-green-600 text-white border-green-600",
+    dateUnselected:
+      "bg-white border-green-300 text-green-700 hover:bg-green-50 hover:border-green-400",
+  },
+  amber: {
+    border: "border-amber-500",
+    bg: "bg-amber-50",
+    iconBg: "bg-amber-500",
+    title: "text-amber-900",
+    desc: "text-amber-700",
+    dateSelected: "bg-amber-500 text-white border-amber-500",
+    dateUnselected:
+      "bg-white border-amber-300 text-amber-700 hover:bg-amber-50 hover:border-amber-400",
+  },
+  red: {
+    border: "border-red-500",
+    bg: "bg-red-50",
+    iconBg: "bg-red-600",
+    title: "text-red-900",
+    desc: "text-red-700",
+    dateSelected: "bg-red-600 text-white border-red-600",
+    dateUnselected:
+      "bg-white border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400",
+  },
+} as const;
+
+// Memoized icon component
+const IconBadge = memo(function IconBadgeInner({
+  type,
+  colorType,
+  isSelected,
+}: {
+  type: IconType;
+  colorType: ColorType;
+  isSelected: boolean;
+}) {
+  const bgColor = isSelected ? COLOR_SCHEMES[colorType].iconBg : "bg-gray-400";
+
+  return (
+    <div className={`rounded-full p-2.5 ${bgColor} transition-colors`}>
+      {type === "check" && (
+        <Check className="h-5 w-5 text-white" strokeWidth={3} />
+      )}
+      {type === "question" && (
+        <HelpCircle className="h-5 w-5 text-white" strokeWidth={3} />
+      )}
+      {type === "x" && <X className="h-5 w-5 text-white" strokeWidth={3} />}
+    </div>
+  );
+});
+
+// Memoized date button
+const DateButton = memo(function DateButtonInner({
+  date,
+  isSelected,
+  colorType,
+  onToggle,
+}: {
+  date: HolidayDate;
+  isSelected: boolean;
+  colorType: ColorType;
+  onToggle: (date: HolidayDate) => void;
+}) {
+  const c = COLOR_SCHEMES[colorType];
+
+  return (
+    <motion.button
+      animate={{ opacity: 1, scale: 1 }}
+      className={`rounded-md border px-2 py-1 font-medium text-xs transition-colors ${
+        isSelected ? c.dateSelected : c.dateUnselected
+      }`}
+      initial={{ opacity: 0, scale: 0.8 }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onToggle(date);
+      }}
+      type="button"
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      {date}
+    </motion.button>
+  );
+});
+
+// Memoized preference card with inline dates
+const PreferenceCardWithDates = memo(function PreferenceCardInner({
+  option,
+  isSelected,
+  onSelect,
+  selectedDates,
+  onToggleDate,
+}: {
+  option: PreferenceOption;
+  isSelected: boolean;
+  onSelect: (id: string) => void;
+  selectedDates: HolidayDate[];
+  onToggleDate: (date: HolidayDate) => void;
+}) {
+  const c = COLOR_SCHEMES[option.colorType];
+  const showDates = isSelected && option.showDates;
+
+  const handleSelect = useCallback(() => {
+    onSelect(option.id);
+  }, [onSelect, option.id]);
+
+  return (
+    <div
+      className={`relative overflow-hidden rounded-xl border-2 transition-colors duration-200 ${
+        isSelected
+          ? `${c.border} ${c.bg} shadow-md`
+          : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm"
+      }`}
+    >
+      <button
+        className="flex w-full cursor-pointer flex-col items-center p-4 text-center"
+        onClick={handleSelect}
+        type="button"
+      >
+        <div className="mb-2">
+          <IconBadge
+            colorType={option.colorType}
+            isSelected={isSelected}
+            type={option.iconType}
+          />
+        </div>
+        <h3
+          className={`mb-1 font-bold text-sm ${
+            isSelected ? c.title : "text-gray-800"
+          }`}
+        >
+          {option.title}
+        </h3>
+        <p className={`text-xs ${isSelected ? c.desc : "text-gray-500"}`}>
+          {option.description}
+        </p>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {showDates && (
+          <motion.div
+            animate={{ height: "auto", opacity: 1 }}
+            className={`border-t ${c.border} px-3 pb-3`}
+            exit={{ height: 0, opacity: 0 }}
+            initial={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            <motion.div
+              animate={{ y: 0, opacity: 1 }}
+              initial={{ y: -10, opacity: 0 }}
+              transition={{ delay: 0.1, duration: 0.2 }}
+            >
+              <p className={`mb-2 pt-2 font-medium text-xs ${c.title}`}>
+                Select dates:
+              </p>
+              <div className="flex flex-wrap gap-1">
+                {HOLIDAY_DATES.map((date, index) => (
+                  <motion.div
+                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    key={date}
+                    transition={{ delay: 0.03 * index, duration: 0.15 }}
+                  >
+                    <DateButton
+                      colorType={option.colorType}
+                      date={date}
+                      isSelected={selectedDates.includes(date)}
+                      onToggle={onToggleDate}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+              {selectedDates.length > 0 && (
+                <motion.p
+                  animate={{ opacity: 1 }}
+                  className={`mt-2 text-xs ${c.desc}`}
+                  initial={{ opacity: 0 }}
+                >
+                  {selectedDates.length} date
+                  {selectedDates.length !== 1 ? "s" : ""} selected
+                </motion.p>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+});
+
+// Step 1: Preferences with animated cards
 function Step1Preferences({
   hostingStatus,
   setHostingStatus,
@@ -43,88 +310,47 @@ function Step1Preferences({
   setHostingStatus: (v: string) => void;
   guestStatus: string;
   setGuestStatus: (v: string) => void;
-  hostingDates: (typeof HOLIDAY_DATES)[number][];
-  toggleHostingDate: (d: (typeof HOLIDAY_DATES)[number]) => void;
-  guestDates: (typeof HOLIDAY_DATES)[number][];
-  toggleGuestDate: (d: (typeof HOLIDAY_DATES)[number]) => void;
+  hostingDates: HolidayDate[];
+  toggleHostingDate: (d: HolidayDate) => void;
+  guestDates: HolidayDate[];
+  toggleGuestDate: (d: HolidayDate) => void;
 }) {
-  const showHostingDates =
-    hostingStatus === "can-host" || hostingStatus === "may-host";
-  const showGuestDates =
-    guestStatus === "looking" || guestStatus === "maybe-guest";
-
   return (
     <div className="space-y-8">
       <div className="space-y-3">
         <Label className="font-medium text-base">
           Are you open to hosting?
         </Label>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 items-start gap-3">
           {HOSTING_OPTIONS.map((option) => (
-            <PreferenceCard
+            <PreferenceCardWithDates
               isSelected={hostingStatus === option.id}
               key={option.id}
               onSelect={setHostingStatus}
+              onToggleDate={toggleHostingDate}
               option={option}
+              selectedDates={hostingDates}
             />
           ))}
         </div>
-        {showHostingDates && (
-          <div className="mt-4 rounded-lg bg-red-50 p-4">
-            <Label className="font-medium text-red-900 text-sm">
-              Which dates can you host?
-            </Label>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {HOLIDAY_DATES.map((date) => (
-                <Button
-                  key={date}
-                  onClick={() => toggleHostingDate(date)}
-                  size="sm"
-                  type="button"
-                  variant={hostingDates.includes(date) ? "default" : "outline"}
-                >
-                  {date}
-                </Button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       <div className="space-y-3">
         <Label className="font-medium text-base">
           Are you looking to be a guest?
         </Label>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 items-start gap-3">
           {GUEST_OPTIONS.map((option) => (
-            <PreferenceCard
+            <PreferenceCardWithDates
               isSelected={guestStatus === option.id}
               key={option.id}
               onSelect={setGuestStatus}
+              onToggleDate={toggleGuestDate}
               option={option}
+              selectedDates={guestDates}
             />
           ))}
         </div>
-        {showGuestDates && (
-          <div className="mt-4 rounded-lg bg-blue-50 p-4">
-            <Label className="font-medium text-blue-900 text-sm">
-              Which dates are you free?
-            </Label>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {HOLIDAY_DATES.map((date) => (
-                <Button
-                  key={date}
-                  onClick={() => toggleGuestDate(date)}
-                  size="sm"
-                  type="button"
-                  variant={guestDates.includes(date) ? "default" : "outline"}
-                >
-                  {date}
-                </Button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -305,7 +531,13 @@ function CompletedState({ onSkip }: { onSkip: () => void }) {
 export default function OnboardingPage() {
   const router = useRouter();
   const { user } = useUser();
-  const profile = useQuery(api.profiles.getMyProfile);
+  const { isLoading: isAuthLoading, isAuthenticated } = useConvexAuth();
+
+  // Only query profile after Convex auth is ready
+  const profile = useQuery(
+    api.profiles.getMyProfile,
+    isAuthLoading || !isAuthenticated ? "skip" : undefined
+  );
   const upsertProfile = useMutation(api.profiles.upsertProfile);
   const syncGooglePhoto = useMutation(api.files.syncGooglePhoto);
 
@@ -316,12 +548,8 @@ export default function OnboardingPage() {
   // Step 1: Preferences
   const [hostingStatus, setHostingStatus] = useState("cant-host");
   const [guestStatus, setGuestStatus] = useState("looking");
-  const [hostingDates, setHostingDates] = useState<
-    (typeof HOLIDAY_DATES)[number][]
-  >([]);
-  const [guestDates, setGuestDates] = useState<
-    (typeof HOLIDAY_DATES)[number][]
-  >([]);
+  const [hostingDates, setHostingDates] = useState<HolidayDate[]>([]);
+  const [guestDates, setGuestDates] = useState<HolidayDate[]>([]);
 
   // Step 2: Basic Info
   const [formData, setFormData] = useState({
@@ -386,18 +614,18 @@ export default function OnboardingPage() {
   };
 
   // Get combined available dates
-  const getAvailableDates = (): (typeof HOLIDAY_DATES)[number][] => {
+  const getAvailableDates = (): HolidayDate[] => {
     const combined = new Set([...hostingDates, ...guestDates]);
-    return Array.from(combined) as (typeof HOLIDAY_DATES)[number][];
+    return Array.from(combined) as HolidayDate[];
   };
 
-  const toggleHostingDate = (date: (typeof HOLIDAY_DATES)[number]) => {
+  const toggleHostingDate = (date: HolidayDate) => {
     setHostingDates((prev) =>
       prev.includes(date) ? prev.filter((d) => d !== date) : [...prev, date]
     );
   };
 
-  const toggleGuestDate = (date: (typeof HOLIDAY_DATES)[number]) => {
+  const toggleGuestDate = (date: HolidayDate) => {
     setGuestDates((prev) =>
       prev.includes(date) ? prev.filter((d) => d !== date) : [...prev, date]
     );
@@ -506,6 +734,8 @@ export default function OnboardingPage() {
             toggleLanguage={toggleLanguage}
           />
         );
+      default:
+        return null;
     }
   };
 
@@ -522,6 +752,15 @@ export default function OnboardingPage() {
     }
     return true;
   };
+
+  // Show loading while auth is initializing
+  if (isAuthLoading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+      </div>
+    );
+  }
 
   if (completed) {
     return <CompletedState onSkip={() => router.push("/browse")} />;

@@ -34,8 +34,23 @@ import { useLocale } from "@/contexts/locale-context";
 import { api } from "@/convex/_generated/api";
 import { CITIES, HOLIDAY_DATES, LANGUAGES } from "@/lib/types";
 
+function getRoleLabelFn(
+  t: ReturnType<typeof useLocale>["t"]
+): (role: "host" | "guest" | "both") => string {
+  return (role) => {
+    if (role === "guest") {
+      return t.guest;
+    }
+    if (role === "host") {
+      return t.host;
+    }
+    return t.both;
+  };
+}
+
 export default function SettingsPage() {
   const { t } = useLocale();
+  const getRoleLabel = getRoleLabelFn(t);
   const { user } = useUser();
   const profile = useQuery(api.profiles.getMyProfile);
   const upsertProfile = useMutation(api.profiles.upsertProfile);
@@ -165,11 +180,7 @@ export default function SettingsPage() {
                         type="button"
                         variant={formData.role === r ? "default" : "outline"}
                       >
-                        {r === "guest"
-                          ? t.guest
-                          : r === "host"
-                            ? t.host
-                            : t.both}
+                        {getRoleLabel(r)}
                       </Button>
                     ))}
                   </div>
