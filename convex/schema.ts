@@ -199,6 +199,9 @@ export default defineSchema({
 
     // Request message (initial message from guest)
     requestMessage: v.optional(v.string()),
+
+    // Event date (for confirmed events)
+    eventDate: v.optional(holidayDate),
   })
     .index("by_guest", ["guestId"])
     .index("by_host", ["hostId"])
