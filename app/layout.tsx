@@ -1,5 +1,6 @@
-import { Analytics } from "@vercel/analytics/next";
+import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+
 import type { Metadata } from "next";
 import {
   Courier_Prime,
@@ -9,7 +10,6 @@ import {
 } from "next/font/google";
 import { DevPanel } from "@/components/DevPanel";
 import { ConvexClientProvider } from "@/components/providers/convex-client-provider";
-
 import { Toaster } from "@/components/ui/sonner";
 import { LocaleProvider } from "@/contexts/locale-context";
 import "./globals.css";
@@ -37,10 +37,73 @@ const courierPrime = Courier_Prime({
   display: "swap",
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nesveskvienas.lt";
+
 export const metadata: Metadata = {
-  title: "Nešvęsk vienas - Don't Celebrate Alone",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Nešvęsk vienas - Don't Celebrate Alone",
+    template: "%s | Nešvęsk vienas",
+  },
   description:
     "A non-profit initiative connecting people for the holidays. Find hosts or guests for holiday celebrations in Lithuania.",
+  keywords: [
+    "Lithuania",
+    "holidays",
+    "Christmas",
+    "New Year",
+    "hospitality",
+    "hosting",
+    "guests",
+    "community",
+    "non-profit",
+    "Lietuva",
+    "Kalėdos",
+    "Naujieji metai",
+  ],
+  authors: [{ name: "Nešvęsk vienas" }],
+  creator: "Nešvęsk vienas",
+  openGraph: {
+    type: "website",
+    locale: "lt_LT",
+    alternateLocale: ["en_US", "uk_UA", "ru_RU"],
+    url: siteUrl,
+    siteName: "Nešvęsk vienas",
+    title: "Nešvęsk vienas - Don't Celebrate Alone",
+    description:
+      "A non-profit initiative connecting people for the holidays. Find hosts or guests for holiday celebrations in Lithuania.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Nešvęsk vienas - Don't Celebrate Alone",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Nešvęsk vienas - Don't Celebrate Alone",
+    description:
+      "A non-profit initiative connecting people for the holidays. Find hosts or guests for holiday celebrations in Lithuania.",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {
+    // Add your verification codes here after registering with search engines
+    // google: "your-google-verification-code",
+    // yandex: "your-yandex-verification-code",
+  },
 };
 
 export default function RootLayout({
@@ -70,8 +133,8 @@ export default function RootLayout({
           <LocaleProvider>{children}</LocaleProvider>
           <DevPanel />
           <Toaster />
-          <Analytics />
         </ConvexClientProvider>
+        <Analytics />
         <SpeedInsights />
       </body>
     </html>

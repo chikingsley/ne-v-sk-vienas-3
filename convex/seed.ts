@@ -553,6 +553,7 @@ export const getTestUsers = query({
           role: profile?.role,
           city: profile?.city,
           verified: profile?.verified,
+          username: profile?.username,
         };
       })
     );

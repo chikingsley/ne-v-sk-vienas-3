@@ -209,7 +209,11 @@ export function DevPanel() {
                   {testUsers?.map((user) => (
                     <Link
                       className="flex items-center gap-2 rounded px-2 py-1.5 transition-colors hover:bg-gray-100"
-                      href={`/profile/${user.userId}`}
+                      href={
+                        user.username
+                          ? `/people/${user.username}`
+                          : `/profile/${user.userId}`
+                      }
                       key={user.userId}
                     >
                       <div className="relative h-6 w-6 flex-shrink-0 overflow-hidden rounded-full bg-gray-200">

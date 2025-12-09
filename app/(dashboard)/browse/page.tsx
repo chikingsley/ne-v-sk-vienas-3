@@ -76,15 +76,15 @@ export default function BrowsePage() {
       (inv) => inv.fromUserId === userId && inv.status === "pending"
     );
     if (!invitation) {
-      toast.error("Invitation not found");
+      toast.error(t.invitationNotFound);
       return;
     }
     try {
       await respondToInvitation({ invitationId: invitation._id, accept: true });
-      toast.success("You're matched! You can now message each other.");
+      toast.success(t.youreMatched);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
-      toast.error(`Failed to accept: ${message}`);
+      toast.error(`${t.failedToAccept}: ${message}`);
     }
   };
 
@@ -127,7 +127,7 @@ export default function BrowsePage() {
                 onClick={() => setActiveTab("host")}
                 type="button"
               >
-                Find a Host
+                {t.findAHost}
               </button>
               <button
                 className={`rounded-md px-4 py-2 font-medium text-sm transition-all ${
@@ -138,7 +138,7 @@ export default function BrowsePage() {
                 onClick={() => setActiveTab("guest")}
                 type="button"
               >
-                Find Guests
+                {t.findGuests}
               </button>
             </div>
 
@@ -151,10 +151,12 @@ export default function BrowsePage() {
               >
                 <SelectTrigger className="h-12 w-full flex-1 rounded-lg border-gray-200 bg-white shadow-sm hover:border-gray-300">
                   <MapPin className="mr-2 h-4 w-4 text-gray-400" />
-                  <SelectValue placeholder="Anywhere in Lithuania" />
+                  <SelectValue placeholder={t.anywhereInLithuania} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__all__">Anywhere in Lithuania</SelectItem>
+                  <SelectItem value="__all__">
+                    {t.anywhereInLithuania}
+                  </SelectItem>
                   {CITIES.map((city) => (
                     <SelectItem key={city} value={city}>
                       {city}
@@ -397,7 +399,11 @@ export default function BrowsePage() {
                   <div className="mt-auto space-y-2">
                     <Link
                       className="block w-full rounded-lg bg-gray-100 px-3 py-2 text-center font-medium text-gray-900 text-xs transition-colors hover:bg-gray-200"
-                      href={`/profile/${profile.userId}`}
+                      href={
+                        profile.username
+                          ? `/people/${profile.username}`
+                          : `/profile/${profile.userId}`
+                      }
                     >
                       View Profile
                     </Link>

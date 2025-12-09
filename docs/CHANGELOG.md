@@ -11,17 +11,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Username routing** - Human-readable profile URLs at `/people/[username]`
+  - Schema: Added `username` field to profiles table with index
+  - Backend: `getProfileByUsername`, `checkUsernameAvailability`, `setUsername`, `generateMissingUsernames` mutations
+  - Frontend: New route at `app/(dashboard)/people/[username]/page.tsx`
+  - Updated all profile links to prefer username route when available
+  - Keeps `/profile/[id]` for backwards compatibility
+  - `lib/utils.ts`: Added `getProfileUrl` utility function
 - **Sentry integration** - Error tracking and monitoring
   - `instrumentation-client.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`
   - `app/global-error.tsx` - Global error boundary with Sentry capture
   - Test page at `/sentry-example-page`
   - `docs/SENTRY-USAGE.md` - Usage guide for spans, logs, and exception capture
-- **Vercel Analytics & Speed Insights** - Enabled in dashboard
+- **Vercel Analytics** - Added `<Analytics />` component to root layout
+- **Convex backend testing** - Set up vitest + convex-test
+  - `vitest.config.ts` - Edge runtime configuration
+  - `convex/profiles.test.ts` - Profile query tests (3 passing)
+  - Scripts: `bun test`, `bun test:once`
+- **SEO** - Added `robots.ts` and `sitemap.ts` for search engines
 - **Consolidated TODO.md** - Living task list with all features and references
 - **Archived old docs** - Moved outdated docs to `docs/archive/`
 - **Legal & Safety page templates** - Scraped Couchsurfing pages for reference
   - Safety guidelines, community guidelines, policies, FAQ, terms templates
   - Located in `docs/courchsurfing-pages/`
+
+### Changed
+
+- **Experiments consolidated** - Moved all prototypes to `app/(experiments)/`
+  - Landing page variants: `landing1/`, `landing2/`, `landing3/`
+  - Client variants: `client1/`, `client2/`, `client3/`
+  - Sentry test page, location picker
+- **Messages page refactored** - Extracted sub-components to reduce complexity
+  - `SidebarItemComponent`, `MessageBubble`, `RequestView`, `ShareDetailsModal`, `EmptyState`
+
+### Removed
+
+- **@tensorflow/tfjs** - Removed from dependencies (face-api bundles it internally)
+
+### Technical
+
+- Added `.depcheckrc` for dependency check false positives
+- Updated `docs/CLAUDE.md` with vitest testing info
 
 ---
 

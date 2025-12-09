@@ -327,3 +327,230 @@ export const updateLastActive = mutation({
     }
   },
 });
+
+// ===== USERNAME ROUTING =====
+
+// Reserved usernames that can't be used
+const RESERVED_USERNAMES = [
+  "admin",
+  "api",
+  "people",
+  "profile",
+  "settings",
+  "browse",
+  "messages",
+  "about",
+  "help",
+  "contact",
+  "terms",
+  "privacy",
+  "safety",
+  "guidelines",
+  "policies",
+  "faq",
+  "support",
+  "null",
+  "undefined",
+];
+
+// Validate username format: 3-30 chars, lowercase alphanumeric + hyphens, no leading/trailing hyphens
+function isValidUsernameFormat(username: string): boolean {
+  const normalized = username.toLowerCase().trim();
+  if (normalized.length < 3 || normalized.length > 30) return false;
+  if (!/^[a-z0-9-]+$/.test(normalized)) return false;
+  if (normalized.startsWith("-") || normalized.endsWith("-")) return false;
+  if (normalized.includes("--")) return false;
+  return true;
+}
+
+// Generate a username from firstName and lastName
+function generateUsername(firstName: string, lastName?: string): string {
+  const first = firstName.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const last = lastName ? lastName.toLowerCase().replace(/[^a-z0-9]/g, "") : "";
+  return last ? `${first}-${last}` : first;
+}
+
+// Get profile by username (public route)
+export const getProfileByUsername = query({
+  args: { username: v.string() },
+  handler: async (ctx, args) => {
+    const normalized = args.username.toLowerCase().trim();
+
+    const profile = await ctx.db
+      .query("profiles")
+      .withIndex("by_username", (q) => q.eq("username", normalized))
+      .first();
+
+    if (!profile) {
+      return null;
+    }
+
+    // Hide sensitive info unless owner or matched
+    const currentUserId = await getCurrentUserId(ctx);
+    const isOwner = currentUserId === profile.userId;
+
+    // Check if matched
+    let isMatched = false;
+    if (currentUserId && currentUserId !== profile.userId) {
+      const sentAccepted = await ctx.db
+        .query("invitations")
+        .withIndex("by_from", (q) => q.eq("fromUserId", currentUserId))
+        .filter((q) =>
+          q.and(
+            q.eq(q.field("toUserId"), profile.userId),
+            q.eq(q.field("status"), "accepted")
+          )
+        )
+        .first();
+
+      if (sentAccepted) {
+        isMatched = true;
+      } else {
+        const receivedAccepted = await ctx.db
+          .query("invitations")
+          .withIndex("by_to", (q) => q.eq("toUserId", currentUserId))
+          .filter((q) =>
+            q.and(
+              q.eq(q.field("fromUserId"), profile.userId),
+              q.eq(q.field("status"), "accepted")
+            )
+          )
+          .first();
+        isMatched = !!receivedAccepted;
+      }
+    }
+
+    if (!(isOwner || isMatched)) {
+      return {
+        ...profile,
+        lastName: undefined,
+        phone: undefined,
+        address: undefined,
+      };
+    }
+
+    return profile;
+  },
+});
+
+// Check if a username is available
+export const checkUsernameAvailability = query({
+  args: { username: v.string() },
+  handler: async (ctx, args) => {
+    const normalized = args.username.toLowerCase().trim();
+
+    // Check format
+    if (!isValidUsernameFormat(normalized)) {
+      return { available: false, reason: "invalid_format" };
+    }
+
+    // Check reserved
+    if (RESERVED_USERNAMES.includes(normalized)) {
+      return { available: false, reason: "reserved" };
+    }
+
+    // Check if taken
+    const existing = await ctx.db
+      .query("profiles")
+      .withIndex("by_username", (q) => q.eq("username", normalized))
+      .first();
+
+    if (existing) {
+      return { available: false, reason: "taken" };
+    }
+
+    return { available: true };
+  },
+});
+
+// Set or update username
+export const setUsername = mutation({
+  args: { username: v.string() },
+  handler: async (ctx, args) => {
+    const userId = await getCurrentUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const normalized = args.username.toLowerCase().trim();
+
+    // Validate format
+    if (!isValidUsernameFormat(normalized)) {
+      throw new Error(
+        "Invalid username format. Use 3-30 lowercase letters, numbers, and hyphens."
+      );
+    }
+
+    // Check reserved
+    if (RESERVED_USERNAMES.includes(normalized)) {
+      throw new Error("This username is reserved.");
+    }
+
+    // Check if taken by someone else
+    const existing = await ctx.db
+      .query("profiles")
+      .withIndex("by_username", (q) => q.eq("username", normalized))
+      .first();
+
+    if (existing && existing.userId !== userId) {
+      throw new Error("This username is already taken.");
+    }
+
+    // Get user's profile
+    const profile = await ctx.db
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!profile) {
+      throw new Error("Profile not found. Complete onboarding first.");
+    }
+
+    // Update username
+    await ctx.db.patch(profile._id, { username: normalized });
+    return normalized;
+  },
+});
+
+// Auto-generate usernames for existing profiles without one
+export const generateMissingUsernames = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const profiles = await ctx.db.query("profiles").collect();
+    let updated = 0;
+
+    for (const profile of profiles) {
+      if (profile.username) continue; // Already has username
+
+      let baseUsername = generateUsername(profile.firstName, profile.lastName);
+
+      // If too short, pad it
+      if (baseUsername.length < 3) {
+        baseUsername = `user-${baseUsername}`;
+      }
+
+      // Find unique username
+      let username = baseUsername;
+      let suffix = 1;
+
+      while (true) {
+        const existing = await ctx.db
+          .query("profiles")
+          .withIndex("by_username", (q) => q.eq("username", username))
+          .first();
+
+        if (!(existing || RESERVED_USERNAMES.includes(username))) {
+          break;
+        }
+
+        username = `${baseUsername}-${suffix}`;
+        suffix++;
+      }
+
+      await ctx.db.patch(profile._id, { username });
+      updated++;
+    }
+
+    return { updated };
+  },
+});

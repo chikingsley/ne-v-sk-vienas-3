@@ -39,6 +39,11 @@ export function ListingCard({ profile, onInvite, onAccept }: ListingCardProps) {
   const isHost = profile.role === "host" || profile.role === "both";
   const isGuest = profile.role === "guest" || profile.role === "both";
 
+  // Use username route if available, otherwise fall back to ID
+  const profileUrl = profile.username
+    ? `/people/${profile.username}`
+    : `/profile/${profile.userId}`;
+
   // Build preference icons
   const preferenceIcons: Array<{
     icon: typeof Wine;
@@ -75,7 +80,7 @@ export function ListingCard({ profile, onInvite, onAccept }: ListingCardProps) {
     <div className="group flex h-full flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
       <Link
         className="relative block aspect-[4/3] overflow-hidden bg-gray-200"
-        href={`/profile/${profile.userId}`}
+        href={profileUrl}
       >
         <Image
           alt={profile.firstName}
@@ -123,7 +128,7 @@ export function ListingCard({ profile, onInvite, onAccept }: ListingCardProps) {
         </div>
 
         {/* Bio */}
-        <Link className="block" href={`/profile/${profile.userId}`}>
+        <Link className="block" href={profileUrl}>
           <p className="line-clamp-2 text-gray-600 text-sm italic transition-colors hover:text-gray-900">
             "{profile.bio}"
           </p>
@@ -202,7 +207,7 @@ export function ListingCard({ profile, onInvite, onAccept }: ListingCardProps) {
       <div className="mt-auto flex gap-2 border-gray-100 border-t p-4">
         <Link
           className="flex-1 rounded-lg bg-gray-50 px-4 py-2 text-center font-medium text-gray-700 text-sm transition-colors hover:bg-gray-100"
-          href={`/profile/${profile.userId}`}
+          href={profileUrl}
         >
           View Details
         </Link>

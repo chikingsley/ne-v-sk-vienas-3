@@ -34,57 +34,103 @@ import type { Id } from "@/convex/_generated/dataModel";
 import { HOLIDAY_DATES } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+// Types
+type ProfileInfo = {
+  firstName: string;
+  photoUrl?: string;
+  city: string;
+};
+
 type SidebarItem =
   | {
       type: "conversation";
       oderId: string;
-      profile: {
-        firstName: string;
-        photoUrl?: string;
-        city: string;
-      } | null;
-      lastMessage?: {
-        content: string;
-        createdAt: number;
-      };
+      profile: ProfileInfo | null;
+      lastMessage?: { content: string; createdAt: number };
       unreadCount: number;
     }
   | {
       type: "request";
       oderId: string;
       invitationId: Id<"invitations">;
-      profile: {
-        firstName: string;
-        photoUrl?: string;
-        city: string;
-      } | null;
+      profile: ProfileInfo | null;
       date: string;
       createdAt: number;
     };
 
-type SidebarItemProps = {
+type EventCard = {
+  date: string;
+  address?: string;
+  phone?: string;
+  note?: string;
+};
+
+// Utility functions
+function formatTime(timestamp: number): string {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const hours = diff / (1000 * 60 * 60);
+
+  if (hours < 24) {
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+  if (hours < 168) {
+    return date.toLocaleDateString("en-US", { weekday: "short" });
+  }
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function formatShortTime(ts: number): string {
+  return new Date(ts).toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+// Sub-components
+function SidebarItemComponent({
+  item,
+  isActive,
+  onClick,
+}: {
   item: SidebarItem;
   isActive: boolean;
   onClick: () => void;
-};
-
-function SidebarItemComponent({ item, isActive, onClick }: SidebarItemProps) {
-  const formatTime = (timestamp: number) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const hours = diff / (1000 * 60 * 60);
-
-    if (hours < 24) {
-      return date.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+}) {
+  const renderTimestamp = () => {
+    if (item.type === "request") {
+      return (
+        <Badge
+          className="shrink-0 bg-amber-500 text-white hover:bg-amber-600"
+          variant="secondary"
+        >
+          Request
+        </Badge>
+      );
     }
-    if (hours < 168) {
-      return date.toLocaleDateString("en-US", { weekday: "short" });
+    if (item.lastMessage) {
+      return (
+        <span className="shrink-0 text-muted-foreground text-xs">
+          {formatTime(item.lastMessage.createdAt)}
+        </span>
+      );
     }
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return null;
+  };
+
+  const renderSubtext = () => {
+    if (item.type === "request") {
+      return <p className="truncate">Wants to connect for {item.date}</p>;
+    }
+    return (
+      <p className="truncate">
+        {item.lastMessage?.content ?? "No messages yet"}
+      </p>
+    );
   };
 
   return (
@@ -117,27 +163,10 @@ function SidebarItemComponent({ item, isActive, onClick }: SidebarItemProps) {
           <span className="truncate font-medium">
             {item.profile?.firstName ?? "Unknown"}
           </span>
-          {item.type === "request" ? (
-            <Badge
-              className="shrink-0 bg-amber-500 text-white hover:bg-amber-600"
-              variant="secondary"
-            >
-              Request
-            </Badge>
-          ) : item.lastMessage ? (
-            <span className="shrink-0 text-muted-foreground text-xs">
-              {formatTime(item.lastMessage.createdAt)}
-            </span>
-          ) : null}
+          {renderTimestamp()}
         </div>
         <div className="flex items-center justify-between text-muted-foreground text-sm">
-          {item.type === "request" ? (
-            <p className="truncate">Wants to connect for {item.date}</p>
-          ) : (
-            <p className="truncate">
-              {item.lastMessage?.content ?? "No messages yet"}
-            </p>
-          )}
+          {renderSubtext()}
           {item.type === "conversation" && item.unreadCount > 0 && (
             <span className="ml-2 flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-red-500 px-1.5 font-medium text-white text-xs">
               {item.unreadCount}
@@ -149,32 +178,17 @@ function SidebarItemComponent({ item, isActive, onClick }: SidebarItemProps) {
   );
 }
 
-type EventCard = {
-  date: string;
-  address?: string;
-  phone?: string;
-  note?: string;
-};
-
-type MessageBubbleProps = {
-  content: string;
-  isOwn: boolean;
-  timestamp: number;
-  eventCard?: EventCard;
-};
-
 function MessageBubble({
   content,
   isOwn,
   timestamp,
   eventCard,
-}: MessageBubbleProps) {
-  const formatTime = (ts: number) =>
-    new Date(ts).toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
+}: {
+  content: string;
+  isOwn: boolean;
+  timestamp: number;
+  eventCard?: EventCard;
+}) {
   if (eventCard) {
     return (
       <div className={cn("flex", isOwn ? "justify-end" : "justify-start")}>
@@ -211,7 +225,7 @@ function MessageBubble({
             )}
           </div>
           <div className="border-t px-4 py-2 text-muted-foreground text-xs">
-            {formatTime(timestamp)}
+            {formatShortTime(timestamp)}
           </div>
         </div>
       </div>
@@ -235,41 +249,271 @@ function MessageBubble({
             isOwn ? "text-white/70" : "text-muted-foreground"
           )}
         >
-          {formatTime(timestamp)}
+          {formatShortTime(timestamp)}
         </p>
       </div>
     </div>
   );
 }
 
+function EmptyConversationsList({
+  onCreateTest,
+}: {
+  onCreateTest: () => Promise<void>;
+}) {
+  return (
+    <div className="flex h-full flex-col items-center justify-center p-4 text-center">
+      <MessageCircle className="mb-4 h-12 w-12 text-muted-foreground/50" />
+      <p className="text-muted-foreground">No messages yet</p>
+      <p className="mt-1 text-muted-foreground text-sm">
+        Connect with hosts or guests to start chatting
+      </p>
+      <Button
+        className="mt-4"
+        onClick={onCreateTest}
+        size="sm"
+        variant="outline"
+      >
+        <UserPlus className="mr-2 h-4 w-4" />
+        Create Test Conversations
+      </Button>
+    </div>
+  );
+}
+
+function RequestView({
+  request,
+  profile,
+  isResponding,
+  onRespond,
+}: {
+  request: Extract<SidebarItem, { type: "request" }>;
+  profile: unknown;
+  isResponding: boolean;
+  onRespond: (accept: boolean) => void;
+}) {
+  return (
+    <>
+      <div className="flex h-[72px] items-center gap-3 border-b px-4">
+        <Avatar className="h-12 w-12">
+          <AvatarImage src={request.profile?.photoUrl} />
+          <AvatarFallback>
+            {request.profile?.firstName?.charAt(0) ?? "?"}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1">
+          <h2 className="font-semibold">{request.profile?.firstName}</h2>
+          <p className="text-muted-foreground text-sm">
+            {request.profile?.city}
+          </p>
+        </div>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button size="sm" variant="outline">
+              View Profile
+            </Button>
+          </SheetTrigger>
+          <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
+            <SheetHeader className="mb-4">
+              <SheetTitle>Profile Details</SheetTitle>
+            </SheetHeader>
+            {profile ? (
+              <ProfileView
+                profile={
+                  profile as Parameters<typeof ProfileView>[0]["profile"]
+                }
+              />
+            ) : (
+              <div className="flex h-40 items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-red-500" />
+              </div>
+            )}
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      <div className="flex flex-1 flex-col items-center justify-center p-8">
+        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-amber-100">
+          <UserPlus className="h-12 w-12 text-amber-600" />
+        </div>
+        <h2 className="mb-2 font-semibold text-2xl">Connection Request</h2>
+        <p className="mb-2 max-w-md text-center text-muted-foreground">
+          <span className="font-medium text-foreground">
+            {request.profile?.firstName}
+          </span>{" "}
+          wants to connect with you for{" "}
+          <span className="font-medium text-foreground">{request.date}</span>.
+        </p>
+        <p className="mb-8 max-w-md text-center text-muted-foreground text-sm">
+          If you accept, you'll be able to message each other and share contact
+          information.
+        </p>
+        <div className="flex gap-3">
+          <Button
+            className="gap-2"
+            disabled={isResponding}
+            onClick={() => onRespond(false)}
+            size="lg"
+            variant="outline"
+          >
+            <X className="h-4 w-4" />
+            Decline
+          </Button>
+          <Button
+            className="gap-2 bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600"
+            disabled={isResponding}
+            onClick={() => onRespond(true)}
+            size="lg"
+          >
+            <Check className="h-4 w-4" />
+            Accept
+          </Button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function ShareDetailsModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  isSending,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: {
+    date: string;
+    address: string;
+    phone: string;
+    note: string;
+  }) => void;
+  isSending: boolean;
+}) {
+  const [date, setDate] = useState("");
+  const [address, setAddress] = useState("");
+  const [phone, setPhone] = useState("");
+  const [note, setNote] = useState("");
+
+  if (!isOpen) return null;
+
+  const handleSubmit = () => {
+    onSubmit({ date, address, phone, note });
+    setDate("");
+    setAddress("");
+    setPhone("");
+    setNote("");
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+        <h3 className="mb-4 font-semibold text-lg">Share Event Details</h3>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="shareDate">Date *</Label>
+            <select
+              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+              id="shareDate"
+              onChange={(e) => setDate(e.target.value)}
+              value={date}
+            >
+              <option value="">Select a date...</option>
+              {HOLIDAY_DATES.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="shareAddress">Address</Label>
+            <Input
+              id="shareAddress"
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Where should they come?"
+              value={address}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="sharePhone">Phone</Label>
+            <Input
+              id="sharePhone"
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Your contact number"
+              value={phone}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="shareNote">Note</Label>
+            <Input
+              id="shareNote"
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Any additional info..."
+              value={note}
+            />
+          </div>
+        </div>
+        <div className="mt-6 flex gap-3">
+          <Button className="flex-1" onClick={onClose} variant="outline">
+            Cancel
+          </Button>
+          <Button
+            className="flex-1 bg-gradient-to-r from-red-500 to-amber-500"
+            disabled={!date || isSending}
+            onClick={handleSubmit}
+          >
+            {isSending ? "Sending..." : "Send Details"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
+      <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+        <MessageCircle className="h-10 w-10 text-muted-foreground" />
+      </div>
+      <h2 className="mb-2 font-semibold text-xl">Your Messages</h2>
+      <p className="max-w-sm text-muted-foreground">
+        Select a conversation to start chatting, or respond to connection
+        requests from hosts and guests.
+      </p>
+    </div>
+  );
+}
+
+// Main component
 function MessagesPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [messageInput, setMessageInput] = useState("");
   const [isResponding, setIsResponding] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [isSendingCard, setIsSendingCard] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
-  const [showShareModal, setShowShareModal] = useState(false);
-  const [shareDate, setShareDate] = useState<string>("");
-  const [shareAddress, setShareAddress] = useState("");
-  const [sharePhone, setSharePhone] = useState("");
-  const [shareNote, setShareNote] = useState("");
-  const [isSendingCard, setIsSendingCard] = useState(false);
-
+  // Queries
   const conversationsQuery = useQuery(api.messages.getConversations);
   const conversations = conversationsQuery ?? [];
   const invitations = useQuery(api.invitations.getMyInvitations);
+  const myProfile = useQuery(api.profiles.getMyProfile);
   const isLoading =
     conversationsQuery === undefined || invitations === undefined;
+
+  // URL params
   const activeId = searchParams.get("chat");
   const activeType = searchParams.get("type") as
     | "conversation"
     | "request"
     | null;
 
+  // Build sidebar items
   const sidebarItems: SidebarItem[] = [];
-
   if (invitations?.received) {
     for (const inv of invitations.received) {
       if (inv.status === "pending" && inv.otherUser) {
@@ -288,15 +532,11 @@ function MessagesPageContent() {
       }
     }
   }
-
   for (const conv of conversations) {
-    sidebarItems.push({
-      type: "conversation",
-      ...conv,
-    });
+    sidebarItems.push({ type: "conversation", ...conv });
   }
 
-  const activeUserId = activeId as Id<"users"> | null;
+  // Active items
   const activeItem = sidebarItems.find((item) => item.oderId === activeId);
   const activeConversation =
     activeItem?.type === "conversation" || activeType === "conversation"
@@ -308,11 +548,11 @@ function MessagesPageContent() {
       ? (activeItem as Extract<SidebarItem, { type: "request" }>)
       : null;
 
+  // More queries
   const messages = useQuery(
     api.messages.getConversationMessages,
     activeConversationId ? { conversationId: activeConversationId } : "skip"
   );
-
   const activeRequestProfile = useQuery(
     api.profiles.getProfile,
     activeRequest?.oderId
@@ -320,39 +560,30 @@ function MessagesPageContent() {
       : "skip"
   );
 
+  // Mutations
   const sendMessage = useMutation(api.messages.sendMessage);
   const markAsRead = useMutation(api.messages.markAsRead);
   const respondToInvitation = useMutation(api.invitations.respond);
   const sendEventCard = useMutation(api.messages.sendInvitationCard);
   const createTestConversations = useMutation(api.seed.createTestConversations);
-  const myProfile = useQuery(api.profiles.getMyProfile);
 
-  // Scroll to bottom when switching conversations - uses useLayoutEffect for instant scroll before paint
+  // Scroll management
   const prevConversationId = useRef(activeConversationId);
   const prevMessagesLength = useRef(messages?.length ?? 0);
 
-  // Instant scroll when switching conversations (before paint)
   useLayoutEffect(() => {
     const container = messagesContainerRef.current;
-    if (!container) {
-      return;
-    }
-
+    if (!container) return;
     if (activeConversationId !== prevConversationId.current) {
-      // Switched conversations - instant scroll before browser paints
       container.scrollTop = container.scrollHeight;
       prevConversationId.current = activeConversationId;
       prevMessagesLength.current = messages?.length ?? 0;
     }
   }, [activeConversationId, messages]);
 
-  // Smooth scroll only for new messages in same conversation
   useEffect(() => {
     const container = messagesContainerRef.current;
-    if (!(container && messages)) {
-      return;
-    }
-
+    if (!(container && messages)) return;
     const currentLength = messages.length;
     if (
       activeConversationId === prevConversationId.current &&
@@ -369,19 +600,13 @@ function MessagesPageContent() {
     }
   }, [activeConversationId, activeConversation?.unreadCount, markAsRead]);
 
-  const setSearchParamsHelper = (params: Record<string, string>) => {
-    const newParams = new URLSearchParams();
-    for (const [key, value] of Object.entries(params)) {
-      newParams.set(key, value);
-    }
-    router.push(`/messages?${newParams.toString()}`);
+  // Handlers
+  const setActiveChat = (id: string, type: "conversation" | "request") => {
+    router.push(`/messages?chat=${id}&type=${type}`);
   };
 
   const handleSend = async () => {
-    if (!(messageInput.trim() && activeConversationId)) {
-      return;
-    }
-
+    if (!(messageInput.trim() && activeConversationId)) return;
     await sendMessage({
       conversationId: activeConversationId,
       content: messageInput.trim(),
@@ -389,17 +614,8 @@ function MessagesPageContent() {
     setMessageInput("");
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
   const handleRespond = async (accept: boolean) => {
-    if (!activeRequest) {
-      return;
-    }
+    if (!activeRequest) return;
     setIsResponding(true);
     try {
       await respondToInvitation({
@@ -407,10 +623,7 @@ function MessagesPageContent() {
         accept,
       });
       if (accept) {
-        setSearchParamsHelper({
-          chat: activeRequest.oderId,
-          type: "conversation",
-        });
+        setActiveChat(activeRequest.oderId, "conversation");
       } else {
         router.push("/messages");
       }
@@ -419,52 +632,57 @@ function MessagesPageContent() {
     }
   };
 
-  const handleItemClick = (item: SidebarItem) => {
-    if (item.type === "request") {
-      setSearchParamsHelper({ chat: item.oderId, type: "request" });
-    } else {
-      setSearchParamsHelper({ chat: item.oderId, type: "conversation" });
-    }
-  };
-
-  const handleShareEventDetails = async () => {
-    if (!(activeConversationId && shareDate)) {
-      return;
-    }
-
+  const handleShareEventDetails = async (data: {
+    date: string;
+    address: string;
+    phone: string;
+    note: string;
+  }) => {
+    if (!activeConversationId) return;
     setIsSendingCard(true);
     try {
       await sendEventCard({
         conversationId: activeConversationId,
-        date: shareDate as "24 Dec" | "25 Dec" | "26 Dec" | "31 Dec",
-        address: shareAddress || undefined,
-        phone: sharePhone || undefined,
-        note: shareNote || undefined,
+        date: data.date as "24 Dec" | "25 Dec" | "26 Dec" | "31 Dec",
+        address: data.address || undefined,
+        phone: data.phone || undefined,
+        note: data.note || undefined,
       });
       setShowShareModal(false);
-      setShareDate("");
-      setShareAddress("");
-      setSharePhone("");
-      setShareNote("");
     } finally {
       setIsSendingCard(false);
+    }
+  };
+
+  const handleCreateTest = async () => {
+    try {
+      const result = await createTestConversations({});
+      if (result.conversations) {
+        toast.success(result.message, {
+          description: result.conversations.join(", "),
+        });
+      } else {
+        toast.info(result.message, {
+          description: `${result.conversationCount} conversations exist`,
+        });
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed");
     }
   };
 
   const filteredItems = sidebarItems.filter((item) =>
     item.profile?.firstName?.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
   const pendingCount =
     invitations?.received?.filter((inv) => inv.status === "pending").length ??
     0;
-
   const isHost = myProfile?.role === "host";
 
   return (
     <div className="flex h-full">
+      {/* Sidebar */}
       <div className="flex w-80 shrink-0 flex-col border-r bg-background">
-        {/* Search bar - aligned with profile header height */}
         <div className="flex h-[72px] items-center border-b px-4">
           <div className="relative w-full">
             <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
@@ -483,38 +701,7 @@ function MessagesPageContent() {
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-red-500" />
             </div>
           ) : filteredItems.length === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center p-4 text-center">
-              <MessageCircle className="mb-4 h-12 w-12 text-muted-foreground/50" />
-              <p className="text-muted-foreground">No messages yet</p>
-              <p className="mt-1 text-muted-foreground text-sm">
-                Connect with hosts or guests to start chatting
-              </p>
-              {/* Dev: Create test conversations */}
-              <Button
-                className="mt-4"
-                onClick={async () => {
-                  try {
-                    const result = await createTestConversations({});
-                    if (result.conversations) {
-                      toast.success(result.message, {
-                        description: result.conversations.join(", "),
-                      });
-                    } else {
-                      toast.info(result.message, {
-                        description: `${result.conversationCount} conversations exist`,
-                      });
-                    }
-                  } catch (e) {
-                    toast.error(e instanceof Error ? e.message : "Failed");
-                  }
-                }}
-                size="sm"
-                variant="outline"
-              >
-                <UserPlus className="mr-2 h-4 w-4" />
-                Create Test Conversations
-              </Button>
-            </div>
+            <EmptyConversationsList onCreateTest={handleCreateTest} />
           ) : (
             <div className="space-y-1">
               {pendingCount > 0 && (
@@ -530,7 +717,7 @@ function MessagesPageContent() {
                   isActive={item.oderId === activeId}
                   item={item}
                   key={`${item.type}-${item.oderId}`}
-                  onClick={() => handleItemClick(item)}
+                  onClick={() => setActiveChat(item.oderId, item.type)}
                 />
               ))}
             </div>
@@ -538,92 +725,18 @@ function MessagesPageContent() {
         </div>
       </div>
 
+      {/* Main content */}
       <div className="flex flex-1 flex-col">
         {activeRequest ? (
+          <RequestView
+            isResponding={isResponding}
+            onRespond={handleRespond}
+            profile={activeRequestProfile}
+            request={activeRequest}
+          />
+        ) : activeId && activeConversation ? (
           <>
-            <div className="flex h-[72px] items-center gap-3 border-b px-4">
-              <Avatar className="h-12 w-12">
-                <AvatarImage src={activeRequest.profile?.photoUrl} />
-                <AvatarFallback>
-                  {activeRequest.profile?.firstName?.charAt(0) ?? "?"}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <h2 className="font-semibold">
-                  {activeRequest.profile?.firstName}
-                </h2>
-                <p className="text-muted-foreground text-sm">
-                  {activeRequest.profile?.city}
-                </p>
-              </div>
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button size="sm" variant="outline">
-                    View Profile
-                  </Button>
-                </SheetTrigger>
-                <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
-                  <SheetHeader className="mb-4">
-                    <SheetTitle>Profile Details</SheetTitle>
-                  </SheetHeader>
-                  {activeRequestProfile ? (
-                    <ProfileView profile={activeRequestProfile} />
-                  ) : (
-                    <div className="flex h-40 items-center justify-center">
-                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-red-500" />
-                    </div>
-                  )}
-                </SheetContent>
-              </Sheet>
-            </div>
-
-            <div className="flex flex-1 flex-col items-center justify-center p-8">
-              <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-amber-100">
-                <UserPlus className="h-12 w-12 text-amber-600" />
-              </div>
-              <h2 className="mb-2 font-semibold text-2xl">
-                Connection Request
-              </h2>
-              <p className="mb-2 max-w-md text-center text-muted-foreground">
-                <span className="font-medium text-foreground">
-                  {activeRequest.profile?.firstName}
-                </span>{" "}
-                wants to connect with you for{" "}
-                <span className="font-medium text-foreground">
-                  {activeRequest.date}
-                </span>
-                .
-              </p>
-              <p className="mb-8 max-w-md text-center text-muted-foreground text-sm">
-                If you accept, you'll be able to message each other and share
-                contact information.
-              </p>
-
-              <div className="flex gap-3">
-                <Button
-                  className="gap-2"
-                  disabled={isResponding}
-                  onClick={() => handleRespond(false)}
-                  size="lg"
-                  variant="outline"
-                >
-                  <X className="h-4 w-4" />
-                  Decline
-                </Button>
-                <Button
-                  className="gap-2 bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600"
-                  disabled={isResponding}
-                  onClick={() => handleRespond(true)}
-                  size="lg"
-                >
-                  <Check className="h-4 w-4" />
-                  Accept
-                </Button>
-              </div>
-            </div>
-          </>
-        ) : activeUserId && activeConversation ? (
-          <>
+            {/* Conversation header */}
             <div className="flex h-[72px] items-center gap-3 border-b px-4">
               <Avatar className="h-12 w-12">
                 <AvatarImage src={activeConversation.profile?.photoUrl} />
@@ -650,7 +763,6 @@ function MessagesPageContent() {
                     Share Details
                   </Button>
                 )}
-
                 <Sheet>
                   <SheetTrigger asChild>
                     <Button size="sm" variant="ghost">
@@ -669,6 +781,7 @@ function MessagesPageContent() {
               </div>
             </div>
 
+            {/* Messages */}
             <div
               className="flex-1 space-y-4 overflow-y-auto p-4"
               ref={messagesContainerRef}
@@ -684,12 +797,18 @@ function MessagesPageContent() {
               ))}
             </div>
 
+            {/* Input */}
             <div className="border-t p-4">
               <div className="flex items-center gap-3">
                 <Input
                   className="flex-1"
                   onChange={(e) => setMessageInput(e.target.value)}
-                  onKeyDown={handleKeyPress}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSend();
+                    }
+                  }}
                   placeholder="Type a message..."
                   value={messageInput}
                 />
@@ -703,88 +822,15 @@ function MessagesPageContent() {
               </div>
             </div>
 
-            {showShareModal && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-                  <h3 className="mb-4 font-semibold text-lg">
-                    Share Event Details
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="shareDate">Date *</Label>
-                      <select
-                        className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                        id="shareDate"
-                        onChange={(e) => setShareDate(e.target.value)}
-                        value={shareDate}
-                      >
-                        <option value="">Select a date...</option>
-                        {HOLIDAY_DATES.map((date) => (
-                          <option key={date} value={date}>
-                            {date}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="shareAddress">Address</Label>
-                      <Input
-                        id="shareAddress"
-                        onChange={(e) => setShareAddress(e.target.value)}
-                        placeholder="Where should they come?"
-                        value={shareAddress}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="sharePhone">Phone</Label>
-                      <Input
-                        id="sharePhone"
-                        onChange={(e) => setSharePhone(e.target.value)}
-                        placeholder="Your contact number"
-                        value={sharePhone}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="shareNote">Note</Label>
-                      <Input
-                        id="shareNote"
-                        onChange={(e) => setShareNote(e.target.value)}
-                        placeholder="Any additional info..."
-                        value={shareNote}
-                      />
-                    </div>
-                  </div>
-                  <div className="mt-6 flex gap-3">
-                    <Button
-                      className="flex-1"
-                      onClick={() => setShowShareModal(false)}
-                      variant="outline"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      className="flex-1 bg-gradient-to-r from-red-500 to-amber-500"
-                      disabled={!shareDate || isSendingCard}
-                      onClick={handleShareEventDetails}
-                    >
-                      {isSendingCard ? "Sending..." : "Send Details"}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
+            <ShareDetailsModal
+              isOpen={showShareModal}
+              isSending={isSendingCard}
+              onClose={() => setShowShareModal(false)}
+              onSubmit={handleShareEventDetails}
+            />
           </>
         ) : (
-          <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
-            <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-              <MessageCircle className="h-10 w-10 text-muted-foreground" />
-            </div>
-            <h2 className="mb-2 font-semibold text-xl">Your Messages</h2>
-            <p className="max-w-sm text-muted-foreground">
-              Select a conversation to start chatting, or respond to connection
-              requests from hosts and guests.
-            </p>
-          </div>
+          <EmptyState />
         )}
       </div>
     </div>

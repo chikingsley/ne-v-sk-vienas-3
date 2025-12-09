@@ -15,10 +15,13 @@ export default function MyProfilePage() {
 
   useEffect(() => {
     if (myProfile?.userId) {
-      // Redirect to the public profile view with your own ID
-      redirect(`/profile/${myProfile.userId}`);
+      // Redirect to the public profile view - prefer username route if available
+      const url = myProfile.username
+        ? `/people/${myProfile.username}`
+        : `/profile/${myProfile.userId}`;
+      redirect(url);
     }
-  }, [myProfile?.userId]);
+  }, [myProfile?.userId, myProfile?.username]);
 
   // Show loading state while fetching profile
   if (myProfile === undefined) {

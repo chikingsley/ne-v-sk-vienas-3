@@ -92,14 +92,16 @@ Holiday hosting/guest matching platform for Lithuania.
 
 ### Username Routing
 
-- [ ] **`/people/[username]` route** - Human-readable profile URLs
-  - See: `docs/USERNAME-ROUTING-ANALYSIS.md` for full plan
-  - Phase 1: Add `username` field to profiles schema + index
-  - Phase 2: `getProfileByUsername` query, `checkUsernameAvailability`, `setUsername` mutation
-  - Phase 3: New route at `app/(dashboard)/people/[username]/page.tsx`
-  - Phase 4: Username selection in onboarding/settings
-  - Phase 5: Update all profile links
-  - Keep `/profile/[id]` for backwards compatibility
+- [x] **`/people/[username]` route** - Human-readable profile URLs
+  - ~~See: `docs/USERNAME-ROUTING-ANALYSIS.md` for full plan~~ (archived)
+  - [x] Phase 1: Add `username` field to profiles schema + index
+  - [x] Phase 2: `getProfileByUsername` query, `checkUsernameAvailability`, `setUsername` mutation
+  - [x] Phase 3: New route at `app/(dashboard)/people/[username]/page.tsx`
+  - [ ] Phase 4: Username selection in onboarding/settings
+  - [x] Phase 5: Update all profile links (listing-card, browse, DevPanel, profile redirect)
+  - [x] Keep `/profile/[id]` for backwards compatibility
+  - [x] `generateMissingUsernames` mutation for existing profiles
+  - [ ] Run `generateMissingUsernames` on production to assign usernames
 
 ### Profile Card in Chat
 
@@ -241,7 +243,17 @@ Holiday hosting/guest matching platform for Lithuania.
   - Page views, unique visitors, referrers
 - [x] **Vercel Speed Insights** - Core Web Vitals monitoring
   - Track page load times, performance scores
-- [ ] **SEO** - Meta tags, OpenGraph, sitemap
+- [x] **SEO** - Meta tags, OpenGraph, sitemap
+  - [x] Root layout metadata (title, description, keywords, OG, Twitter cards)
+  - [x] `sitemap.ts` - Dynamic sitemap generation
+  - [x] `robots.ts` - Search engine crawling rules
+  - [x] Browse page metadata
+  - [x] Dynamic profile page metadata with `generateMetadata`
+  - [ ] **Manual: Create OG image** - Need `public/og-image.png` (1200x630px)
+  - [ ] **Manual: Google Search Console** - Add property, verify ownership, submit sitemap
+  - [ ] **Manual: Bing Webmaster Tools** - Add site, verify, submit sitemap
+  - [ ] **Manual: Add verification codes** - In `app/layout.tsx` verification field
+  - [ ] **Manual: Set NEXT_PUBLIC_SITE_URL** - In Vercel env vars (e.g., `https://nesveskvienas.lt`)
 - [ ] **PWA** - Installable app with offline support (stretch goal)
 
 ### Legal & Safety Pages
@@ -282,11 +294,13 @@ Holiday hosting/guest matching platform for Lithuania.
 
 ## Tech Debt
 
-- [ ] Update root CLAUDE.md to mention vitest for Convex tests
-- [ ] Consider migrating some tests to bun test for speed
-- [ ] Remove unused dependencies from package.json
-- [ ] Clean up old Bun server files (src/ folder)
-- [ ] Consolidate client1, client2, client3 landing page experiments
+- [x] Remove `@tensorflow/tfjs` from package.json (face-api bundles it internally) - DONE
+- [x] Clean up old Bun server files (src/ folder) - DONE (folder doesn't exist)
+- [x] Consolidate experiments into `app/(experiments)/` - landing1-3, client1-3, sentry-example-page, location-picker
+- [x] Add `@vercel/analytics` to layout.tsx (was missing the `<Analytics />` component)
+- [x] Set up Convex testing with vitest (`bun run test`) - 3 tests passing
+- [ ] Reduce component complexity (BrowsePage, MessagesPage, ProfilePages) - partially done, still has warnings
+- [ ] **[Future] Migrate images to Cloudflare R2** - Zero egress fees vs Convex bandwidth limits (50GB/mo on Pro). Not urgent now, consider if scaling past 1K active users.
 
 ---
 

@@ -1,0 +1,14 @@
+# Depcheck configuration
+# These are false positives - packages used through configuration or bundling
+
+ignores:
+  # Dev tools used via CLI or config files
+  - "@tailwindcss/postcss"
+  - "tailwindcss"
+  - "tw-animate-css"
+  - "ultracite"
+  - "@types/node"
+  - "lefthook"
+
+  # face-api bundles tensorflow internally, but we keep it for potential direct use
+  - "@tensorflow/tfjs"

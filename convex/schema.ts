@@ -84,6 +84,9 @@ export default defineSchema({
     // Link to user
     userId: v.id("users"),
 
+    // Username for /people/[username] route
+    username: v.optional(v.string()), // Unique, lowercase, alphanumeric + hyphens
+
     // Basic info
     role: userRole,
     firstName: v.string(),
@@ -122,6 +125,7 @@ export default defineSchema({
     lastActive: v.optional(v.number()),
   })
     .index("by_userId", ["userId"])
+    .index("by_username", ["username"])
     .index("by_city", ["city"])
     .index("by_role", ["role"]),
 
