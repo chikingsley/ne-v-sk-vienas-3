@@ -1,4 +1,5 @@
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import {
   Courier_Prime,
@@ -71,6 +72,7 @@ export default function RootLayout({
           <Toaster />
           <Analytics />
         </ConvexClientProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
