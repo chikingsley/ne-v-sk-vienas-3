@@ -102,47 +102,47 @@ export default function LandingMagicPage() {
 
         {/* Decorative glow */}
         <div className="-translate-x-1/2 pointer-events-none absolute bottom-0 left-1/2 h-64 w-[600px] translate-y-1/2 rounded-full bg-amber-500/10 blur-[100px]" />
-      </div>
 
-      {/* How it works */}
-      <div className="relative bg-slate-900/50 py-24" id="how-it-works">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-16 text-center">
-            <h2 className="mb-4 font-bold font-serif text-3xl text-amber-100 md:text-4xl">
-              {t.howItWorks}
-            </h2>
-            <p className="mx-auto max-w-2xl text-blue-100/70">
-              {t.howItWorksSubtitle}
-            </p>
-          </div>
+        {/* How it works - inside hero for continuous background */}
+        <div className="relative z-10 pt-16 pb-24" id="how-it-works">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-16 text-center">
+              <h2 className="mb-4 font-bold font-serif text-3xl text-amber-100 md:text-4xl">
+                {t.howItWorks}
+              </h2>
+              <p className="mx-auto max-w-2xl text-blue-100/70">
+                {t.howItWorksSubtitle}
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-amber-400/20 to-amber-600/20 shadow-amber-500/10 shadow-lg">
-                <Users className="h-10 w-10 text-amber-400" />
+            <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
+              <div className="flex flex-col items-center text-center">
+                <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-amber-400/20 bg-slate-900/60 shadow-amber-500/10 shadow-lg backdrop-blur-sm">
+                  <Users className="h-10 w-10 text-amber-400" />
+                </div>
+                <h3 className="mb-3 font-bold text-amber-100 text-xl">
+                  1. {t.step1Title}
+                </h3>
+                <p className="text-blue-100/60">{t.step1Description}</p>
               </div>
-              <h3 className="mb-3 font-bold text-amber-100 text-xl">
-                1. {t.step1Title}
-              </h3>
-              <p className="text-blue-100/60">{t.step1Description}</p>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400/20 to-emerald-600/20 shadow-emerald-500/10 shadow-lg">
-                <Calendar className="h-10 w-10 text-emerald-400" />
+              <div className="flex flex-col items-center text-center">
+                <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-emerald-400/20 bg-slate-900/60 shadow-emerald-500/10 shadow-lg backdrop-blur-sm">
+                  <Calendar className="h-10 w-10 text-emerald-400" />
+                </div>
+                <h3 className="mb-3 font-bold text-amber-100 text-xl">
+                  2. {t.step2Title}
+                </h3>
+                <p className="text-blue-100/60">{t.step2Description}</p>
               </div>
-              <h3 className="mb-3 font-bold text-amber-100 text-xl">
-                2. {t.step2Title}
-              </h3>
-              <p className="text-blue-100/60">{t.step2Description}</p>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-rose-400/20 to-rose-600/20 shadow-lg shadow-rose-500/10">
-                <Heart className="h-10 w-10 text-rose-400" />
+              <div className="flex flex-col items-center text-center">
+                <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-rose-400/20 bg-slate-900/60 shadow-lg shadow-rose-500/10 backdrop-blur-sm">
+                  <Heart className="h-10 w-10 text-rose-400" />
+                </div>
+                <h3 className="mb-3 font-bold text-amber-100 text-xl">
+                  3. {t.step3Title}
+                </h3>
+                <p className="text-blue-100/60">{t.step3Description}</p>
               </div>
-              <h3 className="mb-3 font-bold text-amber-100 text-xl">
-                3. {t.step3Title}
-              </h3>
-              <p className="text-blue-100/60">{t.step3Description}</p>
             </div>
           </div>
         </div>
@@ -157,7 +157,7 @@ export default function LandingMagicPage() {
               className="object-cover"
               fill
               sizes="100vw"
-              src="https://images.unsplash.com/photo-1529543544277-750e-b6531c86dc?auto=format&fit=crop&w=2000&q=80"
+              src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=2000&q=80"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-[#0F172A]/30" />
             <div className="absolute inset-0 flex items-center justify-center">
