@@ -63,7 +63,7 @@ export const translations = {
     statsCities: "Lietuvos miestų",
     statsCitiesValue: "60+",
     statsHolidayPeriod: "Švenčių laikotarpis",
-    statsHolidayPeriodValue: "Gruodžio 24–31 d.",
+    statsHolidayPeriodValue: "Gruodžio 23 – Sausio 2",
     statsCommunityMembers: "Bendruomenės nariai",
     statsCommunityMembersValue: "18+",
 
@@ -267,7 +267,7 @@ export const translations = {
     statsCities: "Cities in Lithuania",
     statsCitiesValue: "60+",
     statsHolidayPeriod: "Holiday period",
-    statsHolidayPeriodValue: "December 24–31",
+    statsHolidayPeriodValue: "Dec 23 – Jan 2",
     statsCommunityMembers: "Community members",
     statsCommunityMembersValue: "18+",
 
@@ -471,7 +471,7 @@ export const translations = {
     statsCities: "Міста Литви",
     statsCitiesValue: "60+",
     statsHolidayPeriod: "Святковий період",
-    statsHolidayPeriodValue: "24–31 грудня",
+    statsHolidayPeriodValue: "23 грудня – 2 січня",
     statsCommunityMembers: "Учасники спільноти",
     statsCommunityMembersValue: "18+",
 
@@ -678,7 +678,7 @@ export const translations = {
     statsCities: "Города Литвы",
     statsCitiesValue: "60+",
     statsHolidayPeriod: "Праздничный период",
-    statsHolidayPeriodValue: "24–31 декабря",
+    statsHolidayPeriodValue: "23 декабря – 2 января",
     statsCommunityMembers: "Участники сообщества",
     statsCommunityMembersValue: "18+",
 

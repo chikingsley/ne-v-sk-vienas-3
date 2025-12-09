@@ -4,10 +4,12 @@ import { useConvexAuth } from "convex/react";
 import {
   ArrowRight,
   Calendar,
+  Flame,
   Gift,
   Heart,
-  ShieldCheck,
-  Sparkles,
+  Home,
+  MessageCircle,
+  Star,
   Users,
 } from "lucide-react";
 import Image from "next/image";
@@ -146,17 +148,38 @@ export default function LandingMagicPage() {
         </div>
       </div>
 
+      {/* Cozy Gathering Image Section */}
+      <div className="relative py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="relative h-[300px] overflow-hidden rounded-2xl md:h-[400px]">
+            <Image
+              alt="Cozy candlelit dinner gathering"
+              className="object-cover"
+              fill
+              sizes="100vw"
+              src="https://images.unsplash.com/photo-1529543544277-750e-b6531c86dc?auto=format&fit=crop&w=2000&q=80"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-[#0F172A]/30" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <p className="max-w-2xl px-6 text-center font-serif text-2xl text-amber-100 italic drop-shadow-lg md:text-3xl">
+                "The magic of the holidays is best when shared"
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Story Section */}
       <div className="relative py-24" id="about">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center gap-8 rounded-2xl border border-amber-200/10 bg-gradient-to-br from-slate-800/50 to-slate-900/50 p-8 backdrop-blur-sm md:flex-row md:p-12">
             <div className="relative h-64 w-full md:w-1/3">
               <Image
-                alt="Friends sharing a meal"
+                alt="Friends sharing warmth by candlelight"
                 className="rounded-lg object-cover shadow-black/30 shadow-xl"
                 fill
                 sizes="(max-width: 768px) 100vw, 33vw"
-                src="https://images.unsplash.com/photo-1543007630-9710e4a00a20?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                src="https://images.unsplash.com/photo-1513618827672-0d7c5ad591b1?auto=format&fit=crop&w=800&q=80"
               />
             </div>
             <div className="w-full md:w-2/3">
@@ -177,52 +200,72 @@ export default function LandingMagicPage() {
         </div>
       </div>
 
-      {/* Trust & Safety */}
+      {/* Community & Connection Section (replaces clinical Safety section) */}
       <div className="relative bg-slate-900/50 py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
-            <div>
-              <h2 className="mb-6 font-bold font-serif text-3xl text-amber-100 md:text-4xl">
-                {t.safetyTitle}
-              </h2>
-              <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-emerald-400/10">
-                    <ShieldCheck className="h-6 w-6 text-emerald-400" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-amber-100">
-                      {t.identityVerification}
-                    </h4>
-                    <p className="text-blue-100/60 text-sm">
-                      {t.identityVerificationDesc}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-400/10">
-                    <Users className="h-6 w-6 text-blue-400" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-amber-100">
-                      {t.mutualConsent}
-                    </h4>
-                    <p className="text-blue-100/60 text-sm">
-                      {t.mutualConsentDesc}
-                    </p>
-                  </div>
-                </div>
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 font-bold font-serif text-3xl text-amber-100 md:text-4xl">
+              A Community Built on Warmth
+            </h2>
+            <p className="mx-auto max-w-2xl text-blue-100/70">
+              Every connection starts with trust. Here's what makes our
+              community special.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            {/* Card 1 */}
+            <div className="rounded-2xl border border-amber-200/10 bg-gradient-to-br from-slate-800/30 to-slate-900/30 p-6 backdrop-blur-sm">
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-400/10">
+                <Star className="h-7 w-7 text-amber-400" />
               </div>
+              <h3 className="mb-2 font-semibold text-amber-100 text-lg">
+                {t.identityVerification}
+              </h3>
+              <p className="text-blue-100/60 text-sm leading-relaxed">
+                {t.identityVerificationDesc}
+              </p>
             </div>
-            <div className="relative h-[400px]">
+
+            {/* Card 2 */}
+            <div className="rounded-2xl border border-amber-200/10 bg-gradient-to-br from-slate-800/30 to-slate-900/30 p-6 backdrop-blur-sm">
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-rose-400/10">
+                <MessageCircle className="h-7 w-7 text-rose-400" />
+              </div>
+              <h3 className="mb-2 font-semibold text-amber-100 text-lg">
+                {t.mutualConsent}
+              </h3>
+              <p className="text-blue-100/60 text-sm leading-relaxed">
+                {t.mutualConsentDesc}
+              </p>
+            </div>
+
+            {/* Card 3 */}
+            <div className="rounded-2xl border border-amber-200/10 bg-gradient-to-br from-slate-800/30 to-slate-900/30 p-6 backdrop-blur-sm">
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-400/10">
+                <Home className="h-7 w-7 text-emerald-400" />
+              </div>
+              <h3 className="mb-2 font-semibold text-amber-100 text-lg">
+                Real Homes, Real People
+              </h3>
+              <p className="text-blue-100/60 text-sm leading-relaxed">
+                No restaurants, no formal venues — just genuine hospitality in
+                cozy homes across Lithuania.
+              </p>
+            </div>
+          </div>
+
+          {/* Cozy image below cards */}
+          <div className="mt-12 overflow-hidden rounded-2xl">
+            <div className="relative h-[250px] md:h-[300px]">
               <Image
-                alt="People gathering together"
-                className="rounded-2xl object-cover shadow-black/30 shadow-xl"
+                alt="Warm winter table setting with candles"
+                className="object-cover"
                 fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                src="https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&w=800&q=80"
+                sizes="100vw"
+                src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=2000&q=80"
               />
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-[#0F172A]/60 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#0F172A]/70 via-transparent to-[#0F172A]/70" />
             </div>
           </div>
         </div>
@@ -271,7 +314,7 @@ export default function LandingMagicPage() {
         <div className="-translate-x-1/2 pointer-events-none absolute top-0 left-1/2 h-64 w-[800px] rounded-full bg-amber-500/20 blur-[120px]" />
 
         <div className="relative mx-auto max-w-4xl px-4 text-center">
-          <Sparkles className="mx-auto mb-6 h-12 w-12 text-amber-400" />
+          <Flame className="mx-auto mb-6 h-12 w-12 text-amber-400" />
           <h2 className="mb-4 font-bold font-serif text-3xl text-amber-100 md:text-4xl">
             {t.finalCtaTitle}
           </h2>
