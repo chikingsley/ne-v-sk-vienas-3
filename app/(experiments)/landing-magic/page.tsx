@@ -7,7 +7,6 @@ import {
   Flame,
   Gift,
   Heart,
-  Home,
   MessageCircle,
   Star,
   Users,
@@ -15,6 +14,37 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useLocale } from "@/contexts/locale-context";
+import type { Locale } from "@/lib/i18n";
+
+const languages: { code: Locale; label: string }[] = [
+  { code: "lt", label: "LT" },
+  { code: "en", label: "EN" },
+  { code: "ua", label: "UA" },
+  { code: "ru", label: "RU" },
+];
+
+function MagicLanguageSelector() {
+  const { locale, setLocale } = useLocale();
+
+  return (
+    <div className="flex gap-1 rounded-lg border border-amber-200/20 bg-slate-900/50 p-1 backdrop-blur-sm">
+      {languages.map((lang) => (
+        <button
+          className={`min-w-[2rem] rounded px-2 py-1 font-medium text-xs transition-all ${
+            locale === lang.code
+              ? "bg-amber-400 text-slate-900"
+              : "text-amber-100/70 hover:bg-amber-400/10 hover:text-amber-100"
+          }`}
+          key={lang.code}
+          onClick={() => setLocale(lang.code)}
+          type="button"
+        >
+          {lang.label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export default function LandingMagicPage() {
   const { isAuthenticated: isSignedIn } = useConvexAuth();
@@ -42,8 +72,9 @@ export default function LandingMagicPage() {
               className="hidden text-amber-100/80 text-sm transition-colors hover:text-amber-100 sm:block"
               href="#about"
             >
-              {t.aboutUs}
+              {t.about}
             </Link>
+            <MagicLanguageSelector />
             <Link
               className="rounded-full bg-amber-400/10 px-4 py-2 font-medium text-amber-200 text-sm backdrop-blur-sm transition-all hover:bg-amber-400/20"
               href={isSignedIn ? "/browse" : "/sign-in"}
@@ -148,27 +179,6 @@ export default function LandingMagicPage() {
         </div>
       </div>
 
-      {/* Cozy Gathering Image Section */}
-      <div className="relative py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="relative h-[300px] overflow-hidden rounded-2xl md:h-[400px]">
-            <Image
-              alt="Cozy candlelit dinner gathering"
-              className="object-cover"
-              fill
-              sizes="100vw"
-              src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=2000&q=80"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-[#0F172A]/30" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <p className="max-w-2xl px-6 text-center font-serif text-2xl text-amber-100 italic drop-shadow-lg md:text-3xl">
-                "The magic of the holidays is best when shared"
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Story Section */}
       <div className="relative py-24" id="about">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
@@ -200,20 +210,19 @@ export default function LandingMagicPage() {
         </div>
       </div>
 
-      {/* Community & Connection Section (replaces clinical Safety section) */}
+      {/* Safety Section */}
       <div className="relative bg-slate-900/50 py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-16 text-center">
             <h2 className="mb-4 font-bold font-serif text-3xl text-amber-100 md:text-4xl">
-              A Community Built on Warmth
+              {t.safetyTitle}
             </h2>
             <p className="mx-auto max-w-2xl text-blue-100/70">
-              Every connection starts with trust. Here's what makes our
-              community special.
+              {t.safetySubtitle}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             {/* Card 1 */}
             <div className="rounded-2xl border border-amber-200/10 bg-gradient-to-br from-slate-800/30 to-slate-900/30 p-6 backdrop-blur-sm">
               <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-400/10">
@@ -238,34 +247,6 @@ export default function LandingMagicPage() {
               <p className="text-blue-100/60 text-sm leading-relaxed">
                 {t.mutualConsentDesc}
               </p>
-            </div>
-
-            {/* Card 3 */}
-            <div className="rounded-2xl border border-amber-200/10 bg-gradient-to-br from-slate-800/30 to-slate-900/30 p-6 backdrop-blur-sm">
-              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-400/10">
-                <Home className="h-7 w-7 text-emerald-400" />
-              </div>
-              <h3 className="mb-2 font-semibold text-amber-100 text-lg">
-                Real Homes, Real People
-              </h3>
-              <p className="text-blue-100/60 text-sm leading-relaxed">
-                No restaurants, no formal venues — just genuine hospitality in
-                cozy homes across Lithuania.
-              </p>
-            </div>
-          </div>
-
-          {/* Cozy image below cards */}
-          <div className="mt-12 overflow-hidden rounded-2xl">
-            <div className="relative h-[250px] md:h-[300px]">
-              <Image
-                alt="Warm winter table setting with candles"
-                className="object-cover"
-                fill
-                sizes="100vw"
-                src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=2000&q=80"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#0F172A]/70 via-transparent to-[#0F172A]/70" />
             </div>
           </div>
         </div>
