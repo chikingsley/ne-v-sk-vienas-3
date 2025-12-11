@@ -296,6 +296,11 @@ export const requestToJoin = mutation({
       throw new Error("Not authenticated");
     }
 
+    // Prevent self-connection
+    if (userId === args.hostId) {
+      throw new Error("Cannot request to join yourself");
+    }
+
     // Check if conversation already exists
     const existing = await ctx.db
       .query("conversations")

@@ -152,9 +152,9 @@ export const listProfiles = query({
     }
     profiles = validProfiles;
 
-    // Only show visible profiles (unless it's the current user's profile)
+    // Only show visible profiles and exclude current user from results
     profiles = profiles.filter(
-      (p) => p.isVisible !== false || p.userId === currentUserId
+      (p) => p.isVisible !== false && p.userId !== currentUserId
     );
 
     // Apply filters

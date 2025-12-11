@@ -80,6 +80,11 @@ export const send = mutation({
       throw new Error("Not authenticated");
     }
 
+    // Prevent self-invitation
+    if (userId === args.toUserId) {
+      throw new Error("Cannot send invitation to yourself");
+    }
+
     // Check if invitation already exists
     const existing = await ctx.db
       .query("invitations")
