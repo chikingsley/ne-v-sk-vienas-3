@@ -3,7 +3,11 @@
 import { useMutation, useQuery } from "convex/react";
 import {
   ArrowRight,
+  Ban,
   Check,
+  CheckCircle,
+  Flag,
+  MapPin,
   MessageCircle,
   Search,
   Share2,
@@ -23,6 +27,36 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { HOLIDAY_DATES } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
+// Report reasons
+const REPORT_REASONS = [
+  { value: "spam" as const, label: "Spam or scam" },
+  { value: "harassment" as const, label: "Harassment or bullying" },
+  { value: "inappropriate" as const, label: "Inappropriate content" },
+  { value: "fake_profile" as const, label: "Fake profile" },
+  { value: "other" as const, label: "Other" },
+];
+
+// Role styling helpers
+function getRoleBadgeClass(role: string): string {
+  if (role === "host") {
+    return "bg-green-100 text-green-700";
+  }
+  if (role === "guest") {
+    return "bg-blue-100 text-blue-700";
+  }
+  return "bg-purple-100 text-purple-700";
+}
+
+function getRoleLabel(role: string): string {
+  if (role === "host") {
+    return "Hosting";
+  }
+  if (role === "guest") {
+    return "Looking for host";
+  }
+  return "Host & Guest";
+}
 
 // Types
 type ProfileInfo = {
@@ -199,11 +233,7 @@ function MessageBubble({
   );
 }
 
-function EmptyConversationsList({
-  onCreateTest,
-}: {
-  onCreateTest: () => Promise<void>;
-}) {
+function EmptyConversationsList() {
   return (
     <div className="flex h-full flex-col items-center justify-center p-4 text-center">
       <MessageCircle className="mb-4 h-12 w-12 text-muted-foreground/50" />
@@ -211,15 +241,12 @@ function EmptyConversationsList({
       <p className="mt-1 text-muted-foreground text-sm">
         Connect with hosts or guests to start chatting
       </p>
-      <Button
-        className="mt-4"
-        onClick={onCreateTest}
-        size="sm"
-        variant="outline"
-      >
-        <UserPlus className="mr-2 h-4 w-4" />
-        Create Test Conversations
-      </Button>
+      <Link href="/browse">
+        <Button className="mt-4" size="sm" variant="outline">
+          <UserPlus className="mr-2 h-4 w-4" />
+          Browse People
+        </Button>
+      </Link>
     </div>
   );
 }
@@ -415,6 +442,259 @@ function EmptyState() {
   );
 }
 
+// Report Modal
+function ReportModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  isSubmitting,
+  userName,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (
+    reason: (typeof REPORT_REASONS)[number]["value"],
+    details?: string
+  ) => void;
+  isSubmitting: boolean;
+  userName: string;
+}) {
+  const [reason, setReason] = useState<
+    (typeof REPORT_REASONS)[number]["value"] | ""
+  >("");
+  const [details, setDetails] = useState("");
+
+  if (!isOpen) {
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
+            <Flag className="h-5 w-5 text-red-600" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg">Report {userName}</h3>
+            <p className="text-muted-foreground text-sm">
+              Help us keep the community safe
+            </p>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Reason for report *</Label>
+            <div className="space-y-2">
+              {REPORT_REASONS.map((r) => (
+                <label
+                  className={cn(
+                    "flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors",
+                    reason === r.value
+                      ? "border-red-500 bg-red-50"
+                      : "hover:bg-gray-50"
+                  )}
+                  key={r.value}
+                >
+                  <input
+                    checked={reason === r.value}
+                    className="h-4 w-4 text-red-500"
+                    name="report-reason"
+                    onChange={() => setReason(r.value)}
+                    type="radio"
+                  />
+                  <span className="text-sm">{r.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="reportDetails">Additional details (optional)</Label>
+            <textarea
+              className="min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              id="reportDetails"
+              onChange={(e) => setDetails(e.target.value)}
+              placeholder="Provide any additional context..."
+              value={details}
+            />
+          </div>
+        </div>
+        <div className="mt-6 flex gap-3">
+          <Button className="flex-1" onClick={onClose} variant="outline">
+            Cancel
+          </Button>
+          <Button
+            className="flex-1 bg-red-500 hover:bg-red-600"
+            disabled={!reason || isSubmitting}
+            onClick={() => reason && onSubmit(reason, details || undefined)}
+          >
+            {isSubmitting ? "Reporting..." : "Submit Report"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Profile Sidebar Panel
+function ProfileSidebar({
+  userId,
+  onBlock,
+  onReport,
+  isBlocked,
+}: {
+  userId: Id<"users">;
+  onBlock: () => void;
+  onReport: () => void;
+  isBlocked: boolean;
+}) {
+  const profile = useQuery(api.profiles.getProfile, { userId });
+
+  if (!profile) {
+    return (
+      <div className="hidden w-80 shrink-0 border-l bg-gray-50 p-4 xl:block">
+        <div className="flex h-full items-center justify-center">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted border-t-red-500" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="hidden w-80 shrink-0 flex-col border-l bg-gray-50 xl:flex">
+      {/* Profile Header */}
+      <div className="border-b bg-white p-4">
+        <div className="flex flex-col items-center text-center">
+          <Avatar className="mb-3 h-20 w-20">
+            <AvatarImage src={profile.photoUrl} />
+            <AvatarFallback className="text-2xl">
+              {profile.firstName?.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+          <h3 className="font-semibold text-lg">{profile.firstName}</h3>
+          <div className="mt-1 flex items-center gap-1 text-muted-foreground text-sm">
+            <MapPin className="h-3 w-3" />
+            {profile.city}
+          </div>
+          {profile.verified && (
+            <Badge
+              className="mt-2 bg-green-100 text-green-700"
+              variant="secondary"
+            >
+              <CheckCircle className="mr-1 h-3 w-3" />
+              Verified
+            </Badge>
+          )}
+        </div>
+      </div>
+
+      {/* Profile Info */}
+      <div className="flex-1 overflow-y-auto p-4">
+        {/* Bio */}
+        {profile.bio && (
+          <div className="mb-4">
+            <h4 className="mb-2 font-medium text-gray-500 text-sm">About</h4>
+            <p className="text-sm">{profile.bio}</p>
+          </div>
+        )}
+
+        {/* Languages */}
+        {profile.languages && profile.languages.length > 0 && (
+          <div className="mb-4">
+            <h4 className="mb-2 font-medium text-gray-500 text-sm">
+              Languages
+            </h4>
+            <div className="flex flex-wrap gap-1">
+              {profile.languages.map((lang) => (
+                <Badge
+                  className="bg-blue-100 text-blue-700"
+                  key={lang}
+                  variant="secondary"
+                >
+                  {lang}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Role / Status */}
+        <div className="mb-4">
+          <h4 className="mb-2 font-medium text-gray-500 text-sm">Status</h4>
+          <Badge
+            className={cn(getRoleBadgeClass(profile.role))}
+            variant="secondary"
+          >
+            {getRoleLabel(profile.role)}
+          </Badge>
+        </div>
+
+        {/* Available Dates */}
+        {profile.availableDates && profile.availableDates.length > 0 && (
+          <div className="mb-4">
+            <h4 className="mb-2 font-medium text-gray-500 text-sm">
+              Available
+            </h4>
+            <div className="flex flex-wrap gap-1">
+              {profile.availableDates.slice(0, 5).map((date) => (
+                <Badge
+                  className="bg-amber-100 text-amber-700"
+                  key={date}
+                  variant="secondary"
+                >
+                  {date}
+                </Badge>
+              ))}
+              {profile.availableDates.length > 5 && (
+                <Badge
+                  className="bg-gray-100 text-gray-600"
+                  variant="secondary"
+                >
+                  +{profile.availableDates.length - 5} more
+                </Badge>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* View Full Profile Link */}
+        {profile.username && (
+          <Link
+            className="mb-4 block w-full rounded-lg border bg-white px-4 py-2 text-center font-medium text-sm transition-colors hover:bg-gray-50"
+            href={`/people/${profile.username}`}
+          >
+            View Full Profile
+          </Link>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div className="border-t bg-white p-4">
+        <div className="space-y-2">
+          <Button
+            className="w-full justify-start text-amber-600 hover:bg-amber-50 hover:text-amber-700"
+            onClick={onBlock}
+            size="sm"
+            variant="ghost"
+          >
+            <Ban className="mr-2 h-4 w-4" />
+            {isBlocked ? "Unblock User" : "Block User"}
+          </Button>
+          <Button
+            className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700"
+            onClick={onReport}
+            size="sm"
+            variant="ghost"
+          >
+            <Flag className="mr-2 h-4 w-4" />
+            Report User
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Sidebar component
 function MessagesSidebar({
   items,
@@ -424,7 +704,6 @@ function MessagesSidebar({
   searchQuery,
   onSearchChange,
   onItemClick,
-  onCreateTest,
 }: {
   items: SidebarItem[];
   activeId: string | null;
@@ -433,7 +712,6 @@ function MessagesSidebar({
   searchQuery: string;
   onSearchChange: (value: string) => void;
   onItemClick: (id: string, type: "conversation" | "request") => void;
-  onCreateTest: () => Promise<void>;
 }) {
   const renderContent = () => {
     if (isLoading) {
@@ -444,7 +722,7 @@ function MessagesSidebar({
       );
     }
     if (items.length === 0) {
-      return <EmptyConversationsList onCreateTest={onCreateTest} />;
+      return <EmptyConversationsList />;
     }
     return (
       <div className="space-y-1">
@@ -501,6 +779,8 @@ function ConversationView({
   onCloseShareModal,
   onShareEventDetails,
   isSendingCard,
+  isBlocked,
+  otherUserVerified,
 }: {
   conversation: ConversationSummary;
   messages:
@@ -522,6 +802,8 @@ function ConversationView({
     note: string;
   }) => void;
   isSendingCard: boolean;
+  isBlocked: boolean;
+  otherUserVerified?: boolean;
 }) {
   return (
     <>
@@ -534,13 +816,24 @@ function ConversationView({
           </AvatarFallback>
         </Avatar>
         <div className="flex-1">
-          <h2 className="font-semibold">{conversation.profile?.firstName}</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="font-semibold">{conversation.profile?.firstName}</h2>
+            {otherUserVerified && (
+              <Badge
+                className="bg-green-100 text-green-700"
+                variant="secondary"
+              >
+                <CheckCircle className="mr-1 h-3 w-3" />
+                Verified
+              </Badge>
+            )}
+          </div>
           <p className="text-muted-foreground text-sm">
             {conversation.profile?.city}
           </p>
         </div>
         <div className="flex gap-2">
-          {isHost && (
+          {isHost && !isBlocked && (
             <Button onClick={onShowShareModal} size="sm" variant="outline">
               <Share2 className="mr-1 h-4 w-4" />
               Share Details
@@ -573,27 +866,34 @@ function ConversationView({
 
       {/* Input */}
       <div className="border-t p-4">
-        <div className="flex items-center gap-3">
-          <Input
-            className="flex-1"
-            onChange={(e) => onMessageInputChange(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                onSend();
-              }
-            }}
-            placeholder="Type a message..."
-            value={messageInput}
-          />
-          <Button
-            className="bg-red-500 hover:bg-red-600"
-            disabled={!messageInput.trim()}
-            onClick={onSend}
-          >
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        </div>
+        {isBlocked ? (
+          <div className="flex items-center justify-center gap-2 rounded-lg bg-gray-100 py-3 text-muted-foreground">
+            <Ban className="h-4 w-4" />
+            <span className="text-sm">Messaging is disabled</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <Input
+              className="flex-1"
+              onChange={(e) => onMessageInputChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  onSend();
+                }
+              }}
+              placeholder="Type a message..."
+              value={messageInput}
+            />
+            <Button
+              className="bg-red-500 hover:bg-red-600"
+              disabled={!messageInput.trim()}
+              onClick={onSend}
+            >
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </div>
 
       <ShareDetailsModal
@@ -625,6 +925,8 @@ function MainContentArea({
   onCloseShareModal,
   onShareEventDetails,
   isSendingCard,
+  isBlocked,
+  otherUserVerified,
 }: {
   activeRequest: Extract<SidebarItem, { type: "request" }> | null;
   activeConversation: ConversationSummary | null | undefined;
@@ -650,6 +952,8 @@ function MainContentArea({
     note: string;
   }) => void;
   isSendingCard: boolean;
+  isBlocked: boolean;
+  otherUserVerified?: boolean;
 }) {
   if (activeRequest) {
     return (
@@ -666,6 +970,7 @@ function MainContentArea({
     return (
       <ConversationView
         conversation={activeConversation}
+        isBlocked={isBlocked}
         isHost={isHost}
         isSendingCard={isSendingCard}
         messageInput={messageInput}
@@ -677,6 +982,7 @@ function MainContentArea({
         onSend={onSend}
         onShareEventDetails={onShareEventDetails}
         onShowShareModal={onShowShareModal}
+        otherUserVerified={otherUserVerified}
         showShareModal={showShareModal}
       />
     );
@@ -775,7 +1081,9 @@ function MessagesPageContent() {
   const [messageInput, setMessageInput] = useState("");
   const [isResponding, setIsResponding] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const [isSendingCard, setIsSendingCard] = useState(false);
+  const [isReporting, setIsReporting] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   // Queries
@@ -808,6 +1116,11 @@ function MessagesPageContent() {
       ? (activeItem as Extract<SidebarItem, { type: "request" }>)
       : null;
 
+  // Get the other user's ID for block/report
+  const otherUserId = activeConversation?.otherUserId as
+    | Id<"users">
+    | undefined;
+
   // More queries
   const messages = useQuery(
     api.messages.getConversationMessages,
@@ -819,15 +1132,29 @@ function MessagesPageContent() {
       ? { userId: activeRequest.oderId as Id<"users"> }
       : "skip"
   );
+  const otherUserProfile = useQuery(
+    api.profiles.getProfile,
+    otherUserId ? { userId: otherUserId } : "skip"
+  );
+  const blockStatus = useQuery(
+    api.moderation.isBlocked,
+    otherUserId ? { userId: otherUserId } : "skip"
+  );
 
   // Mutations
   const sendMessage = useMutation(api.messages.sendMessage);
   const respondToInvitation = useMutation(api.invitations.respond);
-  const createTestConversations = useMutation(api.seed.createTestConversations);
+  const blockUser = useMutation(api.moderation.blockUser);
+  const unblockUser = useMutation(api.moderation.unblockUser);
+  const reportUser = useMutation(api.moderation.reportUser);
 
   // Scroll and read management via hooks
   useMessagesScroll(messagesContainerRef, activeConversationId, messages);
   useMarkAsRead(activeConversationId, activeConversation?.unreadCount);
+
+  // Derived state
+  const isBlocked = !!(blockStatus?.blockedByMe || blockStatus?.blockedMe);
+  const isHost = myProfile?.role === "host";
 
   // Handlers
   const setActiveChat = (id: string, type: "conversation" | "request") => {
@@ -838,11 +1165,15 @@ function MessagesPageContent() {
     if (!(messageInput.trim() && activeConversationId)) {
       return;
     }
-    await sendMessage({
-      conversationId: activeConversationId,
-      content: messageInput.trim(),
-    });
-    setMessageInput("");
+    try {
+      await sendMessage({
+        conversationId: activeConversationId,
+        content: messageInput.trim(),
+      });
+      setMessageInput("");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to send message");
+    }
   };
 
   const handleRespond = async (accept: boolean) => {
@@ -877,15 +1208,15 @@ function MessagesPageContent() {
     setIsSendingCard(true);
     try {
       // Format event details as a message
-      const parts = [`📅 Event Details for ${data.date}`];
+      const parts = [`Event Details for ${data.date}`];
       if (data.address) {
-        parts.push(`📍 ${data.address}`);
+        parts.push(`Address: ${data.address}`);
       }
       if (data.phone) {
-        parts.push(`📞 ${data.phone}`);
+        parts.push(`Phone: ${data.phone}`);
       }
       if (data.note) {
-        parts.push(`💬 ${data.note}`);
+        parts.push(`Note: ${data.note}`);
       }
 
       await sendMessage({
@@ -898,20 +1229,46 @@ function MessagesPageContent() {
     }
   };
 
-  const handleCreateTest = async () => {
+  const handleBlock = async () => {
+    if (!otherUserId) {
+      return;
+    }
     try {
-      const result = await createTestConversations({});
-      if (result.conversations) {
-        toast.success(result.message, {
-          description: result.conversations.join(", "),
-        });
+      if (blockStatus?.blockedByMe) {
+        await unblockUser({ userId: otherUserId });
+        toast.success("User unblocked");
       } else {
-        toast.info(result.message, {
-          description: `${result.conversationCount} conversations exist`,
-        });
+        await blockUser({ userId: otherUserId });
+        toast.success("User blocked");
       }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed");
+    }
+  };
+
+  const handleReport = async (
+    reason: (typeof REPORT_REASONS)[number]["value"],
+    details?: string
+  ) => {
+    if (!otherUserId) {
+      return;
+    }
+    setIsReporting(true);
+    try {
+      await reportUser({
+        userId: otherUserId,
+        reason,
+        details,
+        conversationId: activeConversationId,
+      });
+      toast.success("Report submitted", {
+        description: "Thank you for helping keep our community safe.",
+      });
+      setShowReportModal(false);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to submit report");
+    } finally {
+      setIsReporting(false);
     }
   };
 
@@ -921,15 +1278,13 @@ function MessagesPageContent() {
   const pendingCount =
     invitations?.received?.filter((inv) => inv.status === "pending").length ??
     0;
-  const isHost = myProfile?.role === "host";
 
   return (
-    <div className="flex h-full">
+    <div className="flex min-h-0 flex-1">
       <MessagesSidebar
         activeId={activeId}
         isLoading={isLoading}
         items={filteredItems}
-        onCreateTest={handleCreateTest}
         onItemClick={setActiveChat}
         onSearchChange={setSearchQuery}
         pendingCount={pendingCount}
@@ -940,6 +1295,7 @@ function MessagesPageContent() {
           activeConversation={activeConversation}
           activeRequest={activeRequest}
           activeRequestProfileUsername={activeRequestProfile?.username}
+          isBlocked={isBlocked}
           isHost={isHost}
           isResponding={isResponding}
           isSendingCard={isSendingCard}
@@ -953,9 +1309,27 @@ function MessagesPageContent() {
           onSend={handleSend}
           onShareEventDetails={handleShareEventDetails}
           onShowShareModal={() => setShowShareModal(true)}
+          otherUserVerified={otherUserProfile?.verified}
           showShareModal={showShareModal}
         />
       </div>
+      {/* Profile Sidebar - only visible on xl screens when conversation active */}
+      {activeConversation && otherUserId && (
+        <ProfileSidebar
+          isBlocked={!!blockStatus?.blockedByMe}
+          onBlock={handleBlock}
+          onReport={() => setShowReportModal(true)}
+          userId={otherUserId}
+        />
+      )}
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={showReportModal}
+        isSubmitting={isReporting}
+        onClose={() => setShowReportModal(false)}
+        onSubmit={handleReport}
+        userName={activeConversation?.profile?.firstName || "User"}
+      />
     </div>
   );
 }
@@ -964,7 +1338,7 @@ export default function MessagesPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex h-full items-center justify-center">
+        <div className="flex min-h-0 flex-1 items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-red-500" />
         </div>
       }

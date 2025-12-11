@@ -14,8 +14,8 @@ import type * as http from "../http.js";
 import type * as invitations from "../invitations.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as messages from "../messages.js";
+import type * as moderation from "../moderation.js";
 import type * as profiles from "../profiles.js";
-import type * as seed from "../seed.js";
 import type * as users from "../users.js";
 
 import type {
@@ -31,8 +31,8 @@ declare const fullApi: ApiFromModules<{
   invitations: typeof invitations;
   "lib/auth": typeof lib_auth;
   messages: typeof messages;
+  moderation: typeof moderation;
   profiles: typeof profiles;
-  seed: typeof seed;
   users: typeof users;
 }>;
 

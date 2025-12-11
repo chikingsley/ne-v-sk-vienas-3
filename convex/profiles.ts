@@ -1,12 +1,54 @@
 import { v } from "convex/values";
+import type { Doc, Id } from "./_generated/dataModel";
+import type { QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
 import { getCurrentUserId } from "./lib/auth";
 
 type Language = "Lithuanian" | "English" | "Ukrainian" | "Russian";
 type HolidayDate = "24 Dec" | "25 Dec" | "26 Dec" | "31 Dec";
+type ConnectionStatus =
+  | "none"
+  | "pending_sent"
+  | "pending_received"
+  | "matched"
+  | "self";
 
 // Top-level regex for username validation
 const USERNAME_REGEX = /^[a-z0-9-]+$/;
+
+// Helper: Get connection status between two users
+async function getConnectionStatusBetween(
+  ctx: QueryCtx,
+  currentUserId: Id<"users">,
+  otherUserId: Id<"users">
+): Promise<ConnectionStatus> {
+  if (currentUserId === otherUserId) {
+    return "self";
+  }
+
+  const sentInv = await ctx.db
+    .query("invitations")
+    .withIndex("by_from", (q) => q.eq("fromUserId", currentUserId))
+    .filter((q) => q.eq(q.field("toUserId"), otherUserId))
+    .first();
+
+  const receivedInv = await ctx.db
+    .query("invitations")
+    .withIndex("by_to", (q) => q.eq("toUserId", currentUserId))
+    .filter((q) => q.eq(q.field("fromUserId"), otherUserId))
+    .first();
+
+  if (sentInv?.status === "accepted" || receivedInv?.status === "accepted") {
+    return "matched";
+  }
+  if (sentInv?.status === "pending") {
+    return "pending_sent";
+  }
+  if (receivedInv?.status === "pending") {
+    return "pending_received";
+  }
+  return "none";
+}
 
 // Get current user's profile
 export const getMyProfile = query({
@@ -138,43 +180,9 @@ export const listProfiles = query({
     // Get connection status for each profile if user is logged in
     const profilesWithStatus = await Promise.all(
       profiles.map(async (p) => {
-        let connectionStatus:
-          | "none"
-          | "pending_sent"
-          | "pending_received"
-          | "matched"
-          | "self" = "none";
-
-        if (currentUserId) {
-          if (p.userId === currentUserId) {
-            connectionStatus = "self";
-          } else {
-            // Check invitations I sent
-            const sentInv = await ctx.db
-              .query("invitations")
-              .withIndex("by_from", (q) => q.eq("fromUserId", currentUserId))
-              .filter((q) => q.eq(q.field("toUserId"), p.userId))
-              .first();
-
-            // Check invitations I received
-            const receivedInv = await ctx.db
-              .query("invitations")
-              .withIndex("by_to", (q) => q.eq("toUserId", currentUserId))
-              .filter((q) => q.eq(q.field("fromUserId"), p.userId))
-              .first();
-
-            if (
-              sentInv?.status === "accepted" ||
-              receivedInv?.status === "accepted"
-            ) {
-              connectionStatus = "matched";
-            } else if (sentInv?.status === "pending") {
-              connectionStatus = "pending_sent";
-            } else if (receivedInv?.status === "pending") {
-              connectionStatus = "pending_received";
-            }
-          }
-        }
+        const connectionStatus = currentUserId
+          ? await getConnectionStatusBetween(ctx, currentUserId, p.userId)
+          : ("none" as ConnectionStatus);
 
         return {
           ...p,
@@ -722,5 +730,124 @@ export const generateMissingUsernames = mutation({
     }
 
     return { updated };
+  },
+});
+
+// Helper: Count occurrences and return sorted array
+function countToSortedArray(map: Map<string, number>, sort = true) {
+  const arr = Array.from(map.entries()).map(([name, count]) => ({
+    name,
+    count,
+  }));
+  return sort ? arr.sort((a, b) => b.count - a.count) : arr;
+}
+
+// Helper: Get dates for a profile based on role filter
+function getProfileDates(
+  profile: {
+    availableDates: string[];
+    hostingDates?: string[];
+    guestDates?: string[];
+  },
+  roleFilter?: string
+) {
+  if (roleFilter === "host") {
+    return profile.hostingDates || profile.availableDates;
+  }
+  if (roleFilter === "guest") {
+    return profile.guestDates || profile.availableDates;
+  }
+  return profile.availableDates;
+}
+
+// Helper: Count occurrences of a single value
+function incrementCount(map: Map<string, number>, key: string) {
+  map.set(key, (map.get(key) || 0) + 1);
+}
+
+// Helper: Count all languages from profiles
+function countLanguages(
+  profiles: { languages: string[] }[]
+): Map<string, number> {
+  const langMap = new Map<string, number>();
+  for (const p of profiles) {
+    for (const lang of p.languages) {
+      incrementCount(langMap, lang);
+    }
+  }
+  return langMap;
+}
+
+// Helper: Count all dates from profiles
+function countDates(
+  profiles: {
+    availableDates: string[];
+    hostingDates?: string[];
+    guestDates?: string[];
+  }[],
+  roleFilter?: string
+): Map<string, number> {
+  const dateMap = new Map<string, number>();
+  for (const p of profiles) {
+    for (const date of getProfileDates(p, roleFilter)) {
+      incrementCount(dateMap, date);
+    }
+  }
+  return dateMap;
+}
+
+// Helper: Filter profiles by visibility and role
+async function filterVisibleProfiles(
+  ctx: QueryCtx,
+  allProfiles: Doc<"profiles">[],
+  currentUserId: Id<"users"> | null,
+  roleFilter?: string
+): Promise<Doc<"profiles">[]> {
+  const profiles: Doc<"profiles">[] = [];
+  for (const p of allProfiles) {
+    const user = await ctx.db.get(p.userId);
+    const isVisible = p.isVisible !== false || p.userId === currentUserId;
+    const matchesRole =
+      !roleFilter || p.role === roleFilter || p.role === "both";
+    if (user && isVisible && matchesRole) {
+      profiles.push(p);
+    }
+  }
+  return profiles;
+}
+
+// Helper: Count cities from profiles
+function countCities(profiles: { city?: string }[]): Map<string, number> {
+  const cityMap = new Map<string, number>();
+  for (const p of profiles) {
+    if (p.city) {
+      incrementCount(cityMap, p.city);
+    }
+  }
+  return cityMap;
+}
+
+// Get filter counts for browse page (cities, languages, dates with actual profile counts)
+// Returns arrays instead of objects because Convex doesn't allow non-ASCII chars in object keys
+export const getFilterCounts = query({
+  args: {
+    role: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const currentUserId = await getCurrentUserId(ctx);
+    const allProfiles = await ctx.db.query("profiles").collect();
+    const profiles = await filterVisibleProfiles(
+      ctx,
+      allProfiles,
+      currentUserId,
+      args.role
+    );
+
+    return {
+      cities: countToSortedArray(countCities(profiles)),
+      languages: countToSortedArray(countLanguages(profiles)),
+      dates: countToSortedArray(countDates(profiles, args.role), false),
+      totalProfiles: profiles.length,
+    };
   },
 });

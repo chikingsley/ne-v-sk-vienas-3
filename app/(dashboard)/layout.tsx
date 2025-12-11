@@ -5,8 +5,8 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { DashboardNavbar } from "@/components/dashboard-navbar";
+import { Footer } from "@/components/footer";
 import { VerifyBanner } from "@/components/verify-banner";
-import { useLocale } from "@/contexts/locale-context";
 import { api } from "@/convex/_generated/api";
 
 export default function DashboardLayout({
@@ -14,7 +14,6 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { t } = useLocale();
   const router = useRouter();
   const { isLoading: isAuthLoading, isAuthenticated } = useConvexAuth();
   const updateLastActive = useMutation(api.profiles.updateLastActive);
@@ -97,16 +96,11 @@ export default function DashboardLayout({
       <VerifyBanner />
 
       {/* Main content area - scrollable, centered */}
-      <main className="flex-1 bg-gray-50">
-        <div className="mx-auto max-w-7xl px-4 py-6">{children}</div>
+      <main className="flex min-h-0 flex-1 flex-col bg-gray-50">
+        {children}
       </main>
 
-      {/* Footer */}
-      <footer className="shrink-0 border-t bg-gray-50 py-4">
-        <div className="text-center text-gray-500 text-sm">
-          &copy; {new Date().getFullYear()} {t.appName}. {t.allRightsReserved}
-        </div>
-      </footer>
+      <Footer variant="light" />
     </div>
   );
 }

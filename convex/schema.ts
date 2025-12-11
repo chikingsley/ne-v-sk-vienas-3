@@ -127,7 +127,6 @@ export default defineSchema({
     email: v.optional(v.string()),
     name: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
-    isAiTestUser: v.optional(v.boolean()), // For AI test users
   }).index("by_clerkId", ["clerkId"]),
 
   // User profiles (extends user)
@@ -262,4 +261,38 @@ export default defineSchema({
     category: v.string(), // profanity, spam, harassment, etc.
     isRegex: v.optional(v.boolean()),
   }).index("by_category", ["category"]),
+
+  // Blocked users
+  blocks: defineTable({
+    blockerId: v.id("users"), // User who blocked
+    blockedId: v.id("users"), // User who was blocked
+    createdAt: v.number(),
+  })
+    .index("by_blocker", ["blockerId"])
+    .index("by_blocked", ["blockedId"]),
+
+  // User reports
+  reports: defineTable({
+    reporterId: v.id("users"),
+    reportedUserId: v.id("users"),
+    conversationId: v.optional(v.id("conversations")),
+    reason: v.union(
+      v.literal("spam"),
+      v.literal("harassment"),
+      v.literal("inappropriate"),
+      v.literal("fake_profile"),
+      v.literal("other")
+    ),
+    details: v.optional(v.string()),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("reviewed"),
+      v.literal("resolved"),
+      v.literal("dismissed")
+    ),
+    createdAt: v.number(),
+  })
+    .index("by_reporter", ["reporterId"])
+    .index("by_reported", ["reportedUserId"])
+    .index("by_status", ["status"]),
 });

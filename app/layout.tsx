@@ -8,7 +8,6 @@ import {
   Geist_Mono,
   Playfair_Display,
 } from "next/font/google";
-import { DevPanel } from "@/components/DevPanel";
 import { ConvexClientProvider } from "@/components/providers/convex-client-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { LocaleProvider } from "@/contexts/locale-context";
@@ -131,7 +130,6 @@ export default function RootLayout({
       >
         <ConvexClientProvider>
           <LocaleProvider>{children}</LocaleProvider>
-          <DevPanel />
           <Toaster />
         </ConvexClientProvider>
         <Analytics />

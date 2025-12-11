@@ -103,6 +103,39 @@ export const getMyConversations = query({
   },
 });
 
+// Helper to check banned words
+async function checkBannedWords(
+  ctx: {
+    db: {
+      query: (table: "bannedWords") => {
+        collect: () => Promise<
+          Array<{ word: string; category: string; isRegex?: boolean }>
+        >;
+      };
+    };
+  },
+  content: string
+): Promise<{ flagged: boolean; category?: string }> {
+  const bannedWords = await ctx.db.query("bannedWords").collect();
+  const lowerContent = content.toLowerCase();
+
+  for (const banned of bannedWords) {
+    if (banned.isRegex) {
+      try {
+        const regex = new RegExp(banned.word, "i");
+        if (regex.test(content)) {
+          return { flagged: true, category: banned.category };
+        }
+      } catch {
+        // Invalid regex, skip
+      }
+    } else if (lowerContent.includes(banned.word.toLowerCase())) {
+      return { flagged: true, category: banned.category };
+    }
+  }
+  return { flagged: false };
+}
+
 // Send a message in a conversation
 export const sendMessage = mutation({
   args: {
@@ -124,6 +157,28 @@ export const sendMessage = mutation({
       throw new Error("Not authorized");
     }
 
+    // Check if either user has blocked the other
+    const otherId =
+      conversation.guestId === userId
+        ? conversation.hostId
+        : conversation.guestId;
+
+    const blockedByMe = await ctx.db
+      .query("blocks")
+      .withIndex("by_blocker", (q) => q.eq("blockerId", userId))
+      .filter((q) => q.eq(q.field("blockedId"), otherId))
+      .first();
+
+    const blockedMe = await ctx.db
+      .query("blocks")
+      .withIndex("by_blocker", (q) => q.eq("blockerId", otherId))
+      .filter((q) => q.eq(q.field("blockedId"), userId))
+      .first();
+
+    if (blockedByMe || blockedMe) {
+      throw new Error("Cannot send messages in this conversation");
+    }
+
     // Check conversation status - only allow messaging if accepted or higher
     if (
       conversation.status === "requested" ||
@@ -140,6 +195,9 @@ export const sendMessage = mutation({
       }
     }
 
+    // Check for banned words
+    const moderationCheck = await checkBannedWords(ctx, args.content);
+
     const now = Date.now();
 
     const messageId = await ctx.db.insert("messages", {
@@ -148,6 +206,8 @@ export const sendMessage = mutation({
       content: args.content,
       read: false,
       createdAt: now,
+      moderationStatus: moderationCheck.flagged ? "flagged" : "clean",
+      moderationReason: moderationCheck.category,
     });
 
     // Update conversation's lastMessageAt

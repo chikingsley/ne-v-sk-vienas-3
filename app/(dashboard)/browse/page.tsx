@@ -41,6 +41,7 @@ function FilterBar({
   onDateChange,
   onLanguageChange,
   onClear,
+  filterCounts,
   t,
 }: {
   selectedCity: string;
@@ -50,9 +51,34 @@ function FilterBar({
   onDateChange: (v: string) => void;
   onLanguageChange: (v: string) => void;
   onClear: () => void;
+  filterCounts?: {
+    cities: Array<{ name: string; count: number }>;
+    languages: Array<{ name: string; count: number }>;
+    dates: Array<{ name: string; count: number }>;
+    totalProfiles: number;
+  };
   t: ReturnType<typeof useLocale>["t"];
 }) {
   const hasFilters = selectedCity || selectedDate || selectedLanguage;
+
+  // Get cities with profiles (already sorted by count from backend)
+  const citiesWithProfiles = filterCounts
+    ? filterCounts.cities
+    : CITIES.map((name) => ({ name, count: 0 }));
+
+  // Get languages with profiles (already sorted by count from backend)
+  const languagesWithProfiles = filterCounts
+    ? filterCounts.languages
+    : LANGUAGES.map((name) => ({ name, count: 0 }));
+
+  // Get dates with profiles (map to keep HOLIDAY_DATES order)
+  const dateCountMap = new Map(
+    filterCounts?.dates.map((d) => [d.name, d.count]) ?? []
+  );
+  const datesWithProfiles = HOLIDAY_DATES.map((name) => ({
+    name,
+    count: dateCountMap.get(name) ?? 0,
+  }));
 
   return (
     <div className="flex w-full flex-1 flex-col items-center gap-2 md:flex-row lg:w-auto">
@@ -65,10 +91,29 @@ function FilterBar({
           <SelectValue placeholder={t.anywhereInLithuania} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="__all__">{t.anywhereInLithuania}</SelectItem>
-          {CITIES.map((city) => (
-            <SelectItem key={city} value={city}>
-              {city}
+          <SelectItem value="__all__">
+            {t.anywhereInLithuania}
+            {filterCounts && (
+              <span className="ml-auto pl-2 text-gray-400">
+                {filterCounts.totalProfiles}
+              </span>
+            )}
+          </SelectItem>
+          {citiesWithProfiles.map(({ name, count }) => (
+            <SelectItem
+              className={count === 0 ? "text-gray-400" : ""}
+              disabled={count === 0}
+              key={name}
+              value={name}
+            >
+              <span className="flex w-full items-center justify-between">
+                <span>{name}</span>
+                <span
+                  className={`ml-auto pl-2 ${count === 0 ? "text-gray-300" : "text-gray-400"}`}
+                >
+                  {count}
+                </span>
+              </span>
             </SelectItem>
           ))}
         </SelectContent>
@@ -84,9 +129,21 @@ function FilterBar({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="__all__">{t.anyDates}</SelectItem>
-          {HOLIDAY_DATES.map((date) => (
-            <SelectItem key={date} value={date}>
-              {date}
+          {datesWithProfiles.map(({ name, count }) => (
+            <SelectItem
+              className={count === 0 ? "text-gray-400" : ""}
+              disabled={count === 0}
+              key={name}
+              value={name}
+            >
+              <span className="flex w-full items-center justify-between">
+                <span>{name}</span>
+                <span
+                  className={`ml-auto pl-2 ${count === 0 ? "text-gray-300" : "text-gray-400"}`}
+                >
+                  {count}
+                </span>
+              </span>
             </SelectItem>
           ))}
         </SelectContent>
@@ -102,9 +159,21 @@ function FilterBar({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="__all__">{t.anyLanguage}</SelectItem>
-          {LANGUAGES.map((lang) => (
-            <SelectItem key={lang} value={lang}>
-              {lang}
+          {languagesWithProfiles.map(({ name, count }) => (
+            <SelectItem
+              className={count === 0 ? "text-gray-400" : ""}
+              disabled={count === 0}
+              key={name}
+              value={name}
+            >
+              <span className="flex w-full items-center justify-between">
+                <span>{name}</span>
+                <span
+                  className={`ml-auto pl-2 ${count === 0 ? "text-gray-300" : "text-gray-400"}`}
+                >
+                  {count}
+                </span>
+              </span>
             </SelectItem>
           ))}
         </SelectContent>
@@ -346,6 +415,11 @@ export default function BrowsePage() {
     date: selectedDate || undefined,
   });
 
+  // Get filter counts for dynamic filter options
+  const filterCounts = useQuery(api.profiles.getFilterCounts, {
+    role: activeTab,
+  });
+
   const sendInvitation = useMutation(api.invitations.send);
   const respondToInvitation = useMutation(api.invitations.respond);
 
@@ -475,6 +549,7 @@ export default function BrowsePage() {
             </div>
 
             <FilterBar
+              filterCounts={filterCounts ?? undefined}
               onCityChange={setSelectedCity}
               onClear={clearFilters}
               onDateChange={setSelectedDate}
