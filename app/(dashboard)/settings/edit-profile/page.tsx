@@ -1,7 +1,7 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { useConvexAuth, useMutation, useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Check,
@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { memo, useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,7 +37,7 @@ import {
   VIBES_OPTIONS,
 } from "@/lib/types";
 
-type Step = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+type Step = 1 | 2 | 3 | 4 | 5 | 6;
 
 type IconType = "check" | "question" | "x";
 type ColorType = "green" | "amber" | "red";
@@ -49,133 +50,6 @@ type PreferenceOption = {
   colorType: ColorType;
   showDates: boolean;
 };
-
-// Step 0: GDPR Consent
-function Step0Consent({
-  termsAccepted,
-  setTermsAccepted,
-  privacyAccepted,
-  setPrivacyAccepted,
-  marketingConsent,
-  setMarketingConsent,
-}: {
-  termsAccepted: boolean;
-  setTermsAccepted: (v: boolean) => void;
-  privacyAccepted: boolean;
-  setPrivacyAccepted: (v: boolean) => void;
-  marketingConsent: boolean;
-  setMarketingConsent: (v: boolean) => void;
-}) {
-  return (
-    <div className="space-y-6">
-      <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-        <p className="text-amber-800 text-sm">
-          Before you continue, please review and accept our Terms of Service and
-          Privacy Policy. This is required to use our platform.
-        </p>
-      </div>
-
-      <div className="space-y-4">
-        <label className="flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors hover:bg-gray-50">
-          <input
-            checked={termsAccepted}
-            className="mt-0.5 h-5 w-5 rounded border-gray-300 text-red-600 focus:ring-red-500"
-            onChange={(e) => setTermsAccepted(e.target.checked)}
-            type="checkbox"
-          />
-          <div className="flex-1">
-            <p className="font-medium text-gray-900">Terms of Service</p>
-            <p className="mt-1 text-gray-600 text-sm">
-              I have read and agree to the{" "}
-              <Link
-                className="font-medium text-red-600 underline hover:text-red-700"
-                href="/terms"
-                target="_blank"
-              >
-                Terms of Service
-              </Link>
-              , including the community guidelines and acceptable use policy.
-            </p>
-          </div>
-        </label>
-
-        <label className="flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors hover:bg-gray-50">
-          <input
-            checked={privacyAccepted}
-            className="mt-0.5 h-5 w-5 rounded border-gray-300 text-red-600 focus:ring-red-500"
-            onChange={(e) => setPrivacyAccepted(e.target.checked)}
-            type="checkbox"
-          />
-          <div className="flex-1">
-            <p className="font-medium text-gray-900">Privacy Policy</p>
-            <p className="mt-1 text-gray-600 text-sm">
-              I have read and agree to the{" "}
-              <Link
-                className="font-medium text-red-600 underline hover:text-red-700"
-                href="/privacy"
-                target="_blank"
-              >
-                Privacy Policy
-              </Link>
-              , and I consent to the processing of my personal data as described
-              therein.
-            </p>
-          </div>
-        </label>
-
-        <label className="flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors hover:bg-gray-50">
-          <input
-            checked={termsAccepted && privacyAccepted}
-            className="mt-0.5 h-5 w-5 rounded border-gray-300 text-red-600 focus:ring-red-500"
-            disabled
-            type="checkbox"
-          />
-          <div className="flex-1">
-            <p className="font-medium text-gray-900">Safety Guidelines</p>
-            <p className="mt-1 text-gray-600 text-sm">
-              I understand and agree to follow the{" "}
-              <Link
-                className="font-medium text-red-600 underline hover:text-red-700"
-                href="/safety"
-                target="_blank"
-              >
-                Safety Guidelines
-              </Link>{" "}
-              when meeting other users.
-            </p>
-          </div>
-        </label>
-
-        <div className="mt-6 border-t pt-4">
-          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-300 border-dashed p-4 transition-colors hover:bg-gray-50">
-            <input
-              checked={marketingConsent}
-              className="mt-0.5 h-5 w-5 rounded border-gray-300 text-amber-500 focus:ring-amber-500"
-              onChange={(e) => setMarketingConsent(e.target.checked)}
-              type="checkbox"
-            />
-            <div className="flex-1">
-              <p className="font-medium text-gray-900">
-                Marketing Communications{" "}
-                <span className="font-normal text-gray-500">(optional)</span>
-              </p>
-              <p className="mt-1 text-gray-600 text-sm">
-                I would like to receive occasional updates about new features,
-                community events, and holiday celebration tips. You can
-                unsubscribe at any time.
-              </p>
-            </div>
-          </label>
-        </div>
-      </div>
-
-      <p className="text-center text-gray-500 text-xs">
-        By continuing, you confirm you are at least 18 years old and agree to
-        receive important communications about your account.
-      </p>
-    </div>
-  );
-}
 
 const HOSTING_OPTIONS: PreferenceOption[] = [
   {
@@ -428,7 +302,7 @@ const PreferenceCardWithDates = memo(function PreferenceCardInner({
   );
 });
 
-// Step 1: Preferences with animated cards
+// Step 1: Preferences
 function Step1Preferences({
   hostingStatus,
   setHostingStatus,
@@ -837,50 +711,15 @@ function Step6Lifestyle({
   );
 }
 
-// Completed state
-function CompletedState({ onSkip }: { onSkip: () => void }) {
-  return (
-    <Card className="w-full max-w-2xl">
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl">All set!</CardTitle>
-        <CardDescription>
-          Your profile is saved. Verify your identity to build trust, or skip
-          for now.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-3 md:flex-row md:justify-center">
-        <Button asChild>
-          <Link href="/verify">Verify identity</Link>
-        </Button>
-        <Button onClick={onSkip} variant="outline">
-          Skip for now
-        </Button>
-      </CardContent>
-    </Card>
-  );
-}
-
-export default function OnboardingPage() {
+export default function EditProfilePage() {
   const router = useRouter();
   const { user } = useUser();
-  const { isLoading: isAuthLoading, isAuthenticated } = useConvexAuth();
-
-  // Only query profile after Convex auth is ready
-  const profile = useQuery(
-    api.profiles.getMyProfile,
-    isAuthLoading || !isAuthenticated ? "skip" : undefined
-  );
+  const profile = useQuery(api.profiles.getMyProfile);
   const upsertProfile = useMutation(api.profiles.upsertProfile);
-  const syncGooglePhoto = useMutation(api.files.syncGooglePhoto);
 
-  const [step, setStep] = useState<Step>(0);
+  const [step, setStep] = useState<Step>(1);
   const [isSaving, setIsSaving] = useState(false);
-  const [completed, setCompleted] = useState(false);
-
-  // Step 0: GDPR Consent
-  const [termsAccepted, setTermsAccepted] = useState(false);
-  const [privacyAccepted, setPrivacyAccepted] = useState(false);
-  const [marketingConsent, setMarketingConsent] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Step 1: Preferences
   const [hostingStatus, setHostingStatus] = useState("cant-host");
@@ -914,38 +753,44 @@ export default function OnboardingPage() {
   const [petsAllowed, setPetsAllowed] = useState(false);
   const [hasPets, setHasPets] = useState(false);
 
-  // Pre-fill from Clerk user data
+  // Initialize form data from existing profile
   useEffect(() => {
-    if (user && !formData.firstName) {
-      setFormData((prev) => ({
-        ...prev,
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-      }));
-    }
-  }, [user, formData.firstName]);
+    if (profile && !isInitialized) {
+      // Set hosting/guest status
+      setHostingStatus(profile.hostingStatus || "cant-host");
+      setGuestStatus(profile.guestStatus || "looking");
+      setHostingDates((profile.hostingDates as HolidayDate[]) || []);
+      setGuestDates((profile.guestDates as HolidayDate[]) || []);
 
-  // Sync Google photo on mount
-  // Sync Google photo on mount
-  useEffect(() => {
-    if (user?.imageUrl && profile === null) {
-      syncGooglePhoto({ googlePhotoUrl: user.imageUrl }).catch(() => {
-        // Ignore errors if photo sync fails
+      // Basic info
+      setFormData({
+        firstName: profile.firstName || "",
+        lastName: profile.lastName || "",
+        age: profile.age || "",
+        city: profile.city || "Vilnius",
       });
-    }
-  }, [user?.imageUrl, profile, syncGooglePhoto]);
 
-  // If profile already complete, redirect to browse
-  useEffect(() => {
-    if (
-      !completed &&
-      profile?.firstName &&
-      profile?.bio &&
-      profile?.languages.length > 0
-    ) {
-      router.push("/browse");
+      // Bio
+      setBio(profile.bio || "");
+
+      // Languages
+      setLanguages((profile.languages as (typeof LANGUAGES)[number][]) || []);
+
+      // Dietary & Vibes
+      setDietaryInfo(
+        (profile.dietaryInfo as (typeof DIETARY_OPTIONS)[number][]) || []
+      );
+      setVibes((profile.vibes as (typeof VIBES_OPTIONS)[number][]) || []);
+
+      // Lifestyle
+      setSmokingAllowed(profile.smokingAllowed ?? false);
+      setDrinkingAllowed(profile.drinkingAllowed ?? true);
+      setPetsAllowed(profile.petsAllowed ?? false);
+      setHasPets(profile.hasPets ?? false);
+
+      setIsInitialized(true);
     }
-  }, [completed, profile, router]);
+  }, [profile, isInitialized]);
 
   // Derive role from statuses
   const getRole = (): "host" | "guest" | "both" => {
@@ -1005,23 +850,21 @@ export default function OnboardingPage() {
   };
 
   const handleBack = () => {
-    if (step > 0) {
+    if (step > 1) {
       setStep((step - 1) as Step);
     }
   };
 
-  const handleComplete = async () => {
+  const handleSave = async () => {
     setIsSaving(true);
     try {
       const availableDates = getAvailableDates();
       if (availableDates.length === 0) {
-        // Default to all dates if none selected
         availableDates.push(...HOLIDAY_DATES);
       }
 
       await upsertProfile({
         role: getRole(),
-        // Save the actual granular status and dates
         hostingStatus: hostingStatus as "can-host" | "may-host" | "cant-host",
         guestStatus: guestStatus as "looking" | "maybe-guest" | "not-looking",
         hostingDates,
@@ -1035,7 +878,7 @@ export default function OnboardingPage() {
         city: formData.city,
         bio,
         languages,
-        availableDates, // Keep for backwards compat
+        availableDates,
         dietaryInfo,
         amenities: [],
         houseRules: [],
@@ -1045,14 +888,18 @@ export default function OnboardingPage() {
         petsAllowed,
         hasPets,
       });
-      setCompleted(true);
+      toast.success("Profile updated successfully!");
+      router.push("/settings");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update profile"
+      );
     } finally {
       setIsSaving(false);
     }
   };
 
   // Validation
-  const isStep0Valid = termsAccepted && privacyAccepted;
   const isStep1Valid =
     (hostingStatus !== "cant-host" ? hostingDates.length > 0 : true) ||
     (guestStatus !== "not-looking" ? guestDates.length > 0 : true);
@@ -1062,29 +909,17 @@ export default function OnboardingPage() {
 
   // Step descriptions
   const stepDescriptions: Record<Step, string> = {
-    0: "Review and accept our policies",
-    1: "What brings you here this holiday season?",
-    2: "Tell us about yourself",
-    3: "Write a short bio",
-    4: "Select your languages",
-    5: "Dietary preferences & vibes",
-    6: "Almost done! Lifestyle preferences",
+    1: "Update your hosting and guest preferences",
+    2: "Update your basic information",
+    3: "Update your bio",
+    4: "Update your languages",
+    5: "Update dietary preferences & vibes",
+    6: "Update lifestyle preferences",
   };
 
   // Render current step content
   const renderStepContent = () => {
     switch (step) {
-      case 0:
-        return (
-          <Step0Consent
-            marketingConsent={marketingConsent}
-            privacyAccepted={privacyAccepted}
-            setMarketingConsent={setMarketingConsent}
-            setPrivacyAccepted={setPrivacyAccepted}
-            setTermsAccepted={setTermsAccepted}
-            termsAccepted={termsAccepted}
-          />
-        );
       case 1:
         return (
           <Step1Preferences
@@ -1142,11 +977,8 @@ export default function OnboardingPage() {
     }
   };
 
-  // Check if current step is valid for next button
+  // Check if current step is valid
   const isCurrentStepValid = () => {
-    if (step === 0) {
-      return isStep0Valid;
-    }
     if (step === 1) {
       return isStep1Valid;
     }
@@ -1159,70 +991,87 @@ export default function OnboardingPage() {
     if (step === 4) {
       return isStep4Valid;
     }
-    // Steps 5 and 6 are optional, always valid
     return true;
   };
 
-  // Show loading while auth is initializing
-  if (isAuthLoading) {
+  // Show loading while profile is loading
+  if (profile === undefined) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <Loader2 className="h-8 w-8 animate-spin text-red-600" />
       </div>
     );
   }
 
-  if (completed) {
-    return <CompletedState onSkip={() => router.push("/browse")} />;
+  // Redirect if no profile exists
+  if (profile === null) {
+    router.push("/onboarding");
+    return null;
   }
 
   return (
-    <Card className="w-full max-w-2xl">
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Welcome to Nešvęsk vienas</CardTitle>
-        <CardDescription>{stepDescriptions[step]}</CardDescription>
-        <div className="mt-4 flex justify-center gap-2">
-          {[0, 1, 2, 3, 4, 5, 6].map((s) => (
-            <div
-              className={`h-2 w-6 rounded-full transition-colors ${
-                s <= step ? "bg-red-500" : "bg-gray-200"
-              }`}
-              key={s}
-            />
-          ))}
-        </div>
-      </CardHeader>
+    <div className="min-h-screen bg-gray-50 pb-20">
+      <div className="mx-auto flex max-w-2xl flex-col items-center px-4 py-8">
+        <Card className="w-full">
+          <CardHeader className="text-center">
+            <div className="mb-2 flex items-center justify-between">
+              <Link href="/settings">
+                <Button size="sm" variant="ghost">
+                  <ChevronLeft className="mr-1 h-4 w-4" />
+                  Back to Settings
+                </Button>
+              </Link>
+            </div>
+            <CardTitle className="text-2xl">Edit Profile</CardTitle>
+            <CardDescription>{stepDescriptions[step]}</CardDescription>
+            <div className="mt-4 flex justify-center gap-2">
+              {[1, 2, 3, 4, 5, 6].map((s) => (
+                <button
+                  className={`h-2 w-6 rounded-full transition-colors ${
+                    s <= step ? "bg-red-500" : "bg-gray-200"
+                  }`}
+                  key={s}
+                  onClick={() => setStep(s as Step)}
+                  type="button"
+                />
+              ))}
+            </div>
+          </CardHeader>
 
-      <CardContent className="space-y-6">
-        {renderStepContent()}
+          <CardContent className="space-y-6">
+            {renderStepContent()}
 
-        <div className="flex justify-between pt-4">
-          {step > 0 ? (
-            <Button onClick={handleBack} type="button" variant="outline">
-              <ChevronLeft className="mr-1 h-4 w-4" />
-              Back
-            </Button>
-          ) : (
-            <div />
-          )}
+            <div className="flex justify-between pt-4">
+              {step > 1 ? (
+                <Button onClick={handleBack} type="button" variant="outline">
+                  <ChevronLeft className="mr-1 h-4 w-4" />
+                  Back
+                </Button>
+              ) : (
+                <div />
+              )}
 
-          {step < 6 ? (
-            <Button
-              disabled={!isCurrentStepValid()}
-              onClick={handleNext}
-              type="button"
-            >
-              {step === 0 ? "I Agree & Continue" : "Next"}
-              <ChevronRight className="ml-1 h-4 w-4" />
-            </Button>
-          ) : (
-            <Button disabled={isSaving} onClick={handleComplete} type="button">
-              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Complete Setup
-            </Button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+              {step < 6 ? (
+                <Button
+                  disabled={!isCurrentStepValid()}
+                  onClick={handleNext}
+                  type="button"
+                >
+                  Next
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+              ) : (
+                <Button disabled={isSaving} onClick={handleSave} type="button">
+                  {isSaving && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Save Changes
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }

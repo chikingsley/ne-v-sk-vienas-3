@@ -8,8 +8,10 @@ import {
   Geist_Mono,
   Playfair_Display,
 } from "next/font/google";
+import { CookieBanner } from "@/components/cookie-banner";
 import { ConvexClientProvider } from "@/components/providers/convex-client-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { CookieConsentProvider } from "@/contexts/cookie-consent-context";
 import { LocaleProvider } from "@/contexts/locale-context";
 import "./globals.css";
 
@@ -129,8 +131,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${courierPrime.variable} antialiased`}
       >
         <ConvexClientProvider>
-          <LocaleProvider>{children}</LocaleProvider>
-          <Toaster />
+          <CookieConsentProvider>
+            <LocaleProvider>{children}</LocaleProvider>
+            <Toaster />
+            <CookieBanner />
+          </CookieConsentProvider>
         </ConvexClientProvider>
         <Analytics />
         <SpeedInsights />

@@ -198,6 +198,36 @@ export const respond = mutation({
   },
 });
 
+// Cancel a sent invitation (withdraw request)
+export const cancel = mutation({
+  args: {
+    invitationId: v.id("invitations"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getOrCreateUser(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const invitation = await ctx.db.get(args.invitationId);
+    if (!invitation) {
+      throw new Error("Invitation not found");
+    }
+
+    // Only the sender can cancel
+    if (invitation.fromUserId !== userId) {
+      throw new Error("Not authorized to cancel this invitation");
+    }
+
+    // Can only cancel pending invitations
+    if (invitation.status !== "pending") {
+      throw new Error("Can only cancel pending invitations");
+    }
+
+    await ctx.db.delete(args.invitationId);
+  },
+});
+
 // Get pending invitation count
 export const getPendingCount = query({
   args: {},

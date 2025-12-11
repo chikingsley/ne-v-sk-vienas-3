@@ -90,6 +90,14 @@ type SidebarItem =
       profile: ProfileInfo | null;
       date: string;
       createdAt: number;
+    }
+  | {
+      type: "sent_request";
+      oderId: string;
+      invitationId: Id<"invitations">;
+      profile: ProfileInfo | null;
+      date: string;
+      createdAt: number;
     };
 
 // Type for conversation from getConversations query
@@ -143,7 +151,18 @@ function SidebarItemComponent({
         </Badge>
       );
     }
-    if (item.lastMessage) {
+    if (item.type === "sent_request") {
+      return (
+        <Badge
+          className="shrink-0 bg-blue-500 text-white hover:bg-blue-600"
+          variant="secondary"
+        >
+          Sent
+        </Badge>
+      );
+    }
+    // Explicitly check for conversation type for TypeScript narrowing
+    if (item.type === "conversation" && item.lastMessage) {
       return (
         <span className="shrink-0 text-muted-foreground text-xs">
           {formatTime(item.lastMessage.createdAt)}
@@ -156,6 +175,9 @@ function SidebarItemComponent({
   const renderSubtext = () => {
     if (item.type === "request") {
       return <p className="truncate">Wants to connect for {item.date}</p>;
+    }
+    if (item.type === "sent_request") {
+      return <p className="truncate">Waiting for response ({item.date})</p>;
     }
     return (
       <p className="truncate">
@@ -186,6 +208,11 @@ function SidebarItemComponent({
         {item.type === "request" && (
           <div className="-top-1 -right-1 absolute flex h-5 w-5 items-center justify-center rounded-full bg-amber-500">
             <UserPlus className="h-3 w-3 text-white" />
+          </div>
+        )}
+        {item.type === "sent_request" && (
+          <div className="-top-1 -right-1 absolute flex h-5 w-5 items-center justify-center rounded-full bg-blue-500">
+            <ArrowRight className="h-3 w-3 text-white" />
           </div>
         )}
       </div>
@@ -337,6 +364,74 @@ function RequestView({
   );
 }
 
+// Sent request view - shows status of your outgoing request
+function SentRequestView({
+  request,
+  profileUsername,
+  onCancel,
+  isCancelling,
+}: {
+  request: Extract<SidebarItem, { type: "sent_request" }>;
+  profileUsername: string | undefined;
+  onCancel: () => void;
+  isCancelling: boolean;
+}) {
+  return (
+    <>
+      <div className="flex h-[72px] items-center gap-3 border-b px-4">
+        <Avatar className="h-12 w-12">
+          <AvatarImage src={request.profile?.photoUrl} />
+          <AvatarFallback>
+            {request.profile?.firstName?.charAt(0) ?? "?"}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1">
+          <h2 className="font-semibold">{request.profile?.firstName}</h2>
+          <p className="text-muted-foreground text-sm">
+            {request.profile?.city}
+          </p>
+        </div>
+        {profileUsername && (
+          <Link href={`/people/${profileUsername}`}>
+            <Button size="sm" variant="outline">
+              View Profile
+            </Button>
+          </Link>
+        )}
+      </div>
+
+      <div className="flex flex-1 flex-col items-center justify-center p-8">
+        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-blue-100">
+          <ArrowRight className="h-12 w-12 text-blue-600" />
+        </div>
+        <h2 className="mb-2 font-semibold text-2xl">Request Sent</h2>
+        <p className="mb-2 max-w-md text-center text-muted-foreground">
+          You sent a connection request to{" "}
+          <span className="font-medium text-foreground">
+            {request.profile?.firstName}
+          </span>{" "}
+          for{" "}
+          <span className="font-medium text-foreground">{request.date}</span>.
+        </p>
+        <p className="mb-8 max-w-md text-center text-muted-foreground text-sm">
+          They'll be notified and can accept or decline your request. You'll be
+          able to message once they accept.
+        </p>
+        <Button
+          className="gap-2"
+          disabled={isCancelling}
+          onClick={onCancel}
+          size="lg"
+          variant="outline"
+        >
+          <X className="h-4 w-4" />
+          {isCancelling ? "Cancelling..." : "Cancel Request"}
+        </Button>
+      </div>
+    </>
+  );
+}
+
 function ShareDetailsModal({
   isOpen,
   onClose,
@@ -478,14 +573,22 @@ function ReportModal({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/50 p-4"
+    <dialog
+      aria-modal="true"
+      className="fixed inset-0 z-50 m-0 h-full w-full max-w-none overflow-y-auto border-none bg-black/50 p-4"
       onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") {
+          onClose();
+        }
+      }}
+      open
     >
       <div className="flex min-h-full items-center justify-center">
         <div
           className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
           onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
         >
           <div className="mb-4 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
@@ -551,7 +654,7 @@ function ReportModal({
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }
 
@@ -730,7 +833,10 @@ function MessagesSidebar({
   pendingCount: number;
   searchQuery: string;
   onSearchChange: (value: string) => void;
-  onItemClick: (id: string, type: "conversation" | "request") => void;
+  onItemClick: (
+    id: string,
+    type: "conversation" | "request" | "sent_request"
+  ) => void;
 }) {
   const renderContent = () => {
     if (isLoading) {
@@ -1005,10 +1111,14 @@ function ConversationView({
 // Main content area component
 function MainContentArea({
   activeRequest,
+  activeSentRequest,
   activeConversation,
   activeRequestProfileUsername,
+  activeSentRequestProfileUsername,
   isResponding,
+  isCancelling,
   onRespond,
+  onCancelRequest,
   messages,
   myProfile,
   messagesContainerRef,
@@ -1028,10 +1138,14 @@ function MainContentArea({
   onBack,
 }: {
   activeRequest: Extract<SidebarItem, { type: "request" }> | null;
+  activeSentRequest: Extract<SidebarItem, { type: "sent_request" }> | null;
   activeConversation: ConversationSummary | null | undefined;
   activeRequestProfileUsername: string | undefined;
+  activeSentRequestProfileUsername: string | undefined;
   isResponding: boolean;
+  isCancelling: boolean;
   onRespond: (accept: boolean) => void;
+  onCancelRequest: () => void;
   messages:
     | ReturnType<typeof useQuery<typeof api.messages.getConversationMessages>>
     | undefined;
@@ -1064,6 +1178,17 @@ function MainContentArea({
         onRespond={onRespond}
         profileUsername={activeRequestProfileUsername}
         request={activeRequest}
+      />
+    );
+  }
+
+  if (activeSentRequest) {
+    return (
+      <SentRequestView
+        isCancelling={isCancelling}
+        onCancel={onCancelRequest}
+        profileUsername={activeSentRequestProfileUsername}
+        request={activeSentRequest}
       />
     );
   }
@@ -1106,6 +1231,7 @@ function buildSidebarItems(
   >
 ): SidebarItem[] {
   const items: SidebarItem[] = [];
+  // Add received pending requests first
   for (const inv of invitations?.received ?? []) {
     if (inv.status === "pending" && inv.otherUser) {
       items.push({
@@ -1122,6 +1248,24 @@ function buildSidebarItems(
       });
     }
   }
+  // Add sent pending requests
+  for (const inv of invitations?.sent ?? []) {
+    if (inv.status === "pending" && inv.otherUser) {
+      items.push({
+        type: "sent_request",
+        oderId: inv.otherUser.id,
+        invitationId: inv._id,
+        profile: {
+          firstName: inv.otherUser.firstName,
+          photoUrl: inv.otherUser.photoUrl,
+          city: inv.otherUser.city,
+        },
+        date: inv.date,
+        createdAt: inv._creationTime,
+      });
+    }
+  }
+  // Add conversations
   for (const conv of conversations) {
     items.push({ type: "conversation", ...conv });
   }
@@ -1185,6 +1329,7 @@ function MessagesPageContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [messageInput, setMessageInput] = useState("");
   const [isResponding, setIsResponding] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [isSendingCard, setIsSendingCard] = useState(false);
@@ -1220,12 +1365,17 @@ function MessagesPageContent() {
     activeItem?.type === "request"
       ? (activeItem as Extract<SidebarItem, { type: "request" }>)
       : null;
+  const activeSentRequest =
+    activeItem?.type === "sent_request"
+      ? (activeItem as Extract<SidebarItem, { type: "sent_request" }>)
+      : null;
 
   // Get the other user's ID for block/report
   // For conversations, use otherUserId from the conversation
   // For requests, use the oderId (the other person in the invitation)
   const otherUserId = (activeConversation?.otherUserId ||
-    activeRequest?.oderId) as Id<"users"> | undefined;
+    activeRequest?.oderId ||
+    activeSentRequest?.oderId) as Id<"users"> | undefined;
 
   // More queries
   const messages = useQuery(
@@ -1236,6 +1386,12 @@ function MessagesPageContent() {
     api.profiles.getProfile,
     activeRequest?.oderId
       ? { userId: activeRequest.oderId as Id<"users"> }
+      : "skip"
+  );
+  const activeSentRequestProfile = useQuery(
+    api.profiles.getProfile,
+    activeSentRequest?.oderId
+      ? { userId: activeSentRequest.oderId as Id<"users"> }
       : "skip"
   );
   const otherUserProfile = useQuery(
@@ -1250,6 +1406,7 @@ function MessagesPageContent() {
   // Mutations
   const sendMessage = useMutation(api.messages.sendMessage);
   const respondToInvitation = useMutation(api.invitations.respond);
+  const cancelInvitation = useMutation(api.invitations.cancel);
   const blockUser = useMutation(api.moderation.blockUser);
   const unblockUser = useMutation(api.moderation.unblockUser);
   const reportUser = useMutation(api.moderation.reportUser);
@@ -1263,7 +1420,10 @@ function MessagesPageContent() {
   const isHost = myProfile?.role === "host";
 
   // Handlers
-  const setActiveChat = (id: string, type: "conversation" | "request") => {
+  const setActiveChat = (
+    id: string,
+    type: "conversation" | "request" | "sent_request"
+  ) => {
     router.push(`/messages?chat=${id}&type=${type}`);
   };
 
@@ -1299,6 +1459,24 @@ function MessagesPageContent() {
       }
     } finally {
       setIsResponding(false);
+    }
+  };
+
+  const handleCancelRequest = async () => {
+    if (!activeSentRequest) {
+      return;
+    }
+    setIsCancelling(true);
+    try {
+      await cancelInvitation({
+        invitationId: activeSentRequest.invitationId,
+      });
+      toast.success("Request cancelled");
+      router.push("/messages");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to cancel request");
+    } finally {
+      setIsCancelling(false);
     }
   };
 
@@ -1413,7 +1591,10 @@ function MessagesPageContent() {
           activeConversation={activeConversation}
           activeRequest={activeRequest}
           activeRequestProfileUsername={activeRequestProfile?.username}
+          activeSentRequest={activeSentRequest}
+          activeSentRequestProfileUsername={activeSentRequestProfile?.username}
           isBlocked={isBlocked}
+          isCancelling={isCancelling}
           isHost={isHost}
           isResponding={isResponding}
           isSendingCard={isSendingCard}
@@ -1423,6 +1604,7 @@ function MessagesPageContent() {
           myProfile={myProfile}
           onBack={() => router.push("/messages")}
           onBlock={handleBlock}
+          onCancelRequest={handleCancelRequest}
           onCloseShareModal={() => setShowShareModal(false)}
           onMessageInputChange={setMessageInput}
           onReport={() => setShowReportModal(true)}

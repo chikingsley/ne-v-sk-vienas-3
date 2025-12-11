@@ -688,6 +688,40 @@ export const updatePreferences = mutation({
   },
 });
 
+// Update notification preferences
+export const updateNotificationPreferences = mutation({
+  args: {
+    emailNotifications: v.optional(v.boolean()),
+    notifyOnInvitation: v.optional(v.boolean()),
+    notifyOnMessage: v.optional(v.boolean()),
+    notifyOnMatch: v.optional(v.boolean()),
+    marketingEmails: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getCurrentUserId(ctx);
+    if (!userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const profile = await ctx.db
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
+
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    await ctx.db.patch(profile._id, {
+      emailNotifications: args.emailNotifications,
+      notifyOnInvitation: args.notifyOnInvitation,
+      notifyOnMessage: args.notifyOnMessage,
+      notifyOnMatch: args.notifyOnMatch,
+      marketingEmails: args.marketingEmails,
+    });
+  },
+});
+
 // Auto-generate usernames for existing profiles without one
 export const generateMissingUsernames = mutation({
   args: {},

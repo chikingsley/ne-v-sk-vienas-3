@@ -346,8 +346,41 @@ export default function VerifyPage() {
       });
       setStream(mediaStream);
       setShowCamera(true);
-    } catch {
-      setError("Could not access camera. Please check permissions.");
+    } catch (err) {
+      // Provide helpful guidance based on error type
+      const errorName = err instanceof Error ? err.name : "";
+      if (
+        errorName === "NotAllowedError" ||
+        errorName === "PermissionDeniedError"
+      ) {
+        setError(
+          "Camera access was denied. To enable it:\n" +
+            "• Click the camera/lock icon in your browser's address bar\n" +
+            "• Select 'Allow' for camera access\n" +
+            "• Refresh this page and try again"
+        );
+      } else if (
+        errorName === "NotFoundError" ||
+        errorName === "DevicesNotFoundError"
+      ) {
+        setError(
+          "No camera found. Please ensure your device has a camera connected and try again."
+        );
+      } else if (
+        errorName === "NotReadableError" ||
+        errorName === "TrackStartError"
+      ) {
+        setError(
+          "Camera is in use by another application. Please close other apps using the camera and try again."
+        );
+      } else {
+        setError(
+          "Could not access camera. Please check that:\n" +
+            "• Your browser has permission to use the camera\n" +
+            "• No other application is using the camera\n" +
+            "• Your device has a working camera"
+        );
+      }
     }
   };
 
@@ -552,9 +585,11 @@ export default function VerifyPage() {
         </div>
 
         {(error || verificationError) && (
-          <div className="mt-6 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
-            <AlertCircle className="h-5 w-5 flex-shrink-0 text-red-600" />
-            <p className="text-red-700 text-sm">{error || verificationError}</p>
+          <div className="mt-6 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
+            <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" />
+            <p className="whitespace-pre-line text-red-700 text-sm">
+              {error || verificationError}
+            </p>
           </div>
         )}
 

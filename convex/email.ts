@@ -1,20 +1,69 @@
 "use node";
 
 import { v } from "convex/values";
-import { Resend } from "resend";
 import { action, internalAction } from "./_generated/server";
 
-// Initialize Resend with API key from environment
-const getResend = () => {
-  const apiKey = process.env.RESEND_API_KEY;
+// Maileroo API configuration
+const MAILEROO_API_URL = "https://smtp.maileroo.com/api/v2/emails";
+
+// Get Maileroo API key from environment
+const getMailerooKey = () => {
+  const apiKey = process.env.MAILEROO_API_KEY;
   if (!apiKey) {
     console.warn(
-      "RESEND_API_KEY environment variable not set - emails disabled"
+      "MAILEROO_API_KEY environment variable not set - emails disabled"
     );
     return null;
   }
-  return new Resend(apiKey);
+  return apiKey;
 };
+
+// Send email via Maileroo API
+async function sendMailerooEmail(params: {
+  to: string;
+  subject: string;
+  html: string;
+  from?: string;
+}) {
+  const apiKey = getMailerooKey();
+  if (!apiKey) {
+    return { success: false, error: "API key not configured" };
+  }
+
+  const fromAddress =
+    params.from || "Nešvęsk vienas <noreply@nesveskvienas.lt>";
+
+  try {
+    const response = await fetch(MAILEROO_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-Key": apiKey,
+      },
+      body: JSON.stringify({
+        from: {
+          address: fromAddress.match(/<(.+)>/)?.[1] || fromAddress,
+          name: fromAddress.match(/^(.+)\s*</)?.[1]?.trim() || "Nešvęsk vienas",
+        },
+        to: [{ address: params.to }],
+        subject: params.subject,
+        html: params.html,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Maileroo API error:", response.status, errorText);
+      return { success: false, error: `API error: ${response.status}` };
+    }
+
+    const result = await response.json();
+    return { success: true, messageId: result.message_id };
+  } catch (error) {
+    console.error("Maileroo request failed:", error);
+    return { success: false, error: String(error) };
+  }
+}
 
 // Email templates
 const templates = {
@@ -97,9 +146,9 @@ export const sendEmail = internalAction({
   },
   handler: async (_ctx, args) => {
     try {
-      const resend = getResend();
+      const apiKey = getMailerooKey();
 
-      if (!resend) {
+      if (!apiKey) {
         console.log("Email would be sent to:", args.to, "type:", args.type);
         return { success: true, skipped: true };
       }
@@ -132,19 +181,18 @@ export const sendEmail = internalAction({
           throw new Error(`Unknown email type: ${args.type}`);
       }
 
-      const { error } = await resend.emails.send({
-        from: "Nešvęsk vienas <noreply@nesvesk-vienas.lt>",
+      const result = await sendMailerooEmail({
         to: args.to,
         subject: template.subject,
         html: template.html,
       });
 
-      if (error) {
-        console.error("Failed to send email:", error);
-        return { success: false, error: error.message };
+      if (!result.success) {
+        console.error("Failed to send email:", result.error);
+        return { success: false, error: result.error };
       }
 
-      return { success: true };
+      return { success: true, messageId: result.messageId };
     } catch (error) {
       console.error("Email error:", error);
       return { success: false, error: String(error) };
@@ -152,28 +200,24 @@ export const sendEmail = internalAction({
   },
 });
 
-// Public action for testing (remove in production)
+// Test action to verify email sending works (DEV ONLY)
 export const testEmail = action({
-  args: { to: v.string() },
+  args: {
+    to: v.string(),
+  },
   handler: async (_ctx, args) => {
-    const resend = getResend();
-
-    if (!resend) {
-      console.log("Test email would be sent to:", args.to);
-      return { success: true, skipped: true };
-    }
-
-    const { data, error } = await resend.emails.send({
-      from: "Nešvęsk vienas <noreply@nesvesk-vienas.lt>",
+    const result = await sendMailerooEmail({
       to: args.to,
       subject: "Test Email from Nešvęsk vienas",
-      html: "<h1>Test email!</h1><p>If you received this, email is working.</p>",
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #dc2626;">Email Test Successful!</h1>
+          <p>This is a test email from the Nešvęsk vienas platform.</p>
+          <p>If you received this, the Maileroo integration is working correctly.</p>
+          <p style="color: #666; font-size: 14px;">Sent at: ${new Date().toISOString()}</p>
+        </div>
+      `,
     });
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return { success: true, id: data?.id };
+    return result;
   },
 });

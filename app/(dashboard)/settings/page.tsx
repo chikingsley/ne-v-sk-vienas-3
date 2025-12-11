@@ -1,7 +1,7 @@
 "use client";
 
 import { SignOutButton, useUser } from "@clerk/nextjs";
-import { useAction, useQuery } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import { Bell, Key, Loader2, LogOut, Shield, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -39,10 +39,30 @@ export default function SettingsPage() {
   const router = useRouter();
   const profile = useQuery(api.profiles.getMyProfile);
   const deleteUser = useAction(api.users.deleteUser);
+  const updateNotificationPreferences = useMutation(
+    api.profiles.updateNotificationPreferences
+  );
 
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmText, setConfirmText] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  // Notification handlers
+  const handleNotificationChange = async (
+    field:
+      | "emailNotifications"
+      | "notifyOnInvitation"
+      | "notifyOnMessage"
+      | "notifyOnMatch"
+      | "marketingEmails",
+    value: boolean
+  ) => {
+    try {
+      await updateNotificationPreferences({ [field]: value });
+    } catch (_error) {
+      toast.error("Failed to update notification preferences");
+    }
+  };
 
   const handleDeleteAccount = async () => {
     if (!profile?.userId) {
@@ -79,21 +99,24 @@ export default function SettingsPage() {
         </div>
 
         <div className="space-y-6">
-          {/* Profile Link Card */}
+          {/* Profile Edit Card */}
           <Card>
             <CardHeader>
               <CardTitle>{t.navProfile}</CardTitle>
               <CardDescription>
-                Edit your profile information directly on your profile page
+                Edit your profile information, preferences, and photos
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex gap-3">
+              <Link href="/settings/edit-profile">
+                <Button>Edit Profile</Button>
+              </Link>
               <Link
                 href={
                   profile?.username ? `/people/${profile.username}` : "/profile"
                 }
               >
-                <Button variant="outline">Go to Profile</Button>
+                <Button variant="outline">View Profile</Button>
               </Link>
             </CardContent>
           </Card>
@@ -206,7 +229,12 @@ export default function SettingsPage() {
                     {t.receiveEmailNotifications}
                   </p>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={profile?.emailNotifications ?? true}
+                  onCheckedChange={(checked) =>
+                    handleNotificationChange("emailNotifications", checked)
+                  }
+                />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
@@ -216,7 +244,12 @@ export default function SettingsPage() {
                     {t.getNotifiedOnInvitation}
                   </p>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={profile?.notifyOnInvitation ?? true}
+                  onCheckedChange={(checked) =>
+                    handleNotificationChange("notifyOnInvitation", checked)
+                  }
+                />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
@@ -226,7 +259,12 @@ export default function SettingsPage() {
                     {t.getNotifiedOnMessage}
                   </p>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={profile?.notifyOnMessage ?? true}
+                  onCheckedChange={(checked) =>
+                    handleNotificationChange("notifyOnMessage", checked)
+                  }
+                />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
@@ -236,7 +274,12 @@ export default function SettingsPage() {
                     {t.getNotifiedOnMatch}
                   </p>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={profile?.notifyOnMatch ?? true}
+                  onCheckedChange={(checked) =>
+                    handleNotificationChange("notifyOnMatch", checked)
+                  }
+                />
               </div>
               <Separator />
               <div className="flex items-center justify-between">
@@ -246,7 +289,12 @@ export default function SettingsPage() {
                     {t.receiveMarketingEmails}
                   </p>
                 </div>
-                <Switch />
+                <Switch
+                  checked={profile?.marketingEmails ?? false}
+                  onCheckedChange={(checked) =>
+                    handleNotificationChange("marketingEmails", checked)
+                  }
+                />
               </div>
             </CardContent>
           </Card>

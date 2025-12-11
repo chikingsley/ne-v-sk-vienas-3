@@ -178,12 +178,23 @@ Current schema has all needed fields. Key ones not yet displayed:
 - [ ] **Profile completion indicator** - "You're 80% done!" encouragement UI
 - [ ] **State persistence** - Auto-save each step to Convex (no data loss on refresh)
 
-### Email Integration (Resend)
+### Email Integration (Maileroo)
 
-- [ ] **Set up Resend API** - For transactional emails
+- [x] **Set up Maileroo API** - Replaced Resend (doesn't support .lt domain)
+- [x] **Email notification preferences** - Settings UI wired to database
 - [ ] **Email verification** - Optional badge, don't force signup verification (avoid drop-offs)
 - [ ] **Match notifications** - Email when someone accepts your invite
 - [ ] **New message notifications** - Email digest for unread messages
+
+### Clerk Elements Migration (Future)
+
+- [ ] **Migrate to Clerk Elements** - Custom auth UI components for better GDPR compliance
+  - Clerk Elements allows building custom sign-in/sign-up forms
+  - Better control over consent checkboxes placement
+  - Can style to match app design perfectly
+  - Docs: https://clerk.com/docs/customization/elements/overview
+- [ ] **Custom sign-up form** - With Terms/Privacy checkboxes directly in the form
+- [ ] **Custom sign-in form** - Matching app styling
 
 ### Browse/Discovery Enhancements
 
@@ -309,11 +320,9 @@ Current schema has all needed fields. Key ones not yet displayed:
 
 ### Legal & Safety Pages
 
-- [ ] **Safety Guidelines Page** (`/safety`) - User safety tips and best practices
-  - Review profiles carefully, trust instincts, have backup plan
-  - Communicate through platform, know your limits, leave references
-  - Reference: `docs/courchsurfing-pages/main-about-site/about-safety.md`
-  - Reference: `docs/courchsurfing-pages/main-about-site/about-tips.md`
+- [x] **Safety Guidelines Page** (`/safety`) - User safety tips and best practices ✅ EXISTS
+- [x] **Terms of Service** (`/terms`) - Legal terms ✅ EXISTS
+- [x] **Privacy Policy** (`/privacy`) - GDPR compliance ✅ EXISTS
 - [ ] **Community Guidelines Page** (`/guidelines`) - How to behave on the platform
   - Be considerate and respectful, resolve disputes together
   - Don't attack members, use good judgment, report violations
@@ -328,11 +337,271 @@ Current schema has all needed fields. Key ones not yet displayed:
   - Is it safe? How to report problems? References explained
   - What to do in emergencies, message disputes
   - Reference: `docs/courchsurfing-pages/main-about-site/about-faq.md`
-- [ ] **Terms of Service** (`/terms`) - Legal terms
-  - Eligibility (18+), member conduct, liability release
-  - Reference: `docs/courchsurfing-pages/main-about-site/about-terms-of-use.md`
-- [ ] **Privacy Policy** (`/privacy`) - GDPR compliance
-- [ ] **Cookie consent** - Banner for EU users
+- [x] **Cookie Policy Page** (`/cookies`) - Cookie usage disclosure (GDPR requirement) ✅ EXISTS
+
+---
+
+## 🚨 HIGH PRIORITY: GDPR/CCPA Compliance
+
+**Status**: PARTIALLY COMPLIANT - Good foundation, critical gaps remain
+
+**Audit Date**: December 11, 2024
+
+### What's Already Done ✅
+
+- [x] Consent checkboxes in onboarding (Step 0) - Terms + Privacy
+- [x] Checkboxes start unchecked by default (`useState(false)`)
+- [x] Linked legal documents (`/terms`, `/privacy`, `/safety`)
+- [x] Age verification (18+ confirmation)
+- [x] Multilingual legal docs (LT, EN, RU, UA)
+
+---
+
+### 1. Add Privacy/Terms Links to Clerk Sign-Up Page
+
+**Severity**: HIGH (CCPA violation)
+**Effort**: 🟢 EASY (~5 min) - Just add props to ClerkProvider
+**Risk**: $7,988 per violation (CCPA)
+
+**Problem**: Privacy policy not visible on `/sign-up` page where email is collected.
+
+**Fix**: Add `termsPageUrl` and `privacyPageUrl` to ClerkProvider appearance prop.
+
+```typescript
+// app/layout.tsx or components/providers/convex-client-provider.tsx
+<ClerkProvider
+  appearance={{
+    layout: {
+      termsPageUrl: '/terms',
+      privacyPageUrl: '/privacy',
+    }
+  }}
+>
+```
+
+**Files to update**:
+- `components/providers/convex-client-provider.tsx`
+
+**Clerk Docs**: https://clerk.com/docs/customization/layout
+
+---
+
+### 2. Enable Clerk Legal Consent Checkbox (Dashboard Setting)
+
+**Severity**: HIGH (GDPR requirement)
+**Effort**: 🟢 EASY (~2 min) - Dashboard toggle, no code
+**Risk**: €20M or 4% revenue (GDPR)
+
+**Problem**: Sign-up doesn't show consent checkbox before collecting data.
+
+**Fix**: Enable from Clerk Dashboard (no code needed):
+1. Go to **Clerk Dashboard** → **Configure** → **Legal**
+2. Toggle ON "Require express consent to legal documents"
+3. Enter your Terms URL: `https://nesveskvienas.lt/terms`
+4. Enter your Privacy URL: `https://nesveskvienas.lt/privacy`
+
+**Result**: Checkbox automatically appears on `<SignUp />` component.
+
+**Clerk Docs**: https://clerk.com/docs/authentication/configuration/legal-compliance
+
+---
+
+### 3. Add Cookie Consent Banner
+
+**Severity**: CRITICAL (GDPR/ePrivacy violation)
+**Effort**: 🟡 MEDIUM (~30 min) - Custom component, ~100 lines
+**Risk**: €20M or 4% revenue (GDPR)
+
+**Problem**: No cookie consent banner. Google Analytics may be setting cookies without consent.
+
+**Recommended Fix**: Custom banner with Google Consent Mode (FREE, minimal dependencies)
+
+**Dependencies to install**:
+```bash
+bun add client-only
+bun add -d @types/gtag.js
+```
+
+**Files to create**:
+1. `lib/storage-helper.ts` - localStorage wrapper
+2. `lib/gtag-helper.ts` - Google Analytics helper
+3. `components/cookie-banner.tsx` - Banner UI component
+4. `components/google-analytics.tsx` - GA with consent mode
+
+**Key Implementation Points**:
+- GA loads with consent **denied by default**: `gtag('consent', 'default', { 'analytics_storage': 'denied' })`
+- Banner shows "Accept All" and "Reject All" buttons (equal prominence - GDPR requirement)
+- Consent stored in localStorage, persists across sessions
+- On accept: `gtag('consent', 'update', { 'analytics_storage': 'granted' })`
+
+**Alternative (Easier but less control)**:
+```bash
+bun add react-cookie-consent
+```
+Drop-in component with `enableDeclineButton` prop.
+
+**Reference Tutorial**: https://gaudion.dev/blog/setup-google-analytics-with-gdpr-compliant-cookie-consent-in-nextjs13
+
+---
+
+### 4. Add Marketing Consent Checkbox (Onboarding)
+
+**Severity**: CRITICAL (GDPR consent bundling violation)
+**Effort**: 🟢 EASY (~15 min) - Add one checkbox to existing Step0
+**Risk**: €20M or 4% revenue (GDPR)
+
+**Problem**: Age confirmation text bundles "receive important communications" with age verification. GDPR requires separate consent for each purpose.
+
+**Current problematic text**:
+```
+"By continuing, you confirm you are at least 18 years old and
+agree to receive important communications about your account."
+```
+
+**Fix**:
+1. Remove communication consent from age confirmation text
+2. Add separate optional checkbox for marketing emails
+
+**Updated Step 0 structure**:
+```
+REQUIRED:
+☑ Terms of Service
+☑ Privacy Policy
+
+OPTIONAL (unchecked by default):
+☐ I'd like to receive marketing emails about features, events, and
+   community highlights. (You can unsubscribe anytime)
+
+INFO (no checkbox):
+"By continuing, you confirm you are at least 18 years old."
+```
+
+**File to update**:
+- `app/onboarding/page.tsx` (Step0Consent component, lines 54-150)
+
+---
+
+### 5. Add Consent Recording to Database
+
+**Severity**: MEDIUM (Audit risk)
+**Effort**: 🟡 MEDIUM (~1-2 hours) - Schema + mutations
+**Risk**: Cannot prove consent if audited
+
+**Problem**: No record of when/what users consented to. GDPR requires proof of consent.
+
+**Required Fields** (minimum to prove consent):
+- `userId` - Who consented
+- `purpose` - What they consented to (terms, privacy, marketing)
+- `consentTimestamp` - When they consented
+- `consentMethod` - How (checkbox, button)
+- `policyVersion` - Which version of T&Cs they saw
+- `status` - active/withdrawn
+
+**Schema to add** (`convex/schema.ts`):
+```typescript
+// Add to schema
+userConsents: defineTable({
+  userId: v.id("users"),
+  purpose: v.union(
+    v.literal("terms_of_service"),
+    v.literal("privacy_policy"),
+    v.literal("marketing_emails"),
+    v.literal("analytics_cookies")
+  ),
+  policyVersion: v.string(), // e.g., "2024-12-01"
+  status: v.union(v.literal("active"), v.literal("withdrawn")),
+  consentMethod: v.union(v.literal("checkbox"), v.literal("button")),
+  consentTimestamp: v.number(),
+  withdrawnAt: v.optional(v.number()),
+  createdAt: v.number(),
+})
+  .index("by_userId", ["userId"])
+  .index("by_purpose", ["userId", "purpose"]),
+```
+
+**Files to update**:
+- `convex/schema.ts` - Add userConsents table
+- `convex/profiles.ts` - Record consent when profile created
+- `app/onboarding/page.tsx` - Pass consent data to mutation
+
+---
+
+### 6. Create Cookie Policy Page ✅ DONE
+
+**Status**: COMPLETED
+
+Cookie policy page exists at `app/(legal)/cookies/page.tsx` with:
+- Multilingual support (LT, EN, UA, RU)
+- What cookies are used
+- Types of cookies (necessary, analytics, marketing)
+- How to manage cookies
+- Third-party cookies info
+- Consent information
+
+---
+
+### 7. Separate Age Verification from Consent
+
+**Severity**: LOW (Best practice)
+**Effort**: 🟢 EASY (~10 min) - Text change only
+**Risk**: Minor bundling concern
+
+**Problem**: Age confirmation is presented as consent text when it's actually a service requirement.
+
+**Current** (mixed concerns):
+```
+"By continuing, you confirm you are at least 18 years old and
+agree to receive important communications about your account."
+```
+
+**Fix** (separated):
+```
+CONSENT CHECKBOXES:
+☑ Terms of Service (required)
+☑ Privacy Policy (required)
+☐ Marketing emails (optional)
+
+NOTICE (no checkbox, just text):
+"By continuing, you confirm you are at least 18 years old."
+```
+
+**File to update**:
+- `app/onboarding/page.tsx` (line 146-148)
+
+---
+
+### Implementation Priority Order
+
+| # | Task | Effort | Impact | Status |
+|---|------|--------|--------|--------|
+| 2 | Clerk Dashboard Legal Consent | 2 min | HIGH | ✅ YES |
+| 1 | Add Privacy/Terms to ClerkProvider | 5 min | HIGH | ✅ YES |
+| 4 | Add Marketing Checkbox | 15 min | CRITICAL | ✅ YES |
+| 7 | Separate Age Verification | 10 min | LOW | ✅ YES |
+| 3 | Cookie Consent Banner | 30 min | CRITICAL | ✅ DONE |
+| 6 | Cookie Policy Page | 30 min | LOW | ✅ DONE |
+| 5 | Consent Database Recording | 1-2 hr | MEDIUM | After basics |
+
+**Total time for full compliance: ~3-4 hours**
+
+**Quick wins (do in 30 min)**:
+- Clerk Dashboard toggle (2 min)
+- ClerkProvider props (5 min)
+- Fix age verification text (10 min)
+- Add marketing checkbox (15 min)
+
+---
+
+### Reference: GDPR Key Requirements Checklist
+
+- [ ] Consent checkboxes unchecked by default ✅ (already done)
+- [ ] Separate consent for each purpose (fix marketing bundling)
+- [ ] Privacy policy visible where data collected (add to Clerk)
+- [ ] Cookie consent before non-essential cookies (add banner)
+- [ ] "Reject All" equally prominent as "Accept All" (banner design)
+- [ ] Easy consent withdrawal (add to settings page)
+- [ ] Consent audit trail (add to database)
+- [ ] Policy version tracking (add to database)
 
 ### Future Features
 

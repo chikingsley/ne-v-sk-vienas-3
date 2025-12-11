@@ -456,7 +456,9 @@ export default function BrowsePage() {
   };
 
   const handleSheetInvite = async () => {
-    if (!selectedProfile) return;
+    if (!selectedProfile) {
+      return;
+    }
     setIsSending(true);
     // Find first available date that matches the valid invitation dates
     const validDates = ["24 Dec", "25 Dec", "26 Dec", "31 Dec"] as const;
@@ -483,7 +485,9 @@ export default function BrowsePage() {
   };
 
   const handleSheetRespond = async (accept: boolean) => {
-    if (!connectionStatus?.invitationId) return;
+    if (!connectionStatus?.invitationId) {
+      return;
+    }
     setIsSending(true);
     try {
       await respondToInvitation({
@@ -698,13 +702,21 @@ export default function BrowsePage() {
 
       {/* Profile Card Modal */}
       {selectedProfile && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        <dialog
+          aria-modal="true"
+          className="fixed inset-0 z-50 m-0 flex h-full w-full max-w-none items-center justify-center border-none bg-black/50 p-4"
           onClick={() => setSelectedProfile(null)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              setSelectedProfile(null);
+            }
+          }}
+          open
         >
           <div
             className="slide-in-from-right-full animate-in duration-300"
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
           >
             <UnifiedProfileCard
               actionButton={
@@ -723,7 +735,7 @@ export default function BrowsePage() {
               profile={selectedProfile}
             />
           </div>
-        </div>
+        </dialog>
       )}
     </div>
   );

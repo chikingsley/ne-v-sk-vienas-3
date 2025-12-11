@@ -177,6 +177,13 @@ export default defineSchema({
 
     // Timestamps
     lastActive: v.optional(v.number()),
+
+    // Notification preferences (all default to true if not set)
+    emailNotifications: v.optional(v.boolean()), // Master toggle for email notifications
+    notifyOnInvitation: v.optional(v.boolean()), // New invitation alerts
+    notifyOnMessage: v.optional(v.boolean()), // New message notifications
+    notifyOnMatch: v.optional(v.boolean()), // Match confirmations
+    marketingEmails: v.optional(v.boolean()), // Marketing/promotional emails (default false)
   })
     .index("by_userId", ["userId"])
     .index("by_username", ["username"])
