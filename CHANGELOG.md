@@ -7,50 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [1.0.0] - 2025-12-11
 
-### Added
+🎉 **First Production Release**
 
-- **Moderation & Safety**
-  - Block/unblock user functionality
-  - Report user with reasons (Spam, Inappropriate, Harassment, Fake Profile, Other)
-  - Archive conversations
-  - Archive/Block UI view in messages page
-  - Blocked users hidden from conversations and profile browse
-- **Legal Pages** (all 4 languages: LT, EN, UA, RU)
-  - Safety Guidelines (`/safety`) - Updated with client's revised content
-  - Terms of Service (`/terms`)
-  - Privacy Policy (`/privacy`)
-  - Cookie Policy (`/cookies`)
-- **Email Templates** - i18n email preview page
-- **Self-connection prevention** - Users can't invite themselves
+### Core Platform
 
-### Security (Production Hardening)
+- **Authentication**: Clerk magic link auth with Convex sync
+- **Profiles**: Multi-step onboarding, photo gallery (up to 5), face verification
+- **Matching**: Invitation system (send/accept/decline), real-time messaging
+- **Browse**: Filter by city, date, language with grid/list views
+- **i18n**: Full support for Lithuanian, English, Ukrainian, Russian
 
-- **IDOR fix**: `deleteUser` action now only allows self-deletion
-- **Admin guard** (`convex/lib/admin.ts`): Protects dev-only functions behind `ADMIN_CLERK_USER_IDS`
-  - `devGetAllUsers`, `generateMissingUsernames`, `seedBannedWords`
-- **Clerk user sync improvements**:
-  - Added `clerkUserId` field + index for O(1) webhook lookups
-  - Consolidated `extractClerkUserId` utility
-- **Email test action** disabled in production
-- **Sentry hardening**:
-  - Disabled `sendDefaultPii`
-  - Replay gated behind analytics consent
-  - DSN moved to env var
-- **Analytics gating**: Vercel Analytics + SpeedInsights only load after cookie consent
-- **CSP headers**: Added `Content-Security-Policy-Report-Only`
-- **Next.js** upgraded to 16.0.10 (security patch)
-- **Sentry example API** returns 404 in production
+### Moderation & Safety
 
-### Changed
+- Block/unblock users
+- Report users (Spam, Inappropriate, Harassment, Fake Profile, Other)
+- Archive conversations
+- Blocked users hidden from browse and messages
 
-- **Safety page** completely rewritten with client's 6 concise, professionally-worded tips
-- **TODO.md** simplified and updated to reflect actual project state
+### Legal Pages (All 4 Languages)
 
-### Technical
+- Safety Guidelines (`/safety`)
+- Terms of Service (`/terms`)
+- Privacy Policy (`/privacy`)
+- Cookie Policy (`/cookies`)
 
-- Turbopack root pinned to avoid workspace detection issues
+### Security & Compliance
+
+- GDPR cookie consent banner with analytics gating
+- Consent recording to database
+- Admin guard for dev-only Convex functions
+- Sentry error tracking (PII disabled, replay consent-gated)
+- CSP headers (report-only mode)
+- IDOR fix: users can only delete themselves
+- Clerk ↔ Convex bi-directional user sync
+
+### Infrastructure
+
+- Next.js 16 App Router
+- Convex real-time database
+- Clerk authentication
+- Vercel Analytics + Speed Insights (consent-gated)
+- Sentry error monitoring
+- Migrated to `proxy.ts` (Next.js 16 convention)
 
 ---
 
@@ -146,9 +146,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History
 
-| Version    | Date       | Summary                                               |
-| ---------- | ---------- | ----------------------------------------------------- |
-| 0.1.0      | 2024-12-03 | Initial release - auth, profiles, browse, invitations |
-| 0.2.0      | 2024-12-07 | Face verification, E2E testing, docs organization     |
-| 0.3.0      | 2024-12-08 | Next.js App Router, Clerk auth, bi-directional sync   |
-| Unreleased | -          | Sentry, Vercel Analytics, consolidated docs           |
+| Version | Date       | Summary                                               |
+| ------- | ---------- | ----------------------------------------------------- |
+| 0.1.0   | 2024-12-03 | Initial release - auth, profiles, browse, invitations |
+| 0.2.0   | 2024-12-07 | Face verification, E2E testing, docs organization     |
+| 0.3.0   | 2024-12-08 | Next.js App Router, Clerk auth, bi-directional sync   |
+| 1.0.0   | 2025-12-11 | 🎉 First production release                           |
