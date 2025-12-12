@@ -289,6 +289,14 @@ export const deleteUser = action({
 
     const clerkUserId = user.clerkUserId;
 
+    // If user has no clerkUserId (legacy user), just delete from Convex directly
+    if (!clerkUserId) {
+      await ctx.runMutation(internal.users.deleteFromClerk, {
+        clerkUserId: user.clerkId, // Fall back to clerkId for cleanup
+      });
+      return { success: true };
+    }
+
     const clerkSecretKey = process.env.CLERK_SECRET_KEY;
     if (!clerkSecretKey) {
       return { success: false, error: "CLERK_SECRET_KEY not configured" };
