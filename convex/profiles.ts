@@ -14,6 +14,15 @@ type ConnectionStatus =
   | "matched"
   | "self";
 
+function isProfileCompleteForBrowse(
+  profile: Partial<Doc<"profiles">>
+): boolean {
+  const firstNameOk = (profile.firstName ?? "").trim().length > 0;
+  const bioOk = (profile.bio ?? "").trim().length > 0;
+  const languagesOk = (profile.languages?.length ?? 0) > 0;
+  return firstNameOk && bioOk && languagesOk;
+}
+
 // Top-level regex for username validation
 const USERNAME_REGEX = /^[a-z0-9-]+$/;
 
@@ -174,6 +183,7 @@ export const listProfiles = query({
     profiles = profiles.filter(
       (p) =>
         p.isVisible !== false &&
+        isProfileCompleteForBrowse(p) &&
         p.userId !== currentUserId &&
         !blockedUserIds.has(p.userId)
     );
@@ -844,10 +854,14 @@ async function filterVisibleProfiles(
   const profiles: Doc<"profiles">[] = [];
   for (const p of allProfiles) {
     const user = await ctx.db.get(p.userId);
-    const isVisible = p.isVisible !== false || p.userId === currentUserId;
+    const isOwner = p.userId === currentUserId;
+    const isVisible = p.isVisible !== false;
     const matchesRole =
       !roleFilter || p.role === roleFilter || p.role === "both";
-    if (user && isVisible && matchesRole) {
+    // For browse filter counts, only count profiles that would actually show up.
+    // (But keep owner visibility logic intact for safety/backwards-compat.)
+    const isCountable = isProfileCompleteForBrowse(p) && isVisible;
+    if (user && matchesRole && (isOwner || isCountable)) {
       profiles.push(p);
     }
   }

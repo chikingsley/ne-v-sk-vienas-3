@@ -1069,8 +1069,11 @@ export default function OnboardingPage() {
         hasPets,
         // Also save marketing preference to profile
         marketingEmails: marketingConsent,
+        // Make profile visible now that onboarding is complete
+        isVisible: true,
       });
-      setCompleted(true);
+      // Skip verification step and go directly to browse
+      router.push("/browse");
     } finally {
       setIsSaving(false);
     }

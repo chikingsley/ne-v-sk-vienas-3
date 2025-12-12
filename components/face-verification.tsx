@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useFaceVerification } from "@/hooks/use-face-verification";
+import posthog from "posthog-js";
 
 type FaceVerificationProps = {
   onVerificationComplete?: (verified: boolean, confidence: number) => void;
@@ -55,6 +56,12 @@ export function FaceVerification({
     const result = await verifyImages(image1, image2);
 
     if (result) {
+      posthog.capture("face-verification-completed", {
+        verified: result.verified,
+        confidence: result.confidence,
+        euclidean_distance: result.details.euclideanDistance,
+        threshold: result.details.threshold,
+      });
       onVerificationComplete?.(result.verified, result.confidence);
     } else if (error) {
       onError?.(error);
@@ -70,6 +77,10 @@ export function FaceVerification({
   ]);
 
   const handleReset = useCallback(() => {
+    posthog.capture("face-verification-reset", {
+      had_image1: image1 !== null,
+      had_image2: image2 !== null,
+    });
     setImage1(null);
     setImage2(null);
     setImage1Preview(null);
@@ -81,7 +92,7 @@ export function FaceVerification({
       input2Ref.current.value = "";
     }
     reset();
-  }, [reset]);
+  }, [reset, image1, image2]);
 
   return (
     <div className="space-y-6 p-4">

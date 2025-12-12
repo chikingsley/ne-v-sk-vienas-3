@@ -101,6 +101,8 @@ export const addProfilePhoto = mutation({
         city: "Vilnius",
         bio: "",
         verified: false,
+        // IMPORTANT: Placeholder profiles must not be browseable until onboarding is complete.
+        isVisible: false,
         languages: [],
         availableDates: [],
         dietaryInfo: [],
@@ -250,6 +252,8 @@ export const syncGooglePhoto = mutation({
         city: "Vilnius",
         bio: "",
         verified: false,
+        // IMPORTANT: Placeholder profiles must not be browseable until onboarding is complete.
+        isVisible: false,
         languages: [],
         availableDates: [],
         dietaryInfo: [],

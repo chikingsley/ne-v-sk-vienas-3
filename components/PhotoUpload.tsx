@@ -1,5 +1,6 @@
 "use client";
 
+import posthog from "posthog-js";
 import { useMutation } from "convex/react";
 import { Camera, Loader2, X } from "lucide-react";
 import { useRef, useState } from "react";
@@ -61,6 +62,9 @@ export function PhotoUpload({
         storageId: uploadResult.storageId as Id<"_storage">,
       });
       onPhotoUploaded(photoUrl);
+      posthog.capture("profile-photo-uploaded", {
+        storageId: uploadResult.storageId,
+      });
       toast.success("Photo uploaded");
     } catch (err) {
       setPreviewUrl(null);
@@ -76,6 +80,7 @@ export function PhotoUpload({
   };
 
   const handleRemovePhoto = () => {
+    posthog.capture("profile-photo-removed");
     setPreviewUrl(null);
     onPhotoUploaded("");
     if (fileInputRef.current) {

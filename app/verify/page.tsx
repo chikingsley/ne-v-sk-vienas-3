@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/convex/_generated/api";
 import { useFaceVerification } from "@/hooks/use-face-verification";
+import posthog from "posthog-js";
 
 type VerificationState = "idle" | "verifying" | "success" | "failed";
 
@@ -432,6 +433,10 @@ export default function VerifyPage() {
     try {
       // Use client-side verification - photos processed locally!
       const result = await verifyImages(idPhoto, selfie);
+      posthog.capture("verification_attempted", {
+        verified: result?.verified ?? false,
+        confidence: result?.confidence,
+      });
 
       if (result?.verified) {
         await updateVerification({ verified: true });
@@ -444,6 +449,13 @@ export default function VerifyPage() {
         );
       }
     } catch (err) {
+      posthog.capture("verification_attempted", {
+        verified: false,
+        error:
+          err instanceof Error
+            ? err.message
+            : "Verification failed. Please try again.",
+      });
       setState("failed");
       setError(
         err instanceof Error
@@ -454,6 +466,7 @@ export default function VerifyPage() {
   };
 
   const handleReset = () => {
+    posthog.capture("verification_reset");
     setIdPhoto(null);
     setSelfie(null);
     setIdPreview(null);

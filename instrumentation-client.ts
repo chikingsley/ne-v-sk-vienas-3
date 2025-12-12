@@ -3,6 +3,7 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
+import posthog from "posthog-js";
 
 type CookieConsent = {
   analytics: boolean;
@@ -49,6 +50,15 @@ Sentry.init({
   // Enable sending user PII (Personally Identifiable Information)
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
   sendDefaultPii: false,
+});
+
+// Initialize PostHog for analytics and capture exceptions
+posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
+  api_host: "/ingest",
+  ui_host: "https://us.posthog.com",
+  defaults: "2025-05-24",
+  capture_exceptions: true, // This enables capturing exceptions using Error Tracking, set to false if you don't want this
+  debug: process.env.NODE_ENV === "development",
 });
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

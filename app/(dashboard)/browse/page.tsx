@@ -1,5 +1,6 @@
 "use client";
 
+import posthog from "posthog-js";
 import { useMutation, useQuery } from "convex/react";
 import {
   Calendar,
@@ -353,7 +354,7 @@ function ListViewItem({
 }) {
   return (
     <div className="group flex flex-col gap-6 rounded-xl border border-gray-200 bg-white p-4 transition-all hover:shadow-md md:flex-row">
-      <div className="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+      <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-lg bg-gray-100">
         <Image
           alt={profile.firstName}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -533,6 +534,10 @@ export default function BrowsePage() {
         toUserId: userId,
         date: "24 Dec", // TODO: Let user pick date
       });
+      posthog.capture("invitation_sent", {
+        to_user_id: userId,
+        from_view: "list",
+      });
       toast.success(t.requestSent);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -559,6 +564,10 @@ export default function BrowsePage() {
       await sendInvitation({
         toUserId: selectedProfile.userId as Id<"users">,
         date: firstValidDate as "24 Dec" | "25 Dec" | "26 Dec" | "31 Dec",
+      });
+      posthog.capture("invitation_sent", {
+        to_user_id: selectedProfile.userId,
+        from_view: "profile_modal",
       });
       toast.success(t.requestSent);
     } catch (err) {
@@ -620,7 +629,7 @@ export default function BrowsePage() {
 
   // Track if we've loaded at least once to avoid showing skeleton on tab switch
   const hasLoadedOnce = useRef(false);
-  const previousProfiles = useRef<typeof profiles>([]);
+  const previousProfiles = useRef<Profile[]>([]);
   const previousTab = useRef(activeTab);
 
   // Reset previous profiles when tab changes to avoid showing wrong count
@@ -643,7 +652,7 @@ export default function BrowsePage() {
     profiles === undefined &&
     (!hasLoadedOnce.current || previousProfiles.current.length === 0);
   // Use previous profiles while loading to avoid "0 found" flash (only for same tab)
-  const filteredProfiles = profiles ?? previousProfiles.current ?? [];
+  const filteredProfiles = profiles ?? previousProfiles.current;
 
   // Render results content
   const renderResults = () => {
@@ -689,14 +698,19 @@ export default function BrowsePage() {
         <div className="mx-auto max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
             {/* Mode Toggle */}
-            <div className="flex flex-shrink-0 rounded-lg bg-gray-100 p-1">
+            <div className="flex shrink-0 rounded-lg bg-gray-100 p-1">
               <button
                 className={`rounded-md px-4 py-2 font-medium text-sm transition-all ${
                   activeTab === "host"
                     ? "bg-white text-gray-900 shadow-sm"
                     : "text-gray-500 hover:text-gray-900"
                 }`}
-                onClick={() => setActiveTab("host")}
+                onClick={() => {
+                  setActiveTab("host");
+                  posthog.capture("browse_tab_switched", {
+                    active_tab: "host",
+                  });
+                }}
                 type="button"
               >
                 {t.findAHost}
@@ -707,7 +721,12 @@ export default function BrowsePage() {
                     ? "bg-white text-gray-900 shadow-sm"
                     : "text-gray-500 hover:text-gray-900"
                 }`}
-                onClick={() => setActiveTab("guest")}
+                onClick={() => {
+                  setActiveTab("guest");
+                  posthog.capture("browse_tab_switched", {
+                    active_tab: "guest",
+                  });
+                }}
                 type="button"
               >
                 {t.findGuests}

@@ -1,5 +1,6 @@
 "use client";
 
+import posthog from "posthog-js";
 import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -867,6 +868,10 @@ export default function EditProfilePage() {
 
   const handleNext = () => {
     if (step < 6) {
+      posthog.capture("profile_edit_step_completed", {
+        step_completed: step,
+        next_step: step + 1,
+      });
       setStep((step + 1) as Step);
     }
   };
@@ -909,6 +914,15 @@ export default function EditProfilePage() {
         drinkingAllowed,
         petsAllowed,
         hasPets,
+      });
+      posthog.capture("profile_updated", {
+        role: getRole(),
+        hosting_status: hostingStatus,
+        guest_status: guestStatus,
+        city: formData.city,
+        languages_count: languages.length,
+        vibes_count: vibes.length,
+        has_pets: hasPets,
       });
       toast.success("Profile updated successfully!");
       router.push("/settings");

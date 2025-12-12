@@ -8,6 +8,7 @@ import { useLocale } from "@/contexts/locale-context";
 import { api } from "@/convex/_generated/api";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
+import posthog from "posthog-js";
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -35,7 +36,13 @@ export function AppSidebar() {
   return (
     <div className="flex w-64 shrink-0 flex-col border-border border-r bg-sidebar p-4">
       {/* Logo */}
-      <Link className="mb-2 flex items-center gap-3 px-2 py-3" href="/">
+      <Link
+        className="mb-2 flex items-center gap-3 px-2 py-3"
+        href="/"
+        onClick={() =>
+          posthog.capture("sidebar_logo_clicked", { target_url: "/" })
+        }
+      >
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500">
           <Gift className="h-6 w-6 text-white" />
         </div>
@@ -56,6 +63,12 @@ export function AppSidebar() {
             <Button
               className="h-11 w-full justify-start gap-3"
               variant={isActive(item.url) ? "secondary" : "ghost"}
+              onClick={() =>
+                posthog.capture("sidebar_nav_item_clicked", {
+                  url: item.url,
+                  title: item.title,
+                })
+              }
             >
               <item.icon className="h-5 w-5" />
               <span className="flex-1 text-left">{item.title}</span>
