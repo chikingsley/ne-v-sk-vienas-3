@@ -621,6 +621,15 @@ export default function BrowsePage() {
   // Track if we've loaded at least once to avoid showing skeleton on tab switch
   const hasLoadedOnce = useRef(false);
   const previousProfiles = useRef<typeof profiles>([]);
+  const previousTab = useRef(activeTab);
+
+  // Reset previous profiles when tab changes to avoid showing wrong count
+  useEffect(() => {
+    if (previousTab.current !== activeTab) {
+      previousProfiles.current = [];
+      previousTab.current = activeTab;
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     if (profiles !== undefined) {
@@ -629,9 +638,11 @@ export default function BrowsePage() {
     }
   }, [profiles]);
 
-  // Only show skeleton on initial load, not on tab/filter switches
-  const isLoading = profiles === undefined && !hasLoadedOnce.current;
-  // Use previous profiles while loading to avoid "0 found" flash
+  // Show loading on initial load OR when tab just changed and data isn't ready
+  const isLoading =
+    profiles === undefined &&
+    (!hasLoadedOnce.current || previousProfiles.current.length === 0);
+  // Use previous profiles while loading to avoid "0 found" flash (only for same tab)
   const filteredProfiles = profiles ?? previousProfiles.current ?? [];
 
   // Render results content

@@ -368,7 +368,7 @@ function Step1Preferences({
         <Label className="font-medium text-base">
           Are you open to hosting?
         </Label>
-        <div className="grid grid-cols-3 items-start gap-3">
+        <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-3">
           {HOSTING_OPTIONS.map((option) => (
             <PreferenceCardWithDates
               isSelected={hostingStatus === option.id}
@@ -386,7 +386,7 @@ function Step1Preferences({
         <Label className="font-medium text-base">
           Are you looking to be a guest?
         </Label>
-        <div className="grid grid-cols-3 items-start gap-3">
+        <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-3">
           {GUEST_OPTIONS.map((option) => (
             <PreferenceCardWithDates
               isSelected={guestStatus === option.id}

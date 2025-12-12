@@ -305,7 +305,7 @@ export function ProfilePreferenceCards({
       {/* Hosting Section */}
       <div className="space-y-2">
         <h3 className="font-semibold text-sm">Are you open to hosting?</h3>
-        <div className="grid grid-cols-3 items-start gap-2">
+        <div className="grid grid-cols-1 items-start gap-2 sm:grid-cols-3">
           {HOSTING_OPTIONS.map((option) => (
             <PreferenceCard
               isSelected={hostingStatus === option.id}
@@ -324,7 +324,7 @@ export function ProfilePreferenceCards({
         <h3 className="font-semibold text-sm">
           Are you looking to be a guest?
         </h3>
-        <div className="grid grid-cols-3 items-start gap-2">
+        <div className="grid grid-cols-1 items-start gap-2 sm:grid-cols-3">
           {GUEST_OPTIONS.map((option) => (
             <PreferenceCard
               isSelected={guestStatus === option.id}

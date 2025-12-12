@@ -453,7 +453,7 @@ function Step1Preferences({
         <Label className="font-medium text-base">
           Are you open to hosting?
         </Label>
-        <div className="grid grid-cols-3 items-start gap-3">
+        <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-3">
           {HOSTING_OPTIONS.map((option) => (
             <PreferenceCardWithDates
               isSelected={hostingStatus === option.id}
@@ -471,7 +471,7 @@ function Step1Preferences({
         <Label className="font-medium text-base">
           Are you looking to be a guest?
         </Label>
-        <div className="grid grid-cols-3 items-start gap-3">
+        <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-3">
           {GUEST_OPTIONS.map((option) => (
             <PreferenceCardWithDates
               isSelected={guestStatus === option.id}
@@ -1193,8 +1193,22 @@ export default function OnboardingPage() {
     return true;
   };
 
-  // Show loading while auth is initializing
-  if (isAuthLoading) {
+  // Show loading while auth is initializing or checking profile
+  if (isAuthLoading || profile === undefined) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-red-600" />
+      </div>
+    );
+  }
+
+  // If profile already complete, show loading while redirecting (prevents flash)
+  if (
+    !completed &&
+    profile?.firstName &&
+    profile?.bio &&
+    profile?.languages.length > 0
+  ) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-red-600" />
