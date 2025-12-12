@@ -11,62 +11,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Username routing** - Human-readable profile URLs at `/people/[username]`
-  - Schema: Added `username` field to profiles table with index
-  - Backend: `getProfileByUsername`, `checkUsernameAvailability`, `setUsername`, `generateMissingUsernames` mutations
-  - Frontend: New route at `app/(dashboard)/people/[username]/page.tsx`
-  - Updated all profile links to prefer username route when available
-  - Keeps `/profile/[id]` for backwards compatibility
-  - `lib/utils.ts`: Added `getProfileUrl` utility function
-- **Sentry integration** - Error tracking and monitoring
-  - `instrumentation-client.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`
-  - `app/global-error.tsx` - Global error boundary with Sentry capture
-  - Test page at `/sentry-example-page`
-  - `docs/SENTRY-USAGE.md` - Usage guide for spans, logs, and exception capture
-- **Vercel Analytics** - Added `<Analytics />` component to root layout
-- **Convex backend testing** - Set up vitest + convex-test
-  - `vitest.config.ts` - Edge runtime configuration
-  - `convex/profiles.test.ts` - Profile query tests (3 passing)
-  - Scripts: `bun test`, `bun test:once`
-- **SEO** - Added `robots.ts` and `sitemap.ts` for search engines
-- **Consolidated TODO.md** - Living task list with all features and references
-- **Archived old docs** - Moved outdated docs to `docs/archive/`
-- **Legal & Safety page templates** - Scraped Couchsurfing pages for reference
-  - Safety guidelines, community guidelines, policies, FAQ, terms templates
-  - Located in `docs/courchsurfing-pages/`
+- **Moderation & Safety**
+  - Block/unblock user functionality
+  - Report user with reasons (Spam, Inappropriate, Harassment, Fake Profile, Other)
+  - Archive conversations
+  - Archive/Block UI view in messages page
+  - Blocked users hidden from conversations and profile browse
+- **Legal Pages** (all 4 languages: LT, EN, UA, RU)
+  - Safety Guidelines (`/safety`) - Updated with client's revised content
+  - Terms of Service (`/terms`)
+  - Privacy Policy (`/privacy`)
+  - Cookie Policy (`/cookies`)
+- **Email Templates** - i18n email preview page
+- **Self-connection prevention** - Users can't invite themselves
+
+### Security (Production Hardening)
+
+- **IDOR fix**: `deleteUser` action now only allows self-deletion
+- **Admin guard** (`convex/lib/admin.ts`): Protects dev-only functions behind `ADMIN_CLERK_USER_IDS`
+  - `devGetAllUsers`, `generateMissingUsernames`, `seedBannedWords`
+- **Clerk user sync improvements**:
+  - Added `clerkUserId` field + index for O(1) webhook lookups
+  - Consolidated `extractClerkUserId` utility
+- **Email test action** disabled in production
+- **Sentry hardening**:
+  - Disabled `sendDefaultPii`
+  - Replay gated behind analytics consent
+  - DSN moved to env var
+- **Analytics gating**: Vercel Analytics + SpeedInsights only load after cookie consent
+- **CSP headers**: Added `Content-Security-Policy-Report-Only`
+- **Next.js** upgraded to 16.0.10 (security patch)
+- **Sentry example API** returns 404 in production
 
 ### Changed
 
-- **Experiments consolidated** - Moved all prototypes to `app/(experiments)/`
-  - Landing page variants: `landing1/`, `landing2/`, `landing3/`
-  - Client variants: `client1/`, `client2/`, `client3/`
-  - Sentry test page, location picker
-- **Messages page refactored** - Extracted sub-components to reduce complexity
-  - `SidebarItemComponent`, `MessageBubble`, `RequestView`, `ShareDetailsModal`, `EmptyState`
-
-### Security
-
-- **Authorization hardening (Convex)**
-  - Locked down admin/dev-only functions behind an allowlist (`ADMIN_CLERK_USER_IDS`)
-  - `devGetAllUsers`, `generateMissingUsernames`, `seedBannedWords`
-- **Sentry privacy hardening**
-  - Disabled `sendDefaultPii`
-  - Gate Sentry Replay behind analytics consent
-- **Analytics consent**
-  - Gate Vercel Analytics + Speed Insights behind cookie consent
-- **CSP**
-  - Added `Content-Security-Policy-Report-Only` header as a safe starting point
-- **Dependencies**
-  - Upgraded Next.js to address security advisories
-
-### Removed
-
-- **@tensorflow/tfjs** - Removed from dependencies (face-api bundles it internally)
+- **Safety page** completely rewritten with client's 6 concise, professionally-worded tips
+- **TODO.md** simplified and updated to reflect actual project state
 
 ### Technical
 
-- Added `.depcheckrc` for dependency check false positives
-- Updated `docs/CLAUDE.md` with vitest testing info
+- Turbopack root pinned to avoid workspace detection issues
 
 ---
 
