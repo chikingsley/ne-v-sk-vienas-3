@@ -9,6 +9,7 @@ Holiday hosting/guest matching platform for Lithuania.
 ## Completed Features
 
 ### Core Platform
+
 - [x] Next.js 16 App Router + Convex database + Clerk auth
 - [x] Real-time messaging with conversation system
 - [x] Invitation system (send/accept/decline)
@@ -19,6 +20,7 @@ Holiday hosting/guest matching platform for Lithuania.
 - [x] Username routing (`/people/[username]`)
 
 ### Security & Compliance (Production Hardening)
+
 - [x] GDPR cookie consent banner + analytics gating
 - [x] Consent recording to database (`userConsents` table)
 - [x] Admin guard for dev-only Convex functions (`assertAdmin`)
@@ -29,6 +31,7 @@ Holiday hosting/guest matching platform for Lithuania.
 - [x] Email test action disabled in production
 
 ### Moderation & Safety
+
 - [x] Block user functionality
 - [x] Unblock user functionality
 - [x] Report user with reasons
@@ -37,12 +40,14 @@ Holiday hosting/guest matching platform for Lithuania.
 - [x] Blocked users hidden from conversations and browse
 
 ### Legal Pages (All 4 languages)
+
 - [x] Safety Guidelines (`/safety`) - Client's revised version
 - [x] Terms of Service (`/terms`)
 - [x] Privacy Policy (`/privacy`)
 - [x] Cookie Policy (`/cookies`)
 
 ### Monitoring
+
 - [x] Sentry error tracking
 - [x] Vercel Analytics (consent-gated)
 - [x] Vercel Speed Insights (consent-gated)
@@ -99,6 +104,7 @@ Holiday hosting/guest matching platform for Lithuania.
 ## Quick Reference
 
 ### Running the app
+
 ```bash
 bun dev          # Start dev server
 bun run check    # Lint + type check
@@ -106,6 +112,7 @@ bun test         # Run tests
 ```
 
 ### Key files
+
 - `convex/schema.ts` - Database schema
 - `lib/i18n.ts` - All translations
 - `contexts/cookie-consent-context.tsx` - Consent state

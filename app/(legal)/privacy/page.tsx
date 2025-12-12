@@ -508,7 +508,7 @@ export default function PrivacyPage() {
       <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
         <Link
           className="mb-8 inline-flex items-center text-green-700 transition-colors hover:text-green-800 active:scale-95"
-          href="/browse"
+          href="/"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           {t.home}
