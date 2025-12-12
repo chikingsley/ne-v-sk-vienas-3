@@ -105,6 +105,20 @@ export const getMyConversations = query({
       return [];
     }
 
+    // Get users I've blocked
+    const myBlocks = await ctx.db
+      .query("blocks")
+      .withIndex("by_blocker", (q) => q.eq("blockerId", userId))
+      .collect();
+    const blockedByMeIds = new Set(myBlocks.map((b) => b.blockedId));
+
+    // Get users who blocked me
+    const blockedMe = await ctx.db
+      .query("blocks")
+      .withIndex("by_blocked", (q) => q.eq("blockedId", userId))
+      .collect();
+    const blockedMeIds = new Set(blockedMe.map((b) => b.blockerId));
+
     // Get conversations where user is guest (exclude archived)
     const asGuest = await ctx.db
       .query("conversations")
@@ -121,12 +135,17 @@ export const getMyConversations = query({
 
     const allConversations = [...asGuest, ...asHost];
 
-    // Build conversation summaries with profiles
+    // Build conversation summaries with profiles (filtering out blocked users)
     const summaries = await Promise.all(
       allConversations.map(async (conv) => {
         // Get the other person's ID
         const otherId = conv.guestId === userId ? conv.hostId : conv.guestId;
         const isHost = conv.hostId === userId;
+
+        // Skip if blocked (either direction)
+        if (blockedByMeIds.has(otherId) || blockedMeIds.has(otherId)) {
+          return null;
+        }
 
         // Get their profile
         const profile = await ctx.db
@@ -161,12 +180,14 @@ export const getMyConversations = query({
       })
     );
 
-    // Sort by last message time (most recent first)
-    return summaries.sort(
-      (a, b) =>
-        (b.conversation.lastMessageAt ?? b.conversation.createdAt) -
-        (a.conversation.lastMessageAt ?? a.conversation.createdAt)
-    );
+    // Filter out nulls (blocked conversations) and sort by last message time
+    return summaries
+      .filter((s) => s !== null)
+      .sort(
+        (a, b) =>
+          (b.conversation.lastMessageAt ?? b.conversation.createdAt) -
+          (a.conversation.lastMessageAt ?? a.conversation.createdAt)
+      );
   },
 });
 

@@ -44,6 +44,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Messages page refactored** - Extracted sub-components to reduce complexity
   - `SidebarItemComponent`, `MessageBubble`, `RequestView`, `ShareDetailsModal`, `EmptyState`
 
+### Security
+
+- **Authorization hardening (Convex)**
+  - Locked down admin/dev-only functions behind an allowlist (`ADMIN_CLERK_USER_IDS`)
+  - `devGetAllUsers`, `generateMissingUsernames`, `seedBannedWords`
+- **Sentry privacy hardening**
+  - Disabled `sendDefaultPii`
+  - Gate Sentry Replay behind analytics consent
+- **Analytics consent**
+  - Gate Vercel Analytics + Speed Insights behind cookie consent
+- **CSP**
+  - Added `Content-Security-Policy-Report-Only` header as a safe starting point
+- **Dependencies**
+  - Upgraded Next.js to address security advisories
+
 ### Removed
 
 - **@tensorflow/tfjs** - Removed from dependencies (face-api bundles it internally)

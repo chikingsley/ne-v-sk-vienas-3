@@ -13,7 +13,7 @@ Nešvęsk vienas helps people find companions for holiday celebrations. Hosts ca
 - **UI**: React 19, [Tailwind CSS 4](https://tailwindcss.com), [shadcn/ui](https://ui.shadcn.com)
 - **Backend**: [Convex](https://convex.dev)
 - **Auth**: [Clerk](https://clerk.com)
-- **Email**: [Resend](https://resend.com)
+- **Email**: Maileroo (transactional emails)
 - **Face Verification**: [@vladmandic/face-api](https://github.com/vladmandic/face-api)
 - **Linting**: [Biome](https://biomejs.dev) via [Ultracite](https://github.com/haydenbleasel/ultracite)
 
@@ -60,15 +60,19 @@ NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
 CLERK_SECRET_KEY=sk_test_...
 
-# Resend (for emails)
-RESEND_API_KEY=re_...
+# Maileroo (for emails)
+MAILEROO_API_KEY=...
 ```
 
 Also set these in your **Convex Dashboard** (Settings → Environment Variables):
 
 ```env
-CLERK_WEBHOOK_SECRET=whsec_...   # From Clerk webhook endpoint
-CLERK_SECRET_KEY=sk_test_...     # Same as above
+  CLERK_WEBHOOK_SECRET=whsec_...   # From Clerk webhook endpoint
+  CLERK_SECRET_KEY=sk_test_...     # Same as above
+  MAILEROO_API_KEY=...             # Transactional email provider
+
+# Optional admin allowlist for dev/admin Convex functions
+ADMIN_CLERK_USER_IDS=user_...,user_...
 ```
 
 ### Clerk Webhook Setup

@@ -12,6 +12,7 @@ describe("consents", () => {
       async (ctx) =>
         await ctx.db.insert("users", {
           clerkId: "test-clerk-id",
+          clerkUserId: "test-clerk-id",
           email: "test@example.com",
           name: "Test User",
         })
@@ -44,6 +45,7 @@ describe("consents", () => {
       async (ctx) =>
         await ctx.db.insert("users", {
           clerkId: "test-clerk-id-2",
+          clerkUserId: "test-clerk-id-2",
           email: "test2@example.com",
           name: "Test User 2",
         })
@@ -73,6 +75,7 @@ describe("consents", () => {
       async (ctx) =>
         await ctx.db.insert("users", {
           clerkId: "test-clerk-id-3",
+          clerkUserId: "test-clerk-id-3",
           email: "test3@example.com",
           name: "Test User 3",
         })
@@ -108,6 +111,7 @@ describe("consents", () => {
       async (ctx) =>
         await ctx.db.insert("users", {
           clerkId: "test-clerk-id-4",
+          clerkUserId: "test-clerk-id-4",
           email: "test4@example.com",
           name: "Test User 4",
         })

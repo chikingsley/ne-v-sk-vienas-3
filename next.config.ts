@@ -30,9 +30,21 @@ const securityHeaders = [
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=(self)",
   },
+  // Start with report-only CSP to observe violations without breaking production.
+  // Once you review reports, switch this to "Content-Security-Policy".
+  {
+    key: "Content-Security-Policy-Report-Only",
+    value:
+      "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; connect-src 'self' https: wss:; frame-src 'self' https://*.clerk.accounts.dev https://*.clerk.com",
+  },
 ];
 
 const nextConfig: NextConfig = {
+  // Ensure Turbopack uses the repo root as the workspace root.
+  // This avoids mis-detecting the root when other lockfiles exist elsewhere.
+  turbopack: {
+    root: process.cwd(),
+  },
   images: {
     remotePatterns: [
       {

@@ -6,7 +6,7 @@ import {
   internalQuery,
   query,
 } from "./_generated/server";
-import { getCurrentUserId } from "./lib/auth";
+import { extractClerkUserId, getCurrentUserId } from "./lib/auth";
 
 /**
  * Upsert user from Clerk webhook (user.created / user.updated)
@@ -56,17 +56,21 @@ export const upsertFromClerk = internalMutation({
     }),
   },
   async handler(ctx, { data }) {
-    const clerkId = data.id;
+    const clerkUserId = data.id;
 
-    // Find existing user by clerkId (partial match since tokenIdentifier includes issuer)
-    const existingUsers = await ctx.db.query("users").collect();
-    const existingUser = existingUsers.find((u) => u.clerkId.includes(clerkId));
+    // Fast lookup by stable Clerk user id.
+    const existingUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerkUserId", (q) => q.eq("clerkUserId", clerkUserId))
+      .unique();
 
     const email = data.email_addresses?.[0]?.email_address;
     const name = [data.first_name, data.last_name].filter(Boolean).join(" ");
 
     if (existingUser) {
       await ctx.db.patch(existingUser._id, {
+        // Keep existingUser.clerkId if it's already the full tokenIdentifier.
+        // (We cannot derive it from webhook payload.)
         email,
         name: name || existingUser.name,
         imageUrl: data.image_url,
@@ -74,7 +78,8 @@ export const upsertFromClerk = internalMutation({
       console.log("Updated user from Clerk:", existingUser._id);
     } else {
       const userId = await ctx.db.insert("users", {
-        clerkId,
+        clerkId: clerkUserId,
+        clerkUserId,
         email,
         name: name || undefined,
         imageUrl: data.image_url,
@@ -91,9 +96,10 @@ export const upsertFromClerk = internalMutation({
 export const deleteFromClerk = internalMutation({
   args: { clerkUserId: v.string() },
   async handler(ctx, { clerkUserId }) {
-    // Find user by Clerk ID (partial match for tokenIdentifier format)
-    const allUsers = await ctx.db.query("users").collect();
-    const user = allUsers.find((u) => u.clerkId.includes(clerkUserId));
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkUserId", (q) => q.eq("clerkUserId", clerkUserId))
+      .unique();
 
     if (!user) {
       console.warn("No user found for Clerk ID:", clerkUserId);
@@ -179,6 +185,33 @@ export const getUserById = internalQuery({
 });
 
 /**
+ * Internal query to get user by Clerk token identifier.
+ * Useful for actions (which can't use getCurrentUserId).
+ */
+export const getUserByClerkId = internalQuery({
+  args: { clerkId: v.string() },
+  async handler(ctx, { clerkId }) {
+    return await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", clerkId))
+      .unique();
+  },
+});
+
+/**
+ * Internal query to get user by stable Clerk user id.
+ */
+export const getUserByClerkUserId = internalQuery({
+  args: { clerkUserId: v.string() },
+  async handler(ctx, { clerkUserId }) {
+    return await ctx.db
+      .query("users")
+      .withIndex("by_clerkUserId", (q) => q.eq("clerkUserId", clerkUserId))
+      .unique();
+  },
+});
+
+/**
  * Delete a user from both Convex and Clerk (bi-directional delete)
  * Call this from the app to delete a user everywhere
  */
@@ -188,16 +221,43 @@ export const deleteUser = action({
     ctx,
     { userId }
   ): Promise<{ success: boolean; error?: string }> {
+    // Authorization: only allow a user to delete themselves.
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return { success: false, error: "Not authenticated" };
+    }
+
+    // Resolve the current Convex user from identity.
+    const currentUserByToken = await ctx.runQuery(
+      internal.users.getUserByClerkId,
+      {
+        clerkId: identity.tokenIdentifier,
+      }
+    );
+
+    const clerkUserIdFromToken = extractClerkUserId(identity.tokenIdentifier);
+    const currentUserByClerkUserId = await ctx.runQuery(
+      internal.users.getUserByClerkUserId,
+      { clerkUserId: clerkUserIdFromToken }
+    );
+
+    const currentUser = currentUserByToken ?? currentUserByClerkUserId;
+    if (!currentUser) {
+      return { success: false, error: "User not found" };
+    }
+
+    // Only allow deleting yourself.
+    if (currentUser._id !== userId) {
+      return { success: false, error: "Not authorized" };
+    }
+
     const user = await ctx.runQuery(internal.users.getUserById, { userId });
 
     if (!user) {
       return { success: false, error: "User not found" };
     }
 
-    // Extract Clerk user ID from tokenIdentifier (format: "issuer|user_id")
-    const clerkUserId = user.clerkId.includes("|")
-      ? user.clerkId.split("|")[1]
-      : user.clerkId;
+    const clerkUserId = user.clerkUserId;
 
     const clerkSecretKey = process.env.CLERK_SECRET_KEY;
     if (!clerkSecretKey) {

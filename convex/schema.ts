@@ -139,11 +139,18 @@ const consentMethod = v.union(
 export default defineSchema({
   // Users table (linked to Clerk via tokenIdentifier)
   users: defineTable({
+    // Full Clerk token identifier (typically "issuer|userId")
     clerkId: v.string(),
+
+    // Stable Clerk user id (the part after the "|"), used for webhook sync + fast lookups.
+    // NOTE: Webhooks provide only the user id, not the full tokenIdentifier.
+    clerkUserId: v.string(),
     email: v.optional(v.string()),
     name: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
-  }).index("by_clerkId", ["clerkId"]),
+  })
+    .index("by_clerkId", ["clerkId"])
+    .index("by_clerkUserId", ["clerkUserId"]),
 
   // User profiles (extends user)
   profiles: defineTable({

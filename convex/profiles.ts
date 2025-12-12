@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
+import { assertAdmin } from "./lib/admin";
 import { getCurrentUserId } from "./lib/auth";
 
 type Language = "Lithuanian" | "English" | "Ukrainian" | "Russian";
@@ -142,6 +143,23 @@ export const listProfiles = query({
     const currentUserId = await getCurrentUserId(ctx);
     let profiles = await ctx.db.query("profiles").collect();
 
+    // Get blocked user IDs (both directions) if logged in
+    let blockedUserIds = new Set<Id<"users">>();
+    if (currentUserId) {
+      const myBlocks = await ctx.db
+        .query("blocks")
+        .withIndex("by_blocker", (q) => q.eq("blockerId", currentUserId))
+        .collect();
+      const blockedMe = await ctx.db
+        .query("blocks")
+        .withIndex("by_blocked", (q) => q.eq("blockedId", currentUserId))
+        .collect();
+      blockedUserIds = new Set([
+        ...myBlocks.map((b) => b.blockedId),
+        ...blockedMe.map((b) => b.blockerId),
+      ]);
+    }
+
     // Filter out profiles where the user no longer exists (orphaned profiles)
     const validProfiles: typeof profiles = [];
     for (const p of profiles) {
@@ -152,9 +170,12 @@ export const listProfiles = query({
     }
     profiles = validProfiles;
 
-    // Only show visible profiles and exclude current user from results
+    // Only show visible profiles, exclude current user, and exclude blocked users
     profiles = profiles.filter(
-      (p) => p.isVisible !== false && p.userId !== currentUserId
+      (p) =>
+        p.isVisible !== false &&
+        p.userId !== currentUserId &&
+        !blockedUserIds.has(p.userId)
     );
 
     // Apply filters
@@ -370,8 +391,10 @@ export const upsertProfile = mutation({
       .unique();
 
     if (!user) {
+      const clerkUserId = identity.tokenIdentifier.split("|").at(-1);
       const userId = await ctx.db.insert("users", {
         clerkId: identity.tokenIdentifier,
+        clerkUserId: clerkUserId ?? identity.tokenIdentifier,
         email: identity.email,
         name: identity.name,
         imageUrl: identity.pictureUrl,
@@ -728,6 +751,8 @@ export const updateNotificationPreferences = mutation({
 export const generateMissingUsernames = mutation({
   args: {},
   handler: async (ctx) => {
+    await assertAdmin(ctx);
+
     const profiles = await ctx.db.query("profiles").collect();
     let updated = 0;
 
@@ -895,6 +920,8 @@ export const getFilterCounts = query({
 export const devGetAllUsers = query({
   args: {},
   handler: async (ctx) => {
+    await assertAdmin(ctx);
+
     const users = await ctx.db.query("users").collect();
 
     const usersWithProfiles = await Promise.all(

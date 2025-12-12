@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { assertAdmin } from "./lib/admin";
 import { getCurrentUserId } from "./lib/auth";
 
 // Block a user
@@ -199,6 +200,95 @@ export const reportUser = mutation({
   },
 });
 
+// Get combined archived conversations and blocked users for archive view
+export const getArchivedAndBlocked = query({
+  args: {},
+  handler: async (ctx) => {
+    const currentUserId = await getCurrentUserId(ctx);
+    if (!currentUserId) {
+      return [];
+    }
+
+    // Get archived conversations where user is guest
+    const archivedAsGuest = await ctx.db
+      .query("conversations")
+      .withIndex("by_guest", (q) => q.eq("guestId", currentUserId))
+      .filter((q) => q.eq(q.field("isArchivedByGuest"), true))
+      .collect();
+
+    // Get archived conversations where user is host
+    const archivedAsHost = await ctx.db
+      .query("conversations")
+      .withIndex("by_host", (q) => q.eq("hostId", currentUserId))
+      .filter((q) => q.eq(q.field("isArchivedByHost"), true))
+      .collect();
+
+    // Get blocked users
+    const blocks = await ctx.db
+      .query("blocks")
+      .withIndex("by_blocker", (q) => q.eq("blockerId", currentUserId))
+      .collect();
+
+    // Build archived conversation items
+    const archivedItems = await Promise.all(
+      [...archivedAsGuest, ...archivedAsHost].map(async (conv) => {
+        const isGuest = conv.guestId === currentUserId;
+        const otherId = isGuest ? conv.hostId : conv.guestId;
+        const archivedAt = isGuest
+          ? conv.archivedByGuestAt
+          : conv.archivedByHostAt;
+
+        const profile = await ctx.db
+          .query("profiles")
+          .withIndex("by_userId", (q) => q.eq("userId", otherId))
+          .first();
+
+        return {
+          type: "archived" as const,
+          oderId: otherId,
+          conversationId: conv._id,
+          profile: profile
+            ? {
+                firstName: profile.firstName,
+                photoUrl: profile.photoUrl,
+                city: profile.city,
+              }
+            : null,
+          sortDate: archivedAt ?? conv.lastMessageAt ?? conv.createdAt,
+        };
+      })
+    );
+
+    // Build blocked user items
+    const blockedItems = await Promise.all(
+      blocks.map(async (block) => {
+        const profile = await ctx.db
+          .query("profiles")
+          .withIndex("by_userId", (q) => q.eq("userId", block.blockedId))
+          .first();
+
+        return {
+          type: "blocked" as const,
+          oderId: block.blockedId,
+          blockId: block._id,
+          profile: profile
+            ? {
+                firstName: profile.firstName,
+                photoUrl: profile.photoUrl,
+                city: profile.city,
+              }
+            : null,
+          sortDate: block.createdAt,
+        };
+      })
+    );
+
+    // Combine and sort by date (most recent first)
+    const allItems = [...archivedItems, ...blockedItems];
+    return allItems.sort((a, b) => (b.sortDate ?? 0) - (a.sortDate ?? 0));
+  },
+});
+
 // Check banned words in content
 export const checkContent = query({
   args: { content: v.string() },
@@ -230,6 +320,8 @@ export const checkContent = query({
 export const seedBannedWords = mutation({
   args: {},
   handler: async (ctx) => {
+    await assertAdmin(ctx);
+
     const existing = await ctx.db.query("bannedWords").first();
     if (existing) {
       return { message: "Already seeded" };

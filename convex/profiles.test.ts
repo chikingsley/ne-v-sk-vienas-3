@@ -18,6 +18,7 @@ describe("profiles", () => {
       async (ctx) =>
         await ctx.db.insert("users", {
           clerkId: "test-clerk-id",
+          clerkUserId: "test-clerk-id",
           email: "test@example.com",
           name: "Test User",
         })
@@ -68,6 +69,7 @@ describe("profiles", () => {
       async (ctx) =>
         await ctx.db.insert("users", {
           clerkId: "host-clerk-id",
+          clerkUserId: "host-clerk-id",
           email: "host@example.com",
         })
     );
@@ -76,6 +78,7 @@ describe("profiles", () => {
       async (ctx) =>
         await ctx.db.insert("users", {
           clerkId: "guest-clerk-id",
+          clerkUserId: "guest-clerk-id",
           email: "guest@example.com",
         })
     );

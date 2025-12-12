@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery } from "convex/react";
 import {
+  Archive,
   ArrowLeft,
   ArrowRight,
   Ban,
@@ -583,6 +584,132 @@ function EmptyState() {
   );
 }
 
+// Archive View - displays archived conversations and blocked users
+type ArchivedItem = {
+  type: "archived" | "blocked";
+  oderId: Id<"users">;
+  conversationId?: Id<"conversations">;
+  blockId?: Id<"blocks">;
+  profile: {
+    firstName: string;
+    photoUrl?: string;
+    city: string;
+  } | null;
+  sortDate: number;
+};
+
+function ArchiveView({
+  items,
+  isLoading,
+  onBack,
+  onUnarchive,
+  onUnblock,
+}: {
+  items: ArchivedItem[];
+  isLoading: boolean;
+  onBack: () => void;
+  onUnarchive: (conversationId: Id<"conversations">) => void;
+  onUnblock: (userId: Id<"users">) => void;
+}) {
+  if (isLoading) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-red-500" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-full w-full flex-col">
+      {/* Header */}
+      <div className="flex h-[72px] items-center gap-3 border-b px-4">
+        <Button onClick={onBack} size="icon" variant="ghost">
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div className="flex-1">
+          <h2 className="font-semibold text-lg">Archived</h2>
+          <p className="text-muted-foreground text-sm">
+            {items.length} {items.length === 1 ? "item" : "items"}
+          </p>
+        </div>
+      </div>
+
+      {/* Content */}
+      {items.length === 0 ? (
+        <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
+          <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+            <Archive className="h-10 w-10 text-muted-foreground" />
+          </div>
+          <h2 className="mb-2 font-semibold text-xl">No archived items</h2>
+          <p className="max-w-sm text-muted-foreground">
+            Archived conversations and blocked users will appear here.
+          </p>
+        </div>
+      ) : (
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="space-y-2">
+            {items.map((item) => (
+              <div
+                className="flex items-center gap-3 rounded-lg border bg-white p-3"
+                key={`${item.type}-${item.oderId}`}
+              >
+                <Avatar className={item.type === "blocked" ? "opacity-50" : ""}>
+                  <AvatarImage src={item.profile?.photoUrl} />
+                  <AvatarFallback>
+                    {item.profile?.firstName?.charAt(0) ?? "?"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    {item.type === "blocked" && (
+                      <Ban className="h-4 w-4 shrink-0 text-red-500" />
+                    )}
+                    <span
+                      className={cn(
+                        "truncate font-medium",
+                        item.type === "blocked" &&
+                          "text-muted-foreground line-through"
+                      )}
+                    >
+                      {item.profile?.firstName ?? "Unknown"}
+                    </span>
+                  </div>
+                  <p className="text-muted-foreground text-sm">
+                    {item.type === "blocked" ? "Blocked" : "Archived"} •{" "}
+                    {item.profile?.city}
+                  </p>
+                </div>
+                {item.type === "archived" && item.conversationId && (
+                  <Button
+                    onClick={() => {
+                      if (item.conversationId) {
+                        onUnarchive(item.conversationId);
+                      }
+                    }}
+                    size="sm"
+                    variant="outline"
+                  >
+                    Unarchive
+                  </Button>
+                )}
+                {item.type === "blocked" && (
+                  <Button
+                    onClick={() => onUnblock(item.oderId)}
+                    size="sm"
+                    variant="outline"
+                  >
+                    Unblock
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Report Modal
 function ReportModal({
   isOpen,
@@ -862,21 +989,23 @@ function MessagesSidebar({
   items,
   activeId,
   isLoading,
-  pendingCount,
+  archivedCount,
   searchQuery,
   onSearchChange,
   onItemClick,
+  onOpenArchive,
 }: {
   items: SidebarItem[];
   activeId: string | null;
   isLoading: boolean;
-  pendingCount: number;
+  archivedCount: number;
   searchQuery: string;
   onSearchChange: (value: string) => void;
   onItemClick: (
     id: string,
     type: "conversation" | "request" | "sent_request"
   ) => void;
+  onOpenArchive: () => void;
 }) {
   const renderContent = () => {
     if (isLoading) {
@@ -891,14 +1020,6 @@ function MessagesSidebar({
     }
     return (
       <div className="space-y-1">
-        {pendingCount > 0 && (
-          <div className="mb-2 px-3 py-2">
-            <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-              {pendingCount} pending request
-              {pendingCount !== 1 ? "s" : ""}
-            </span>
-          </div>
-        )}
         {items.map((item) => (
           <SidebarItemComponent
             isActive={item.oderId === activeId}
@@ -933,6 +1054,24 @@ function MessagesSidebar({
         </div>
       </div>
       <div className="flex-1 overflow-y-auto p-2">{renderContent()}</div>
+      {/* Archive button at bottom */}
+      <div className="border-t p-2">
+        <button
+          className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          onClick={onOpenArchive}
+          type="button"
+        >
+          <span className="flex items-center gap-2 text-sm">
+            <Archive className="h-4 w-4" />
+            Archived
+          </span>
+          {archivedCount > 0 && (
+            <span className="text-muted-foreground text-xs">
+              {archivedCount}
+            </span>
+          )}
+        </button>
+      </div>
     </div>
   );
 }
@@ -1261,6 +1400,14 @@ function MainContentArea({
   return <EmptyState />;
 }
 
+// Helper to get sort date from a sidebar item
+function getSortDate(item: SidebarItem): number {
+  if (item.type === "conversation") {
+    return item.lastMessage?.createdAt ?? 0;
+  }
+  return item.createdAt;
+}
+
 // Helper to build sidebar items
 function buildSidebarItems(
   invitations: ReturnType<
@@ -1271,7 +1418,7 @@ function buildSidebarItems(
   >
 ): SidebarItem[] {
   const items: SidebarItem[] = [];
-  // Add received pending requests first
+  // Add received pending requests
   for (const inv of invitations?.received ?? []) {
     if (inv.status === "pending" && inv.otherUser) {
       items.push({
@@ -1309,7 +1456,8 @@ function buildSidebarItems(
   for (const conv of conversations) {
     items.push({ type: "conversation", ...conv });
   }
-  return items;
+  // Sort all items by most recent activity
+  return items.sort((a, b) => getSortDate(b) - getSortDate(a));
 }
 
 // Custom hook for scroll management
@@ -1372,6 +1520,7 @@ function MessagesPageContent() {
   const [isCancelling, setIsCancelling] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showArchive, setShowArchive] = useState(false);
   const [isSendingCard, setIsSendingCard] = useState(false);
   const [isReporting, setIsReporting] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -1381,6 +1530,10 @@ function MessagesPageContent() {
   const conversations = conversationsQuery ?? [];
   const invitations = useQuery(api.invitations.getMyInvitations);
   const myProfile = useQuery(api.profiles.getMyProfile);
+  const archivedAndBlockedQuery = useQuery(
+    api.moderation.getArchivedAndBlocked
+  );
+  const archivedAndBlocked = archivedAndBlockedQuery ?? [];
   const isLoading =
     conversationsQuery === undefined || invitations === undefined;
 
@@ -1430,6 +1583,7 @@ function MessagesPageContent() {
   const blockUser = useMutation(api.moderation.blockUser);
   const unblockUser = useMutation(api.moderation.unblockUser);
   const reportUser = useMutation(api.moderation.reportUser);
+  const unarchiveConversation = useMutation(api.messages.unarchiveConversation);
 
   // Scroll and read management via hooks
   useMessagesScroll(messagesContainerRef, activeConversationId, messages);
@@ -1585,19 +1739,52 @@ function MessagesPageContent() {
   const filteredItems = sidebarItems.filter((item) =>
     item.profile?.firstName?.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  const pendingCount =
-    invitations?.received?.filter((inv) => inv.status === "pending").length ??
-    0;
+  const archivedCount = archivedAndBlocked.length;
+
+  // Archive handlers
+  const handleUnarchive = async (conversationId: Id<"conversations">) => {
+    try {
+      await unarchiveConversation({ conversationId });
+      toast.success("Conversation unarchived");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to unarchive");
+    }
+  };
+
+  const handleUnblockFromArchive = async (userId: Id<"users">) => {
+    try {
+      await unblockUser({ userId });
+      toast.success("User unblocked");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to unblock");
+    }
+  };
+
+  // Show archive view
+  if (showArchive) {
+    return (
+      <div className="flex min-h-0 flex-1">
+        <ArchiveView
+          isLoading={archivedAndBlockedQuery === undefined}
+          items={archivedAndBlocked as ArchivedItem[]}
+          onBack={() => setShowArchive(false)}
+          onUnarchive={handleUnarchive}
+          onUnblock={handleUnblockFromArchive}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-0 flex-1">
       <MessagesSidebar
         activeId={activeId}
+        archivedCount={archivedCount}
         isLoading={isLoading}
         items={filteredItems}
         onItemClick={setActiveChat}
+        onOpenArchive={() => setShowArchive(true)}
         onSearchChange={setSearchQuery}
-        pendingCount={pendingCount}
         searchQuery={searchQuery}
       />
       <div

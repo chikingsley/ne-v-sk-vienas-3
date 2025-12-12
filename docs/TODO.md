@@ -2,7 +2,7 @@
 
 Holiday hosting/guest matching platform for Lithuania.
 
-**Last updated**: December 9, 2024
+**Last updated**: December 11, 2025
 
 ---
 

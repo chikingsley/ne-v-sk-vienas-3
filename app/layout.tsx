@@ -1,6 +1,3 @@
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-
 import type { Metadata } from "next";
 import {
   Courier_Prime,
@@ -8,6 +5,7 @@ import {
   Geist_Mono,
   Playfair_Display,
 } from "next/font/google";
+import { AnalyticsGate } from "@/components/analytics-gate";
 import { CookieBanner } from "@/components/cookie-banner";
 import { ConvexClientProvider } from "@/components/providers/convex-client-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -135,10 +133,9 @@ export default function RootLayout({
             <LocaleProvider>{children}</LocaleProvider>
             <Toaster />
             <CookieBanner />
+            <AnalyticsGate />
           </CookieConsentProvider>
         </ConvexClientProvider>
-        <Analytics />
-        <SpeedInsights />
       </body>
     </html>
   );
