@@ -153,20 +153,25 @@ export const getMyConversations = query({
           .withIndex("by_userId", (q) => q.eq("userId", otherId))
           .first();
 
-        // Get last message
-        const messages = await ctx.db
+        // Get last message - use order + first instead of collecting all
+        const lastMessage = await ctx.db
           .query("messages")
           .withIndex("by_conversation", (q) => q.eq("conversationId", conv._id))
+          .order("desc")
+          .first();
+
+        // Count unread - only fetch unread messages from other person
+        const unreadMessages = await ctx.db
+          .query("messages")
+          .withIndex("by_conversation", (q) => q.eq("conversationId", conv._id))
+          .filter((q) =>
+            q.and(
+              q.eq(q.field("senderId"), otherId),
+              q.eq(q.field("read"), false)
+            )
+          )
           .collect();
-
-        const lastMessage = messages.sort(
-          (a, b) => b.createdAt - a.createdAt
-        )[0];
-
-        // Count unread (messages from other person that aren't read)
-        const unreadCount = messages.filter(
-          (m) => m.senderId === otherId && !m.read
-        ).length;
+        const unreadCount = unreadMessages.length;
 
         return {
           conversation: conv,
@@ -335,37 +340,38 @@ export const getUnreadCount = query({
       return 0;
     }
 
-    // Get all conversations for user
-    const asGuest = await ctx.db
-      .query("conversations")
-      .withIndex("by_guest", (q) => q.eq("guestId", userId))
-      .collect();
+    // Get all conversations for user in parallel
+    const [asGuest, asHost] = await Promise.all([
+      ctx.db
+        .query("conversations")
+        .withIndex("by_guest", (q) => q.eq("guestId", userId))
+        .collect(),
+      ctx.db
+        .query("conversations")
+        .withIndex("by_host", (q) => q.eq("hostId", userId))
+        .collect(),
+    ]);
 
-    const asHost = await ctx.db
-      .query("conversations")
-      .withIndex("by_host", (q) => q.eq("hostId", userId))
-      .collect();
+    const allConversations = [...asGuest, ...asHost];
 
-    const allConversationIds = [...asGuest, ...asHost].map((c) => c._id);
-
-    let totalUnread = 0;
-
-    for (const convId of allConversationIds) {
-      const unreadMessages = await ctx.db
-        .query("messages")
-        .withIndex("by_conversation", (q) => q.eq("conversationId", convId))
-        .filter((q) =>
-          q.and(
-            q.neq(q.field("senderId"), userId),
-            q.eq(q.field("read"), false)
+    // Count unread messages in parallel across all conversations
+    const unreadCounts = await Promise.all(
+      allConversations.map(async (conv) => {
+        const unreadMessages = await ctx.db
+          .query("messages")
+          .withIndex("by_conversation", (q) => q.eq("conversationId", conv._id))
+          .filter((q) =>
+            q.and(
+              q.neq(q.field("senderId"), userId),
+              q.eq(q.field("read"), false)
+            )
           )
-        )
-        .collect();
+          .collect();
+        return unreadMessages.length;
+      })
+    );
 
-      totalUnread += unreadMessages.length;
-    }
-
-    return totalUnread;
+    return unreadCounts.reduce((sum, count) => sum + count, 0);
   },
 });
 
