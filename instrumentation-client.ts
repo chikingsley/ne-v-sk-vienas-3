@@ -22,6 +22,12 @@ function isKnownInAppBrowserUA(): boolean {
   }
 }
 
+/**
+ * Detects whether a Sentry event represents the Facebook iOS in-app browser crash caused by an `InvalidAccessError`.
+ *
+ * @param event - The Sentry event to inspect
+ * @returns `true` if the event is an `InvalidAccessError` whose message matches the known Facebook in-app browser crash text and the client user agent is a known in-app browser, `false` otherwise.
+ */
 function isFacebookInAppPostMessageInvalidAccessError(
   event: Sentry.Event
 ): boolean {
@@ -44,6 +50,43 @@ function isFacebookInAppPostMessageInvalidAccessError(
   return isKnownInAppBrowserUA();
 }
 
+/**
+ * Detects whether a Sentry event represents the Facebook iOS in-app browser crash caused by accessing `window.webkit.messageHandlers`.
+ *
+ * @param event - The Sentry event to inspect.
+ * @returns `true` if the event is a `TypeError` whose message includes "undefined is not an object" and "window.webkit.messageHandlers" and the user agent matches a known in-app browser; `false` otherwise.
+ */
+function isFacebookInAppWebKitMessageHandlerError(
+  event: Sentry.Event
+): boolean {
+  const exc = event.exception?.values?.[0];
+  const type = exc?.type;
+  const value = exc?.value ?? "";
+
+  if (type !== "TypeError") {
+    return false;
+  }
+
+  // Sentry issue reports show this exact message for the FB iOS in-app browser crash
+  // when trying to access window.webkit.messageHandlers that don't exist.
+  if (
+    !(
+      value.includes("undefined is not an object") &&
+      value.includes("window.webkit.messageHandlers")
+    )
+  ) {
+    return false;
+  }
+
+  // Ensure we only drop this in environments where we actually see the bug.
+  return isKnownInAppBrowserUA();
+}
+
+/**
+ * Determines whether the user has granted analytics consent by reading the "cookie_consent" entry in localStorage.
+ *
+ * @returns `true` if the parsed consent object has `analytics` set to `true`, `false` otherwise.
+ */
 function hasAnalyticsConsent(): boolean {
   if (typeof window === "undefined") {
     return false;
@@ -88,6 +131,10 @@ Sentry.init({
 
   beforeSend(event) {
     if (isFacebookInAppPostMessageInvalidAccessError(event)) {
+      return null;
+    }
+
+    if (isFacebookInAppWebKitMessageHandlerError(event)) {
       return null;
     }
 
