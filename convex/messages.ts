@@ -3,6 +3,7 @@ import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
+import { assertAdmin } from "./lib/admin";
 import { getCurrentUserId } from "./lib/auth";
 
 // Helper to check if messaging is blocked between users
@@ -160,18 +161,10 @@ export const getMyConversations = query({
           .order("desc")
           .first();
 
-        // Count unread - only fetch unread messages from other person
-        const unreadMessages = await ctx.db
-          .query("messages")
-          .withIndex("by_conversation", (q) => q.eq("conversationId", conv._id))
-          .filter((q) =>
-            q.and(
-              q.eq(q.field("senderId"), otherId),
-              q.eq(q.field("read"), false)
-            )
-          )
-          .collect();
-        const unreadCount = unreadMessages.length;
+        // Use denormalized unread count (O(1) instead of querying messages)
+        const unreadCount = isHost
+          ? (conv.unreadCountForHost ?? 0)
+          : (conv.unreadCountForGuest ?? 0);
 
         return {
           conversation: conv,
@@ -285,8 +278,18 @@ export const sendMessage = mutation({
       moderationReason: moderationCheck.category,
     });
 
-    // Update conversation's lastMessageAt
-    await ctx.db.patch(args.conversationId, { lastMessageAt: now });
+    // Update conversation's lastMessageAt and increment recipient's unread count
+    const isHost = conversation.hostId === userId;
+    const currentUnread = isHost
+      ? (conversation.unreadCountForGuest ?? 0)
+      : (conversation.unreadCountForHost ?? 0);
+
+    await ctx.db.patch(args.conversationId, {
+      lastMessageAt: now,
+      ...(isHost
+        ? { unreadCountForGuest: currentUnread + 1 }
+        : { unreadCountForHost: currentUnread + 1 }),
+    });
 
     // Send email notification to the recipient
     const senderProfile = await ctx.db
@@ -316,6 +319,12 @@ export const markAsRead = mutation({
       return;
     }
 
+    // Get conversation to determine role
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation) {
+      return;
+    }
+
     // Get unread messages from the other person
     const messages = await ctx.db
       .query("messages")
@@ -327,7 +336,14 @@ export const markAsRead = mutation({
       )
       .collect();
 
+    // Mark messages as read
     await Promise.all(messages.map((m) => ctx.db.patch(m._id, { read: true })));
+
+    // Reset the user's unread count to 0
+    const isHost = conversation.hostId === userId;
+    await ctx.db.patch(args.conversationId, {
+      ...(isHost ? { unreadCountForHost: 0 } : { unreadCountForGuest: 0 }),
+    });
   },
 });
 
@@ -352,26 +368,16 @@ export const getUnreadCount = query({
         .collect(),
     ]);
 
-    const allConversations = [...asGuest, ...asHost];
+    // Sum denormalized unread counts directly (O(1) per conversation, no message queries)
+    let totalUnread = 0;
+    for (const conv of asGuest) {
+      totalUnread += conv.unreadCountForGuest ?? 0;
+    }
+    for (const conv of asHost) {
+      totalUnread += conv.unreadCountForHost ?? 0;
+    }
 
-    // Count unread messages in parallel across all conversations
-    const unreadCounts = await Promise.all(
-      allConversations.map(async (conv) => {
-        const unreadMessages = await ctx.db
-          .query("messages")
-          .withIndex("by_conversation", (q) => q.eq("conversationId", conv._id))
-          .filter((q) =>
-            q.and(
-              q.neq(q.field("senderId"), userId),
-              q.eq(q.field("read"), false)
-            )
-          )
-          .collect();
-        return unreadMessages.length;
-      })
-    );
-
-    return unreadCounts.reduce((sum, count) => sum + count, 0);
+    return totalUnread;
   },
 });
 
@@ -703,5 +709,54 @@ export const getConversation = query({
       .collect();
 
     return messages.sort((a, b) => a.createdAt - b.createdAt);
+  },
+});
+
+// Admin-only: Backfill unread counts for existing conversations
+// Run once after deploying the schema change to populate counts for old conversations
+export const backfillUnreadCounts = mutation({
+  args: {},
+  handler: async (ctx) => {
+    await assertAdmin(ctx);
+
+    const conversations = await ctx.db.query("conversations").collect();
+    let updated = 0;
+
+    for (const conv of conversations) {
+      // Count unread messages for guest (messages from host that are unread)
+      const unreadForGuest = await ctx.db
+        .query("messages")
+        .withIndex("by_conversation", (q) => q.eq("conversationId", conv._id))
+        .filter((q) =>
+          q.and(
+            q.eq(q.field("senderId"), conv.hostId),
+            q.eq(q.field("read"), false)
+          )
+        )
+        .collect();
+
+      // Count unread messages for host (messages from guest that are unread)
+      const unreadForHost = await ctx.db
+        .query("messages")
+        .withIndex("by_conversation", (q) => q.eq("conversationId", conv._id))
+        .filter((q) =>
+          q.and(
+            q.eq(q.field("senderId"), conv.guestId),
+            q.eq(q.field("read"), false)
+          )
+        )
+        .collect();
+
+      await ctx.db.patch(conv._id, {
+        unreadCountForGuest: unreadForGuest.length,
+        unreadCountForHost: unreadForHost.length,
+      });
+      updated++;
+    }
+
+    return {
+      updated,
+      message: `Backfilled unread counts for ${updated} conversations`,
+    };
   },
 });

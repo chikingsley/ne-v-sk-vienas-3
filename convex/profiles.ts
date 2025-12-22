@@ -221,43 +221,82 @@ export const listProfiles = query({
     // Apply limit after filtering
     const limitedProfiles = filteredProfiles.slice(0, limit);
 
-    // Get connection status for each profile if user is logged in
-    // Batch the invitation queries for better performance
-    const profilesWithStatus = await Promise.all(
-      limitedProfiles.map(async (p) => {
-        const connectionStatus = currentUserId
-          ? await getConnectionStatusBetween(ctx, currentUserId, p.userId)
-          : ("none" as ConnectionStatus);
+    // Batch fetch all invitations for current user ONCE (2 queries total instead of 2 per profile)
+    // This reduces 100 queries to 2 queries for 50 profiles
+    let invitationStatusMap = new Map<Id<"users">, ConnectionStatus>();
+    if (currentUserId) {
+      const [allSent, allReceived] = await Promise.all([
+        ctx.db
+          .query("invitations")
+          .withIndex("by_from", (q) => q.eq("fromUserId", currentUserId))
+          .collect(),
+        ctx.db
+          .query("invitations")
+          .withIndex("by_to", (q) => q.eq("toUserId", currentUserId))
+          .collect(),
+      ]);
 
-        // Return slim profile - exclude large fields not needed in list view
-        return {
-          _id: p._id,
-          _creationTime: p._creationTime,
-          userId: p.userId,
-          username: p.username,
-          firstName: p.firstName,
-          age: p.age,
-          city: p.city,
-          bio: p.bio,
-          photoUrl: p.photoUrl, // Only main photo, not the full photos array
-          role: p.role,
-          hostingStatus: p.hostingStatus,
-          guestStatus: p.guestStatus,
-          languages: p.languages,
-          availableDates: p.availableDates,
-          hostingDates: p.hostingDates,
-          guestDates: p.guestDates,
-          verified: p.verified,
-          vibes: p.vibes,
-          dietaryInfo: p.dietaryInfo,
-          concept: p.concept,
-          capacity: p.capacity,
-          lastActive: p.lastActive,
-          connectionStatus,
-          // Explicitly excluded: photos array, lastName, phone, address, amenities, houseRules
-        };
-      })
-    );
+      // Build lookup map for O(1) status checks
+      for (const p of limitedProfiles) {
+        const sentInv = allSent.find((inv) => inv.toUserId === p.userId);
+        const receivedInv = allReceived.find(
+          (inv) => inv.fromUserId === p.userId
+        );
+
+        if (
+          sentInv?.status === "accepted" ||
+          receivedInv?.status === "accepted"
+        ) {
+          invitationStatusMap.set(p.userId, "matched");
+        } else if (sentInv?.status === "pending") {
+          invitationStatusMap.set(p.userId, "pending_sent");
+        } else if (receivedInv?.status === "pending") {
+          invitationStatusMap.set(p.userId, "pending_received");
+        } else {
+          invitationStatusMap.set(p.userId, "none");
+        }
+      }
+    }
+
+    // Map profiles with connection status (now O(1) lookups instead of O(n) queries)
+    const profilesWithStatus = limitedProfiles.map((p) => {
+      const connectionStatus = currentUserId
+        ? (invitationStatusMap.get(p.userId) ?? "none")
+        : ("none" as ConnectionStatus);
+
+      // Return slim profile - exclude large fields not needed in list view
+      return {
+        _id: p._id,
+        _creationTime: p._creationTime,
+        userId: p.userId,
+        username: p.username,
+        firstName: p.firstName,
+        age: p.age,
+        city: p.city,
+        bio: p.bio,
+        photoUrl: p.photoUrl, // Only main photo, not the full photos array
+        role: p.role,
+        hostingStatus: p.hostingStatus,
+        guestStatus: p.guestStatus,
+        languages: p.languages,
+        availableDates: p.availableDates,
+        hostingDates: p.hostingDates,
+        guestDates: p.guestDates,
+        verified: p.verified,
+        vibes: p.vibes,
+        dietaryInfo: p.dietaryInfo,
+        concept: p.concept,
+        capacity: p.capacity,
+        lastActive: p.lastActive,
+        // Lifestyle booleans needed by ListingCard
+        smokingAllowed: p.smokingAllowed,
+        drinkingAllowed: p.drinkingAllowed,
+        petsAllowed: p.petsAllowed,
+        hasPets: p.hasPets,
+        connectionStatus,
+        // Explicitly excluded: photos array, lastName, phone, address, amenities, houseRules
+      };
+    });
 
     return profilesWithStatus;
   },

@@ -31,6 +31,12 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { CITIES, HOLIDAY_DATES, LANGUAGES } from "@/lib/types";
 
+// PostHog event names - centralized for consistency and typo prevention
+const POSTHOG_EVENTS = {
+  INVITATION_SENT: "invitation_sent",
+  BROWSE_TAB_SWITCHED: "browse_tab_switched",
+} as const;
+
 type Profile = NonNullable<
   ReturnType<typeof useQuery<typeof api.profiles.listProfiles>>
 >[number];
@@ -585,7 +591,7 @@ export default function BrowsePage() {
         toUserId: userId,
         date: "24 Dec", // TODO: Let user pick date
       });
-      posthog.capture("invitation_sent", {
+      posthog.capture(POSTHOG_EVENTS.INVITATION_SENT, {
         to_user_id: userId,
         from_view: "list",
       });
@@ -616,7 +622,7 @@ export default function BrowsePage() {
         toUserId: selectedProfile.userId as Id<"users">,
         date: firstValidDate as "24 Dec" | "25 Dec" | "26 Dec" | "31 Dec",
       });
-      posthog.capture("invitation_sent", {
+      posthog.capture(POSTHOG_EVENTS.INVITATION_SENT, {
         to_user_id: selectedProfile.userId,
         from_view: "profile_modal",
       });
@@ -766,7 +772,7 @@ export default function BrowsePage() {
                 }`}
                 onClick={() => {
                   setActiveTab("host");
-                  posthog.capture("browse_tab_switched", {
+                  posthog.capture(POSTHOG_EVENTS.BROWSE_TAB_SWITCHED, {
                     active_tab: "host",
                   });
                 }}
@@ -782,7 +788,7 @@ export default function BrowsePage() {
                 }`}
                 onClick={() => {
                   setActiveTab("guest");
-                  posthog.capture("browse_tab_switched", {
+                  posthog.capture(POSTHOG_EVENTS.BROWSE_TAB_SWITCHED, {
                     active_tab: "guest",
                   });
                 }}
