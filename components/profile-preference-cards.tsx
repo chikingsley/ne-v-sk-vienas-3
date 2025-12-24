@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Check, HelpCircle, X } from "lucide-react";
 import { memo, useCallback } from "react";
 import type { HolidayDate } from "@/lib/types";

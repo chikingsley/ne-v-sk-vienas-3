@@ -16,8 +16,8 @@ import Link from "next/link";
 import posthog from "posthog-js";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { ProfileCard } from "@/components/profile-card";
 import { ProfileActionButton } from "@/components/profile-action-button";
+import { ProfileCard } from "@/components/profile-card";
 import {
   Select,
   SelectContent,

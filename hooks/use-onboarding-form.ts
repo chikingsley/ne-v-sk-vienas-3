@@ -2,7 +2,13 @@
 
 import { useCallback, useState } from "react";
 import type { HolidayDate } from "@/lib/types";
-import { CITIES, DIETARY_OPTIONS, HOLIDAY_DATES, LANGUAGES, VIBES_OPTIONS } from "@/lib/types";
+import {
+  type CITIES,
+  type DIETARY_OPTIONS,
+  HOLIDAY_DATES,
+  type LANGUAGES,
+  type VIBES_OPTIONS,
+} from "@/lib/types";
 
 export type OnboardingFormData = {
   // Step 0: GDPR Consent
@@ -60,7 +66,10 @@ export function useOnboardingForm() {
 
   // Generic updater for any field
   const updateField = useCallback(
-    <K extends keyof OnboardingFormData>(field: K, value: OnboardingFormData[K]) => {
+    <K extends keyof OnboardingFormData>(
+      field: K,
+      value: OnboardingFormData[K]
+    ) => {
       setFormData((prev) => ({ ...prev, [field]: value }));
     },
     []
@@ -96,7 +105,8 @@ export function useOnboardingForm() {
   );
 
   const toggleDietary = useCallback(
-    (diet: (typeof DIETARY_OPTIONS)[number]) => toggleArrayItem("dietaryInfo", diet),
+    (diet: (typeof DIETARY_OPTIONS)[number]) =>
+      toggleArrayItem("dietaryInfo", diet),
     [toggleArrayItem]
   );
 
@@ -108,17 +118,26 @@ export function useOnboardingForm() {
   // Derived values
   const getRole = useCallback((): "host" | "guest" | "both" => {
     const canHost =
-      formData.hostingStatus === "can-host" || formData.hostingStatus === "may-host";
+      formData.hostingStatus === "can-host" ||
+      formData.hostingStatus === "may-host";
     const isGuest =
-      formData.guestStatus === "looking" || formData.guestStatus === "maybe-guest";
+      formData.guestStatus === "looking" ||
+      formData.guestStatus === "maybe-guest";
 
-    if (canHost && isGuest) return "both";
-    if (canHost) return "host";
+    if (canHost && isGuest) {
+      return "both";
+    }
+    if (canHost) {
+      return "host";
+    }
     return "guest";
   }, [formData.hostingStatus, formData.guestStatus]);
 
   const getAvailableDates = useCallback((): HolidayDate[] => {
-    const combined = new Set([...formData.hostingDates, ...formData.guestDates]);
+    const combined = new Set([
+      ...formData.hostingDates,
+      ...formData.guestDates,
+    ]);
     return Array.from(combined) as HolidayDate[];
   }, [formData.hostingDates, formData.guestDates]);
 
@@ -126,8 +145,12 @@ export function useOnboardingForm() {
   const isStep0Valid = formData.termsAccepted && formData.privacyAccepted;
 
   const isStep1Valid =
-    (formData.hostingStatus !== "cant-host" ? formData.hostingDates.length > 0 : true) ||
-    (formData.guestStatus !== "not-looking" ? formData.guestDates.length > 0 : true);
+    (formData.hostingStatus !== "cant-host"
+      ? formData.hostingDates.length > 0
+      : true) ||
+    (formData.guestStatus !== "not-looking"
+      ? formData.guestDates.length > 0
+      : true);
 
   const ageValue =
     typeof formData.age === "number"
@@ -164,8 +187,14 @@ export function useOnboardingForm() {
 
     return {
       role: getRole(),
-      hostingStatus: formData.hostingStatus as "can-host" | "may-host" | "cant-host",
-      guestStatus: formData.guestStatus as "looking" | "maybe-guest" | "not-looking",
+      hostingStatus: formData.hostingStatus as
+        | "can-host"
+        | "may-host"
+        | "cant-host",
+      guestStatus: formData.guestStatus as
+        | "looking"
+        | "maybe-guest"
+        | "not-looking",
       hostingDates: formData.hostingDates,
       guestDates: formData.guestDates,
       firstName: formData.firstName,

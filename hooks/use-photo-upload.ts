@@ -98,7 +98,7 @@ export function usePhotoUpload(options: UsePhotoUploadOptions = {}) {
   );
 
   const handleFileChange = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) {
         return null;

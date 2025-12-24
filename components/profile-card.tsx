@@ -3,6 +3,7 @@
 import {
   Calendar,
   Check,
+  CheckCircle,
   Dog,
   Globe,
   MapPin,
@@ -12,7 +13,6 @@ import {
   Users,
   UtensilsCrossed,
   X,
-  CheckCircle,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -630,7 +630,7 @@ type ProfileCardProps =
 
 export function ProfileCard(props: ProfileCardProps) {
   if (props.variant === "compact") {
-    return <CompactCard profile={props.profile} onClick={props.onClick} />;
+    return <CompactCard onClick={props.onClick} profile={props.profile} />;
   }
   return (
     <FullCard
