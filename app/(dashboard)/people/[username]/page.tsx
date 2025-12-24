@@ -6,8 +6,8 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { ProfileActionButton } from "@/components/profile-action-button";
+import { ProfileCard } from "@/components/profile-card";
 import { Button } from "@/components/ui/button";
-import { UnifiedProfileCard } from "@/components/unified-profile-card";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 
@@ -135,7 +135,7 @@ export default function UsernamePage() {
         </div>
       )}
 
-      <UnifiedProfileCard profile={profile} />
+      <ProfileCard profile={profile} variant="full" />
     </div>
   );
 }

@@ -16,8 +16,8 @@ import Link from "next/link";
 import posthog from "posthog-js";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { ListingCard } from "@/components/listing-card";
 import { ProfileActionButton } from "@/components/profile-action-button";
+import { ProfileCard } from "@/components/profile-card";
 import {
   Select,
   SelectContent,
@@ -25,7 +25,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UnifiedProfileCard } from "@/components/unified-profile-card";
 import { useLocale } from "@/contexts/locale-context";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -731,10 +730,11 @@ export default function BrowsePage() {
       return (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {filteredProfiles.map((profile) => (
-            <ListingCard
+            <ProfileCard
               key={profile._id}
               onClick={() => setSelectedProfile(profile)}
               profile={profile}
+              variant="compact"
             />
           ))}
         </div>
@@ -856,7 +856,7 @@ export default function BrowsePage() {
             type="button"
           />
           <div className="slide-in-from-right-full relative animate-in duration-300">
-            <UnifiedProfileCard
+            <ProfileCard
               actionButton={
                 <ProfileActionButton
                   hasAvailableDates={
@@ -871,6 +871,7 @@ export default function BrowsePage() {
                 />
               }
               profile={selectedProfile}
+              variant="full"
             />
           </div>
         </div>

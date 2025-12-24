@@ -89,10 +89,7 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
     setUploadingIndex(currentSlot);
 
     try {
-      const uploadResult = await uploadCompressedImage(
-        file,
-        generateUploadUrl
-      );
+      const uploadResult = await uploadCompressedImage(file, generateUploadUrl);
       if (!uploadResult.success) {
         toast.error(uploadResult.error);
         clearSlotPreview(currentSlot);
