@@ -1,6 +1,47 @@
 // Type definitions matching Convex schema
+import type { Id } from "@/convex/_generated/dataModel";
 
 export type UserRole = "host" | "guest" | "both";
+
+export type ConnectionStatus =
+  | "none"
+  | "pending_sent"
+  | "pending_received"
+  | "matched"
+  | "self";
+
+// Slim profile type matching what listProfiles returns
+// Excludes large arrays like photos, amenities, houseRules for bandwidth efficiency
+export type SlimProfile = {
+  _id: Id<"profiles">;
+  _creationTime?: number;
+  userId: Id<"users">;
+  username?: string;
+  firstName: string;
+  age: number;
+  city: string;
+  bio: string;
+  photoUrl?: string;
+  role: "host" | "guest" | "both";
+  hostingStatus?: "can-host" | "may-host" | "cant-host";
+  guestStatus?: "looking" | "maybe-guest" | "not-looking";
+  languages: string[];
+  availableDates: string[];
+  hostingDates?: string[];
+  guestDates?: string[];
+  verified: boolean;
+  vibes?: string[];
+  dietaryInfo?: string[];
+  concept?: "Party" | "Dinner" | "Hangout";
+  capacity?: number;
+  lastActive?: number;
+  smokingAllowed: boolean;
+  drinkingAllowed: boolean;
+  petsAllowed: boolean;
+  hasPets: boolean;
+  // Optional connection status (only present when viewing other profiles)
+  connectionStatus?: ConnectionStatus;
+};
 
 export type City =
   | "Vilnius"
