@@ -67,7 +67,7 @@ export function DashboardNavbar() {
                 <div className="relative">
                   <item.icon className="h-5 w-5" />
                   {item.badge ? (
-                    <span className="-top-1.5 -right-2.5 absolute flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 font-medium text-[10px] text-white">
+                    <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 font-medium text-[10px] text-white">
                       {item.badge > 9 ? "9+" : item.badge}
                     </span>
                   ) : null}
@@ -123,7 +123,7 @@ export function DashboardNavbar() {
                 <div className="relative">
                   <item.icon className="h-5 w-5" />
                   {item.badge ? (
-                    <span className="-top-1 -right-1 absolute flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 font-medium text-[10px] text-white">
+                    <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 font-medium text-[10px] text-white">
                       {item.badge > 9 ? "9+" : item.badge}
                     </span>
                   ) : null}

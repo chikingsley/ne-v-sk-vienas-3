@@ -55,7 +55,7 @@ export function PhotoUpload({
           />
           {!isUploading && (
             <button
-              className="-top-1 -right-1 absolute rounded-full bg-red-600 p-1 text-white hover:bg-red-700"
+              className="absolute -top-1 -right-1 rounded-full bg-red-600 p-1 text-white hover:bg-red-700"
               onClick={handleRemovePhoto}
               type="button"
             >

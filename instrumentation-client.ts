@@ -5,12 +5,18 @@
 import * as Sentry from "@sentry/nextjs";
 import posthog from "posthog-js";
 
-type CookieConsent = {
+interface CookieConsent {
   analytics: boolean;
-};
+}
 
 const IN_APP_BROWSER_UA_RE =
   /FBAN|FBAV|Instagram|Messenger|LinkedIn|TikTok|Snapchat|Pinterest|Twitter|Line|WeChat|MicroMessenger/i;
+
+const FIRST_HTTP_URL_RE = /https?:\/\/[^\s]+/;
+const CLERK_ERROR_CODE_RE = /code="([^"]+)"/;
+const TRAILING_PUNCTUATION_RE = /[),.]+$/;
+
+const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 
 function isKnownInAppBrowserUA(): boolean {
   try {
@@ -83,6 +89,72 @@ function isFacebookInAppWebKitMessageHandlerError(
 }
 
 /**
+ * Detects whether a Sentry event represents Clerk failing to load its JavaScript bundle.
+ * This commonly occurs in in-app browsers that block external scripts, or with ad blockers/privacy extensions.
+ *
+ * @param event - The Sentry event to inspect.
+ * @returns `true` if the event is a Clerk script load failure in an in-app browser; `false` otherwise.
+ */
+function isClerkScriptLoadFailure(event: Sentry.Event): boolean {
+  const values = event.exception?.values ?? [];
+
+  for (const exc of values) {
+    const value = exc?.value ?? "";
+    // Check for Clerk's specific error message when script fails to load
+    if (
+      value.toLowerCase().includes("failed to load") &&
+      value.toLowerCase().includes("clerk")
+    ) {
+      // Only filter this in in-app browsers where we expect script loading issues
+      return isKnownInAppBrowserUA();
+    }
+  }
+
+  return false;
+}
+
+function captureClerkScriptLoadFailureToPosthog(event: Sentry.Event): void {
+  if (!posthogKey) {
+    return;
+  }
+
+  try {
+    const values = event.exception?.values ?? [];
+    const rawMessages: string[] = [];
+
+    for (const exc of values) {
+      const value = exc?.value;
+      if (value) {
+        rawMessages.push(value);
+      }
+    }
+
+    const message = rawMessages.join(" | ").slice(0, 500);
+    const scriptUrl = rawMessages
+      .map((value) => value.match(FIRST_HTTP_URL_RE)?.[0] ?? null)
+      .find((value): value is string => Boolean(value))
+      ?.replace(TRAILING_PUNCTUATION_RE, "");
+    const clerkErrorCode = rawMessages
+      .map((value) => value.match(CLERK_ERROR_CODE_RE)?.[1] ?? null)
+      .find((value): value is string => Boolean(value));
+
+    posthog.capture("clerk_js_failed_to_load_in_app_browser", {
+      clerkErrorCode,
+      inAppBrowserUaMatch: isKnownInAppBrowserUA(),
+      message,
+      scriptUrl,
+      sentryEventId: event.event_id,
+      sentryRelease: event.release,
+      sentryTransaction: event.transaction,
+      url: typeof window === "undefined" ? undefined : window.location.href,
+      referrer: typeof document === "undefined" ? undefined : document.referrer,
+    });
+  } catch {
+    // Never let telemetry capture break app error handling.
+  }
+}
+
+/**
  * Determines whether the user has granted analytics consent by reading the "cookie_consent" entry in localStorage.
  *
  * @returns `true` if the parsed consent object has `analytics` set to `true`, `false` otherwise.
@@ -138,12 +210,16 @@ Sentry.init({
       return null;
     }
 
+    if (isClerkScriptLoadFailure(event)) {
+      captureClerkScriptLoadFailureToPosthog(event);
+      return null;
+    }
+
     return event;
   },
 });
 
 // Initialize PostHog for analytics and capture exceptions
-const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 if (posthogKey) {
   posthog.init(posthogKey, {
     api_host: "/ingest",

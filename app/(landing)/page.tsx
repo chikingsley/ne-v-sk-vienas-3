@@ -269,7 +269,7 @@ export default function LandingPage() {
                 href={isSignedIn ? "/onboarding" : "/sign-in"}
               >
                 <span className="relative z-10">{t.inviteGuests}</span>
-                <div className="-translate-x-full absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+                <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
               </Link>
               <Link
                 className="rounded-full border-2 border-amber-200/30 px-4 py-2.5 font-semibold text-amber-100 text-sm backdrop-blur-sm transition-all hover:border-amber-200/60 hover:bg-amber-200/10 sm:px-6 sm:py-3 md:px-8 md:py-4 md:text-base lg:text-lg"
@@ -282,7 +282,7 @@ export default function LandingPage() {
         </div>
 
         {/* Decorative glow */}
-        <div className="-translate-x-1/2 pointer-events-none absolute bottom-0 left-1/2 h-32 w-[300px] translate-y-1/2 rounded-full bg-amber-500/10 blur-[80px] sm:h-64 sm:w-[600px] sm:blur-[100px]" />
+        <div className="pointer-events-none absolute bottom-0 left-1/2 h-32 w-[300px] -translate-x-1/2 translate-y-1/2 rounded-full bg-amber-500/10 blur-[80px] sm:h-64 sm:w-[600px] sm:blur-[100px]" />
 
         {/* Divider between hero and how it works */}
         <div className="relative z-10 mx-auto max-w-xs px-4 sm:max-w-md">
@@ -457,7 +457,7 @@ export default function LandingPage() {
       {/* CTA */}
       <div className="relative overflow-hidden pt-8 pb-12 sm:pt-12 sm:pb-16 md:pt-16 md:pb-24">
         <div className="absolute inset-0 bg-linear-to-br from-amber-600/20 via-rose-600/10 to-amber-600/20" />
-        <div className="-translate-x-1/2 pointer-events-none absolute top-0 left-1/2 h-32 w-[400px] rounded-full bg-amber-500/20 blur-[80px] sm:h-64 sm:w-[800px] sm:blur-[120px]" />
+        <div className="pointer-events-none absolute top-0 left-1/2 h-32 w-[400px] -translate-x-1/2 rounded-full bg-amber-500/20 blur-[80px] sm:h-64 sm:w-[800px] sm:blur-[120px]" />
 
         {/* Separator at top of CTA */}
         <div className="relative mx-auto mb-8 max-w-xs px-4 sm:mb-12 sm:max-w-md">
@@ -483,7 +483,7 @@ export default function LandingPage() {
             >
               <span className="relative z-10">{t.getStarted}</span>
               <ArrowRight className="relative z-10 h-4 w-4 sm:h-5 sm:w-5" />
-              <div className="-translate-x-full absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+              <div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
             </Link>
             <Link
               className="flex items-center justify-center rounded-full border-2 border-amber-200/30 px-4 py-2.5 font-semibold text-amber-100 text-sm backdrop-blur-sm transition-all hover:border-amber-200/60 hover:bg-amber-200/10 sm:px-6 sm:py-3 md:px-8 md:py-4 md:text-base"

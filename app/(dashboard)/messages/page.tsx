@@ -244,12 +244,12 @@ function SidebarItemComponent({
           </AvatarFallback>
         </Avatar>
         {item.type === "request" && (
-          <div className="-top-1 -right-1 absolute flex h-5 w-5 items-center justify-center rounded-full bg-amber-500">
+          <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500">
             <UserPlus className="h-3 w-3 text-white" />
           </div>
         )}
         {item.type === "sent_request" && (
-          <div className="-top-1 -right-1 absolute flex h-5 w-5 items-center justify-center rounded-full bg-blue-500">
+          <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500">
             <ArrowRight className="h-3 w-3 text-white" />
           </div>
         )}
@@ -1044,7 +1044,7 @@ function MessagesSidebar({
     >
       <div className="flex h-[72px] items-center border-b px-4">
         <div className="relative w-full">
-          <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             className="pl-9"
             onChange={(e) => onSearchChange(e.target.value)}
