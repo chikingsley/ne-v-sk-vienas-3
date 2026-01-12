@@ -1,7 +1,7 @@
 "use client";
 
 import { ExternalLink, Link as LinkIcon } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useLocale } from "@/contexts/locale-context";
 
 const IN_APP_BROWSER_RE =
   /FBAN|FBAV|Instagram|Messenger|LinkedIn|TikTok|Snapchat|Pinterest|Twitter|Line|WeChat|MicroMessenger/i;
@@ -45,6 +46,7 @@ export function InAppBrowserGate({
   mode: Mode;
   children: React.ReactNode;
 }) {
+  const { t } = useLocale();
   const [gateState, setGateState] = useState<{
     isInApp: boolean;
     currentUrl: string;
@@ -60,10 +62,9 @@ export function InAppBrowserGate({
     });
   }, []);
 
-  const copyLabel = useMemo(
-    () => (mode === "sign-in" ? "Copy sign-in link" : "Copy sign-up link"),
-    [mode]
-  );
+  // Copy button label based on mode
+  const copyLabel =
+    mode === "sign-in" ? "Copy sign-in link" : "Copy sign-up link";
 
   // Important: we intentionally avoid rendering `children` until after the
   // first client effect runs. Some in-app browsers (notably Facebook on iOS)
@@ -74,10 +75,8 @@ export function InAppBrowserGate({
       <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Checking your browser…</CardTitle>
-            <CardDescription>
-              Preparing a safe sign-in experience.
-            </CardDescription>
+            <CardTitle className="text-2xl">{t.checkingBrowser}</CardTitle>
+            <CardDescription>{t.preparingSafeSignIn}</CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -94,18 +93,13 @@ export function InAppBrowserGate({
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Open in your browser</CardTitle>
-          <CardDescription>
-            Social apps use an in-app browser that can break secure sign-in.
-            Open this page in Safari/Chrome to continue.
-          </CardDescription>
+          <CardTitle className="text-2xl">{t.openInBrowserTitle}</CardTitle>
+          <CardDescription>{t.openInBrowserDescription}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <p className="text-muted-foreground text-sm">
-              If the button doesn&apos;t work, tap the menu (•••) in the top
-              corner and choose{" "}
-              <span className="font-medium">Open in browser</span>.
+              {t.openInBrowserInstructions}
             </p>
           </div>
 
@@ -133,7 +127,7 @@ export function InAppBrowserGate({
                 type="button"
               >
                 <ExternalLink className="h-4 w-4" />
-                Open in browser
+                {t.openInBrowserButton}
               </Button>
 
               <Button
@@ -141,11 +135,9 @@ export function InAppBrowserGate({
                 onClick={async () => {
                   try {
                     await navigator.clipboard.writeText(currentUrl);
-                    toast.success("Link copied. Paste it into Safari/Chrome.");
+                    toast.success(t.linkCopied);
                   } catch {
-                    toast.error(
-                      "Couldn’t copy automatically. Copy it manually."
-                    );
+                    toast.error(t.linkCopyFailed);
                   }
                 }}
                 type="button"

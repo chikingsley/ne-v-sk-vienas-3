@@ -136,6 +136,27 @@ const consentMethod = v.union(
   v.literal("cookie_banner")
 );
 
+// Holiday status for multi-holiday support
+const holidayStatus = v.union(
+  v.literal("upcoming"), // Not yet open for registration
+  v.literal("active"), // Currently accepting signups / in progress
+  v.literal("completed") // Holiday is over
+);
+
+// Holiday notification types
+const holidayNotificationType = v.union(
+  v.literal("registration_open"), // "Easter registration is open!"
+  v.literal("reminder"), // "Have you updated your availability?"
+  v.literal("last_chance"), // "Only 3 days left to sign up"
+  v.literal("holiday_starting") // "Easter starts tomorrow!"
+);
+
+const notificationChannel = v.union(
+  v.literal("email"),
+  v.literal("push"),
+  v.literal("in_app")
+);
+
 export default defineSchema({
   // Users table (linked to Clerk via tokenIdentifier)
   users: defineTable({
@@ -357,4 +378,99 @@ export default defineSchema({
     .index("by_userId", ["userId"])
     .index("by_purpose", ["userId", "purpose"])
     .index("by_status", ["status"]),
+
+  // ============================================
+  // MULTI-HOLIDAY INFRASTRUCTURE
+  // ============================================
+
+  // Holidays - defines each holiday season (Christmas 2025, Easter 2026, etc.)
+  holidays: defineTable({
+    // Identity
+    slug: v.string(), // "christmas-2025", "easter-2026" - URL-safe unique identifier
+    name: v.string(), // "Christmas 2025" - default display name
+
+    // Localized names for multi-language support
+    names: v.object({
+      lt: v.string(), // Lithuanian
+      en: v.string(), // English
+      ua: v.optional(v.string()), // Ukrainian
+      ru: v.optional(v.string()), // Russian
+    }),
+
+    // Timing
+    registrationOpensAt: v.number(), // When users can start signing up
+    startsAt: v.number(), // First day of the holiday (timestamp)
+    endsAt: v.number(), // Last day of the holiday (timestamp)
+
+    // The actual dates people can select (e.g., ["20 Apr", "21 Apr", "22 Apr"])
+    // These are display strings, not timestamps, for flexibility
+    selectableDates: v.array(v.string()),
+
+    // State
+    status: holidayStatus,
+
+    // Theme/branding (optional customization per holiday)
+    theme: v.optional(
+      v.object({
+        primaryColor: v.optional(v.string()), // Hex color
+        heroImage: v.optional(v.string()), // URL to hero image
+        description: v.optional(v.string()), // Short description
+      })
+    ),
+
+    createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_status", ["status"]),
+
+  // Holiday Availability - per-user, per-holiday participation
+  // This replaces the per-profile hostingDates/guestDates for multi-holiday support
+  holidayAvailability: defineTable({
+    userId: v.id("users"),
+    holidayId: v.id("holidays"),
+
+    // Same structure as profile fields, but scoped to this specific holiday
+    hostingStatus: v.optional(hostingStatus), // "can-host" | "may-host" | "cant-host"
+    guestStatus: v.optional(guestStatus), // "looking" | "maybe-guest" | "not-looking"
+
+    // Dates selected from holiday.selectableDates
+    hostingDates: v.array(v.string()), // Dates when user can host
+    guestDates: v.array(v.string()), // Dates when user wants to be a guest
+
+    // Holiday-specific capacity (might differ per event)
+    capacity: v.optional(v.number()),
+
+    // Derived role for this holiday (computed from hostingStatus + guestStatus)
+    role: v.optional(userRole),
+
+    // Notification tracking
+    notifiedAt: v.optional(v.number()), // When we sent "holiday is coming" notification
+    reminderSentAt: v.optional(v.number()), // When we sent "update your availability" reminder
+
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_holiday", ["holidayId"])
+    .index("by_user_holiday", ["userId", "holidayId"])
+    .index("by_role", ["holidayId", "role"]),
+
+  // Holiday Notifications - track what notifications we've sent to users
+  holidayNotifications: defineTable({
+    userId: v.id("users"),
+    holidayId: v.id("holidays"),
+    type: holidayNotificationType,
+    sentAt: v.number(),
+    channel: notificationChannel,
+
+    // Optional metadata
+    messageId: v.optional(v.string()), // Email provider message ID for tracking
+    opened: v.optional(v.boolean()), // If we track opens
+    clicked: v.optional(v.boolean()), // If we track clicks
+  })
+    .index("by_user", ["userId"])
+    .index("by_holiday", ["holidayId"])
+    .index("by_user_holiday", ["userId", "holidayId"])
+    .index("by_type", ["holidayId", "type"]),
 });

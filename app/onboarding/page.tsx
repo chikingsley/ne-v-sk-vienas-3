@@ -26,6 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useLocale } from "@/contexts/locale-context";
 import { api } from "@/convex/_generated/api";
 import type { HolidayDate } from "@/lib/types";
 import {
@@ -58,6 +59,7 @@ function Step0Consent({
   setPrivacyAccepted,
   marketingConsent,
   setMarketingConsent,
+  t,
 }: {
   termsAccepted: boolean;
   setTermsAccepted: (v: boolean) => void;
@@ -65,14 +67,12 @@ function Step0Consent({
   setPrivacyAccepted: (v: boolean) => void;
   marketingConsent: boolean;
   setMarketingConsent: (v: boolean) => void;
+  t: Record<string, string>;
 }) {
   return (
     <div className="space-y-6">
       <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-        <p className="text-amber-800 text-sm">
-          Before you continue, please review and accept our Terms of Service and
-          Privacy Policy. This is required to use our platform.
-        </p>
+        <p className="text-amber-800 text-sm">{t.onboardingConsentIntro}</p>
       </div>
 
       <div className="space-y-4">
@@ -84,7 +84,7 @@ function Step0Consent({
             type="checkbox"
           />
           <div className="flex-1">
-            <p className="font-medium text-gray-900">Terms of Service</p>
+            <p className="font-medium text-gray-900">{t.termsLabel}</p>
             <p className="mt-1 text-gray-600 text-sm">
               I have read and agree to the{" "}
               <Link
@@ -92,9 +92,9 @@ function Step0Consent({
                 href="/terms"
                 target="_blank"
               >
-                Terms of Service
+                {t.termsLinkText}
               </Link>
-              , including the community guidelines and acceptable use policy.
+              {t.termsAdditional}
             </p>
           </div>
         </label>
@@ -107,7 +107,7 @@ function Step0Consent({
             type="checkbox"
           />
           <div className="flex-1">
-            <p className="font-medium text-gray-900">Privacy Policy</p>
+            <p className="font-medium text-gray-900">{t.privacyLabel}</p>
             <p className="mt-1 text-gray-600 text-sm">
               I have read and agree to the{" "}
               <Link
@@ -115,10 +115,9 @@ function Step0Consent({
                 href="/privacy"
                 target="_blank"
               >
-                Privacy Policy
+                {t.privacyLinkText}
               </Link>
-              , and I consent to the processing of my personal data as described
-              therein.
+              {t.privacyAdditional}
             </p>
           </div>
         </label>
@@ -131,7 +130,7 @@ function Step0Consent({
             type="checkbox"
           />
           <div className="flex-1">
-            <p className="font-medium text-gray-900">Safety Guidelines</p>
+            <p className="font-medium text-gray-900">{t.safetyLabel}</p>
             <p className="mt-1 text-gray-600 text-sm">
               I understand and agree to follow the{" "}
               <Link
@@ -139,9 +138,9 @@ function Step0Consent({
                 href="/safety"
                 target="_blank"
               >
-                Safety Guidelines
+                {t.safetyLinkText}
               </Link>{" "}
-              when meeting other users.
+              {t.safetyAdditional}
             </p>
           </div>
         </label>
@@ -156,22 +155,20 @@ function Step0Consent({
             />
             <div className="flex-1">
               <p className="font-medium text-gray-900">
-                Marketing Communications{" "}
-                <span className="font-normal text-gray-500">(optional)</span>
+                {t.marketingLabel}{" "}
+                <span className="font-normal text-gray-500">
+                  {t.marketingOptional}
+                </span>
               </p>
               <p className="mt-1 text-gray-600 text-sm">
-                I would like to receive occasional updates about new features,
-                community events, and holiday celebration tips. You can
-                unsubscribe at any time.
+                {t.marketingDescription}
               </p>
             </div>
           </label>
         </div>
       </div>
 
-      <p className="text-center text-gray-500 text-xs">
-        By continuing, you confirm you are at least 18 years old.
-      </p>
+      <p className="text-center text-gray-500 text-xs">{t.ageConfirmation}</p>
     </div>
   );
 }
@@ -895,6 +892,7 @@ export default function OnboardingPage() {
   const router = useRouter();
   const { user } = useUser();
   const { isLoading: isAuthLoading, isAuthenticated } = useConvexAuth();
+  const { t } = useLocale();
 
   // Only query profile after Convex auth is ready
   const profile = useQuery(
@@ -1147,6 +1145,7 @@ export default function OnboardingPage() {
             setMarketingConsent={setMarketingConsent}
             setPrivacyAccepted={setPrivacyAccepted}
             setTermsAccepted={setTermsAccepted}
+            t={t}
             termsAccepted={termsAccepted}
           />
         );

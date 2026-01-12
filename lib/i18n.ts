@@ -203,6 +203,161 @@ export const translations = {
     getNotifiedOnMatch: "Gauti pranešimą, kai kas nors priima jūsų kvietimą",
     marketingEmails: "Rinkodaros el. laiškai",
     receiveMarketingEmails: "Gauti el. laiškus apie naujas funkcijas",
+
+    // Onboarding - GDPR Consent
+    onboardingWelcome: "Sveiki atvykę į Nešvęsk vienas",
+    onboardingConsentIntro:
+      "Prieš tęsdami, peržiūrėkite ir sutikite su mūsų Paslaugų teikimo sąlygomis ir Privatumo politika. Tai būtina norint naudotis platforma.",
+    termsLabel: "Paslaugų teikimo sąlygos",
+    termsLinkText: "Paslaugų teikimo sąlygomis",
+    termsAdditional:
+      ", įskaitant bendruomenės gaires ir priimtino naudojimo politiką.",
+    privacyLabel: "Privatumo politika",
+    privacyLinkText: "Privatumo politika",
+    privacyAdditional:
+      ", ir sutinku su mano asmens duomenų tvarkymu, kaip aprašyta.",
+    safetyLabel: "Saugos gairės",
+    safetyLinkText: "Saugos gairėmis",
+    safetyAdditional: "susitinkant su kitais vartotojais.",
+    marketingLabel: "Rinkodaros komunikacija",
+    marketingOptional: "(neprivaloma)",
+    marketingDescription:
+      "Norėčiau gauti retkarčiais naujienas apie naujas funkcijas, bendruomenės renginius ir švenčių šventimo patarimus. Galite bet kada atsisakyti.",
+    ageConfirmation: "Tęsdami patvirtinate, kad esate bent 18 metų.",
+    iAgreeAndContinue: "Sutinku ir tęsiu",
+    completeSetup: "Baigti nustatymą",
+
+    // Onboarding - Preferences
+    selectDates: "Pasirinkite datas:",
+    datesSelected: "datos pasirinktos",
+    dateSelected: "data pasirinkta",
+    hostingQuestion: "Ar esate pasiruošęs priimti svečius?",
+    guestQuestion: "Ar ieškote šeimininko?",
+
+    // Onboarding - Hosting Options
+    canHostTitle: "Taip, galiu priimti",
+    canHostDescription:
+      "Turiu vietą ir galiu priimti svečius nurodytomis datomis.",
+    mayHostTitle: "Galbūt galiu priimti",
+    mayHostDescription: "Dar nesu tikras, bet gali būti, kad galėsiu priimti.",
+    cantHostTitle: "Ne, negaliu priimti",
+    cantHostDescription: "Šiuo metu neplanuoju priimti svečių.",
+
+    // Onboarding - Guest Options
+    lookingTitle: "Taip, ieškau šeimininko",
+    lookingDescription: "Aktyviai ieškau kur praleisti šventes.",
+    maybeGuestTitle: "Galbūt",
+    maybeGuestDescription: "Dar nesu tikras, bet gali būti, kad ieškosiu.",
+    notLookingTitle: "Ne, neieškau",
+    notLookingDescription: "Šiuo metu neieškau šeimininko.",
+
+    // Onboarding - Basic Info
+    firstNameLabel: "Vardas *",
+    firstNamePlaceholder: "Jūsų vardas",
+    firstNameRequired: "Vardas yra privalomas",
+    lastNameLabel: "Pavardė",
+    optionalPlaceholder: "Neprivaloma",
+    ageLabel: "Amžius *",
+    agePlaceholder: "18+",
+    ageRequired: "Amžius yra privalomas",
+    ageMustBe18: "Turite būti 18 metų ar vyresnis",
+    cityLabel: "Miestas",
+
+    // Onboarding - Bio
+    bioLabel: "Papasakokite apie save *",
+    bioPlaceholder:
+      "Pasidalinkite šiek tiek apie save, savo pomėgius ir kokios švenčių patirties ieškote...",
+    bioMinChars: "Mažiausiai 10 simbolių",
+
+    // Onboarding - Languages & Preferences
+    languagesLabel: "Kalbos, kuriomis kalbate *",
+    languagesDescription: "Pasirinkite visas kalbas, kuriomis galite bendrauti",
+    dietaryLabel: "Mitybos preferencijos",
+    dietaryDescription:
+      "Informuokite šeimininkus apie savo mitybos poreikius (neprivaloma)",
+    vibesLabel: "Kokios atmosferos ieškote?",
+    vibesDescription:
+      "Padėkite kitiems suprasti, kokio pobūdžio susibūrimą pageidaujate",
+
+    // Onboarding - Lifestyle
+    lifestyleLabel: "Gyvenimo būdo preferencijos",
+    lifestyleDescription: "Tai padeda surasti tinkamus šeimininkus ir svečius",
+    alcoholLabel: "Alkoholis",
+    alcoholDescription: "Ar jums tinka alkoholis susibūrimuose?",
+    yes: "Taip",
+    no: "Ne",
+    smokingLabel: "Rūkymas",
+    smokingDescription: "Ar jums tinka rūkymas?",
+    petsWelcomeLabel: "Gyvūnai laukiami",
+    petsWelcomeDescription: "Ar jums tinka gyvūnai susibūrimuose?",
+    hasPetsLabel: "Turiu gyvūnų",
+    hasPetsDescription: "Ar turite gyvūnų, kurie gali būti?",
+
+    // Onboarding - Completion
+    allSet: "Viskas paruošta!",
+    allSetDescription:
+      "Jūsų profilis išsaugotas. Patvirtinkite savo tapatybę, kad padidintumėte pasitikėjimą, arba praleiskite kol kas.",
+    verifyIdentity: "Patvirtinti tapatybę",
+    skipForNow: "Praleisti kol kas",
+
+    // Onboarding - Validation
+    acceptTermsRequired:
+      "Prašome sutikti su Paslaugų teikimo sąlygomis ir Privatumo politika",
+    selectDateRequired: "Prašome pasirinkti bent vieną datą",
+    enterNameAndAge: "Prašome įvesti vardą ir amžių (turi būti 18+)",
+    bioTooShort: "Prašome parašyti bent 10 simbolių aprašyme",
+    selectLanguageRequired: "Prašome pasirinkti bent vieną kalbą",
+
+    // Profile Action Button
+    connect: "Susisiekti",
+    decline: "Atmesti",
+    requestDeclined: "Užklausa atmesta",
+    youDeclined: "Jūs atmetėte",
+    noDatesAvailable: "Nėra prieinamų datų",
+
+    // Messages - Role Labels
+    roleHosting: "Priima svečius",
+    roleLookingForHost: "Ieško šeimininko",
+    roleHostAndGuest: "Šeimininkas ir svečias",
+
+    // Messages - Report Reasons
+    reportReasonSpam: "Brukalas arba sukčiavimas",
+    reportReasonHarassment: "Priekabiavimas arba patyčios",
+    reportReasonInappropriate: "Netinkamas turinys",
+    reportReasonFakeProfile: "Netikras profilis",
+    reportReasonOther: "Kita",
+
+    // Photo Gallery
+    photos: "Nuotraukos",
+    selectImageFile: "Prašome pasirinkti paveikslėlio failą",
+    photoUploaded: "Nuotrauka įkelta",
+    failedToSavePhoto: "Nepavyko išsaugoti nuotraukos",
+    photoRemoved: "Nuotrauka pašalinta",
+    failedToRemovePhoto: "Nepavyko pašalinti nuotraukos",
+    mainPhotoUpdated: "Pagrindinė nuotrauka atnaujinta",
+    failedToSetMainPhoto: "Nepavyko nustatyti pagrindinės nuotraukos",
+
+    // In-App Browser Gate
+    checkingBrowser: "Tikrinama jūsų naršyklė…",
+    preparingSafeSignIn: "Ruošiama saugi prisijungimo patirtis.",
+    openInBrowserTitle: "Atidarykite savo naršyklėje",
+    openInBrowserDescription:
+      "Socialinės programos naudoja įtaisytą naršyklę, kuri gali sutrikdyti saugų prisijungimą. Atidarykite šį puslapį Safari/Chrome, kad tęstumėte.",
+    openInBrowserInstructions:
+      'Jei mygtukas neveikia, palieskite meniu (•••) viršutiniame kampe ir pasirinkite „Atidaryti naršyklėje".',
+    openInBrowserButton: "Atidaryti naršyklėje",
+    linkCopied: "Nuoroda nukopijuota. Įklijuokite į Safari/Chrome.",
+    linkCopyFailed:
+      "Nepavyko automatiškai nukopijuoti. Nukopijuokite rankiniu būdu.",
+
+    // Settings - Edit Profile
+    editProfile: "Redaguoti profilį",
+    editProfileDescription:
+      "Redaguokite savo profilio informaciją, preferencijas ir nuotraukas",
+    failedToUpdateNotifications: "Nepavyko atnaujinti pranešimų nustatymų",
+    unableToDeleteAccount: "Nepavyko ištrinti paskyros. Bandykite dar kartą.",
+    accountDeletedSuccess: "Paskyra sėkmingai ištrinta",
+    failedToDeleteAccount: "Nepavyko ištrinti paskyros",
   },
   en: {
     // App
@@ -407,6 +562,163 @@ export const translations = {
     getNotifiedOnMatch: "Get notified when someone accepts your invitation",
     marketingEmails: "Marketing Emails",
     receiveMarketingEmails: "Receive emails about new features",
+
+    // Onboarding - GDPR Consent
+    onboardingWelcome: "Welcome to Don't Celebrate Alone",
+    onboardingConsentIntro:
+      "Before you continue, please review and accept our Terms of Service and Privacy Policy. This is required to use our platform.",
+    termsLabel: "Terms of Service",
+    termsLinkText: "Terms of Service",
+    termsAdditional:
+      ", including the community guidelines and acceptable use policy.",
+    privacyLabel: "Privacy Policy",
+    privacyLinkText: "Privacy Policy",
+    privacyAdditional:
+      ", and I consent to the processing of my personal data as described therein.",
+    safetyLabel: "Safety Guidelines",
+    safetyLinkText: "Safety Guidelines",
+    safetyAdditional: "when meeting other users.",
+    marketingLabel: "Marketing Communications",
+    marketingOptional: "(optional)",
+    marketingDescription:
+      "I would like to receive occasional updates about new features, community events, and holiday celebration tips. You can unsubscribe at any time.",
+    ageConfirmation:
+      "By continuing, you confirm you are at least 18 years old.",
+    iAgreeAndContinue: "I Agree & Continue",
+    completeSetup: "Complete Setup",
+
+    // Onboarding - Preferences
+    selectDates: "Select dates:",
+    datesSelected: "dates selected",
+    dateSelected: "date selected",
+    hostingQuestion: "Are you open to hosting?",
+    guestQuestion: "Are you looking to be a guest?",
+
+    // Onboarding - Hosting Options
+    canHostTitle: "Yes, I can host",
+    canHostDescription:
+      "I have space and can host guests on the selected dates.",
+    mayHostTitle: "Maybe I can host",
+    mayHostDescription: "I'm not sure yet, but I might be able to host.",
+    cantHostTitle: "No, I can't host",
+    cantHostDescription: "I'm not planning to host guests at this time.",
+
+    // Onboarding - Guest Options
+    lookingTitle: "Yes, I'm looking for a host",
+    lookingDescription: "I'm actively looking for a place to celebrate.",
+    maybeGuestTitle: "Maybe",
+    maybeGuestDescription: "I'm not sure yet, but I might be looking.",
+    notLookingTitle: "No, I'm not looking",
+    notLookingDescription: "I'm not looking for a host at this time.",
+
+    // Onboarding - Basic Info
+    firstNameLabel: "First Name *",
+    firstNamePlaceholder: "Your first name",
+    firstNameRequired: "First name is required",
+    lastNameLabel: "Last Name",
+    optionalPlaceholder: "Optional",
+    ageLabel: "Age *",
+    agePlaceholder: "18+",
+    ageRequired: "Age is required",
+    ageMustBe18: "You must be 18 or older",
+    cityLabel: "City",
+
+    // Onboarding - Bio
+    bioLabel: "Tell others about yourself *",
+    bioPlaceholder:
+      "Share a bit about yourself, your interests, and what kind of holiday experience you're looking for...",
+    bioMinChars: "Minimum 10 characters",
+
+    // Onboarding - Languages & Preferences
+    languagesLabel: "Languages you speak *",
+    languagesDescription:
+      "Select all languages you're comfortable communicating in",
+    dietaryLabel: "Dietary preferences",
+    dietaryDescription: "Let hosts know about your dietary needs (optional)",
+    vibesLabel: "What vibe are you looking for?",
+    vibesDescription:
+      "Help others understand what kind of gathering you prefer",
+
+    // Onboarding - Lifestyle
+    lifestyleLabel: "Lifestyle preferences",
+    lifestyleDescription:
+      "These help match you with compatible hosts and guests",
+    alcoholLabel: "Alcohol",
+    alcoholDescription: "Are you okay with alcohol at gatherings?",
+    yes: "Yes",
+    no: "No",
+    smokingLabel: "Smoking",
+    smokingDescription: "Are you okay with smoking?",
+    petsWelcomeLabel: "Pets welcome",
+    petsWelcomeDescription: "Are you okay with pets at gatherings?",
+    hasPetsLabel: "I have pets",
+    hasPetsDescription: "Do you have pets that might be present?",
+
+    // Onboarding - Completion
+    allSet: "All set!",
+    allSetDescription:
+      "Your profile is saved. Verify your identity to build trust, or skip for now.",
+    verifyIdentity: "Verify identity",
+    skipForNow: "Skip for now",
+
+    // Onboarding - Validation
+    acceptTermsRequired:
+      "Please accept the Terms of Service and Privacy Policy to continue",
+    selectDateRequired:
+      "Please select at least one date for hosting or visiting",
+    enterNameAndAge: "Please enter your first name and age (must be 18+)",
+    bioTooShort: "Please write at least 10 characters in your bio",
+    selectLanguageRequired: "Please select at least one language",
+
+    // Profile Action Button
+    connect: "Connect",
+    decline: "Decline",
+    requestDeclined: "Request Declined",
+    youDeclined: "You Declined",
+    noDatesAvailable: "No dates available",
+
+    // Messages - Role Labels
+    roleHosting: "Hosting",
+    roleLookingForHost: "Looking for host",
+    roleHostAndGuest: "Host & Guest",
+
+    // Messages - Report Reasons
+    reportReasonSpam: "Spam or scam",
+    reportReasonHarassment: "Harassment or bullying",
+    reportReasonInappropriate: "Inappropriate content",
+    reportReasonFakeProfile: "Fake profile",
+    reportReasonOther: "Other",
+
+    // Photo Gallery
+    photos: "Photos",
+    selectImageFile: "Please select an image file",
+    photoUploaded: "Photo uploaded",
+    failedToSavePhoto: "Failed to save photo",
+    photoRemoved: "Photo removed",
+    failedToRemovePhoto: "Failed to remove photo",
+    mainPhotoUpdated: "Main photo updated",
+    failedToSetMainPhoto: "Failed to set main photo",
+
+    // In-App Browser Gate
+    checkingBrowser: "Checking your browser…",
+    preparingSafeSignIn: "Preparing a safe sign-in experience.",
+    openInBrowserTitle: "Open in your browser",
+    openInBrowserDescription:
+      "Social apps use an in-app browser that can break secure sign-in. Open this page in Safari/Chrome to continue.",
+    openInBrowserInstructions:
+      "If the button doesn't work, tap the menu (•••) in the top corner and choose Open in browser.",
+    openInBrowserButton: "Open in browser",
+    linkCopied: "Link copied. Paste it into Safari/Chrome.",
+    linkCopyFailed: "Couldn't copy automatically. Copy it manually.",
+
+    // Settings - Edit Profile
+    editProfile: "Edit Profile",
+    editProfileDescription:
+      "Edit your profile information, preferences, and photos",
+    failedToUpdateNotifications: "Failed to update notification preferences",
+    unableToDeleteAccount: "Unable to delete account. Please try again.",
+    accountDeletedSuccess: "Account deleted successfully",
+    failedToDeleteAccount: "Failed to delete account",
   },
   ua: {
     // App
@@ -614,6 +926,162 @@ export const translations = {
       "Отримувати сповіщення, коли хтось приймає ваше запрошення",
     marketingEmails: "Маркетингові листи",
     receiveMarketingEmails: "Отримувати листи про нові функції",
+
+    // Onboarding - GDPR Consent
+    onboardingWelcome: "Ласкаво просимо до Не святкуй наодинці",
+    onboardingConsentIntro:
+      "Перш ніж продовжити, будь ласка, ознайомтеся та погодьтеся з нашими Умовами користування та Політикою конфіденційності. Це необхідно для використання платформи.",
+    termsLabel: "Умови користування",
+    termsLinkText: "Умовами користування",
+    termsAdditional:
+      ", включаючи правила спільноти та політику прийнятного використання.",
+    privacyLabel: "Політика конфіденційності",
+    privacyLinkText: "Політикою конфіденційності",
+    privacyAdditional:
+      ", і я даю згоду на обробку моїх персональних даних, як там описано.",
+    safetyLabel: "Правила безпеки",
+    safetyLinkText: "Правилами безпеки",
+    safetyAdditional: "при зустрічах з іншими користувачами.",
+    marketingLabel: "Маркетингові комунікації",
+    marketingOptional: "(необов'язково)",
+    marketingDescription:
+      "Я хочу отримувати періодичні оновлення про нові функції, події спільноти та поради щодо святкування. Ви можете відмовитися в будь-який час.",
+    ageConfirmation:
+      "Продовжуючи, ви підтверджуєте, що вам виповнилося 18 років.",
+    iAgreeAndContinue: "Погоджуюся та продовжую",
+    completeSetup: "Завершити налаштування",
+
+    // Onboarding - Preferences
+    selectDates: "Виберіть дати:",
+    datesSelected: "дат вибрано",
+    dateSelected: "дата вибрана",
+    hostingQuestion: "Чи готові ви приймати гостей?",
+    guestQuestion: "Чи шукаєте ви господаря?",
+
+    // Onboarding - Hosting Options
+    canHostTitle: "Так, можу приймати",
+    canHostDescription:
+      "У мене є місце і я можу приймати гостей у вибрані дати.",
+    mayHostTitle: "Можливо, зможу приймати",
+    mayHostDescription: "Ще не впевнений, але можливо зможу приймати.",
+    cantHostTitle: "Ні, не можу приймати",
+    cantHostDescription: "Наразі не планую приймати гостей.",
+
+    // Onboarding - Guest Options
+    lookingTitle: "Так, шукаю господаря",
+    lookingDescription: "Активно шукаю місце для святкування.",
+    maybeGuestTitle: "Можливо",
+    maybeGuestDescription: "Ще не впевнений, але можливо буду шукати.",
+    notLookingTitle: "Ні, не шукаю",
+    notLookingDescription: "Наразі не шукаю господаря.",
+
+    // Onboarding - Basic Info
+    firstNameLabel: "Ім'я *",
+    firstNamePlaceholder: "Ваше ім'я",
+    firstNameRequired: "Ім'я обов'язкове",
+    lastNameLabel: "Прізвище",
+    optionalPlaceholder: "Необов'язково",
+    ageLabel: "Вік *",
+    agePlaceholder: "18+",
+    ageRequired: "Вік обов'язковий",
+    ageMustBe18: "Вам має бути 18 років або більше",
+    cityLabel: "Місто",
+
+    // Onboarding - Bio
+    bioLabel: "Розкажіть про себе *",
+    bioPlaceholder:
+      "Поділіться трохи про себе, свої інтереси та який святковий досвід ви шукаєте...",
+    bioMinChars: "Мінімум 10 символів",
+
+    // Onboarding - Languages & Preferences
+    languagesLabel: "Мови, якими ви говорите *",
+    languagesDescription: "Виберіть усі мови, якими вам зручно спілкуватися",
+    dietaryLabel: "Харчові переваги",
+    dietaryDescription:
+      "Повідомте господарям про ваші харчові потреби (необов'язково)",
+    vibesLabel: "Яку атмосферу ви шукаєте?",
+    vibesDescription:
+      "Допоможіть іншим зрозуміти, який тип зібрання ви віддаєте перевагу",
+
+    // Onboarding - Lifestyle
+    lifestyleLabel: "Переваги способу життя",
+    lifestyleDescription: "Це допомагає знайти сумісних господарів та гостей",
+    alcoholLabel: "Алкоголь",
+    alcoholDescription: "Чи влаштовує вас алкоголь на зібраннях?",
+    yes: "Так",
+    no: "Ні",
+    smokingLabel: "Куріння",
+    smokingDescription: "Чи влаштовує вас куріння?",
+    petsWelcomeLabel: "Тварини вітаються",
+    petsWelcomeDescription: "Чи влаштовують вас тварини на зібраннях?",
+    hasPetsLabel: "У мене є тварини",
+    hasPetsDescription: "Чи є у вас тварини, які можуть бути присутні?",
+
+    // Onboarding - Completion
+    allSet: "Все готово!",
+    allSetDescription:
+      "Ваш профіль збережено. Підтвердіть свою особу, щоб збільшити довіру, або пропустіть поки що.",
+    verifyIdentity: "Підтвердити особу",
+    skipForNow: "Пропустити поки що",
+
+    // Onboarding - Validation
+    acceptTermsRequired:
+      "Будь ласка, погодьтеся з Умовами користування та Політикою конфіденційності",
+    selectDateRequired: "Будь ласка, виберіть хоча б одну дату",
+    enterNameAndAge: "Будь ласка, введіть ім'я та вік (має бути 18+)",
+    bioTooShort: "Будь ласка, напишіть щонайменше 10 символів в описі",
+    selectLanguageRequired: "Будь ласка, виберіть хоча б одну мову",
+
+    // Profile Action Button
+    connect: "Зв'язатися",
+    decline: "Відхилити",
+    requestDeclined: "Запит відхилено",
+    youDeclined: "Ви відхилили",
+    noDatesAvailable: "Немає доступних дат",
+
+    // Messages - Role Labels
+    roleHosting: "Приймає гостей",
+    roleLookingForHost: "Шукає господаря",
+    roleHostAndGuest: "Господар і гість",
+
+    // Messages - Report Reasons
+    reportReasonSpam: "Спам або шахрайство",
+    reportReasonHarassment: "Переслідування або цькування",
+    reportReasonInappropriate: "Неприйнятний вміст",
+    reportReasonFakeProfile: "Фейковий профіль",
+    reportReasonOther: "Інше",
+
+    // Photo Gallery
+    photos: "Фотографії",
+    selectImageFile: "Будь ласка, виберіть файл зображення",
+    photoUploaded: "Фото завантажено",
+    failedToSavePhoto: "Не вдалося зберегти фото",
+    photoRemoved: "Фото видалено",
+    failedToRemovePhoto: "Не вдалося видалити фото",
+    mainPhotoUpdated: "Головне фото оновлено",
+    failedToSetMainPhoto: "Не вдалося встановити головне фото",
+
+    // In-App Browser Gate
+    checkingBrowser: "Перевірка вашого браузера…",
+    preparingSafeSignIn: "Підготовка безпечного входу.",
+    openInBrowserTitle: "Відкрийте у вашому браузері",
+    openInBrowserDescription:
+      "Соціальні додатки використовують вбудований браузер, який може перешкоджати безпечному входу. Відкрийте цю сторінку в Safari/Chrome, щоб продовжити.",
+    openInBrowserInstructions:
+      "Якщо кнопка не працює, натисніть меню (•••) у верхньому куті та виберіть «Відкрити в браузері».",
+    openInBrowserButton: "Відкрити в браузері",
+    linkCopied: "Посилання скопійовано. Вставте його в Safari/Chrome.",
+    linkCopyFailed: "Не вдалося автоматично скопіювати. Скопіюйте вручну.",
+
+    // Settings - Edit Profile
+    editProfile: "Редагувати профіль",
+    editProfileDescription:
+      "Редагуйте інформацію профілю, переваги та фотографії",
+    failedToUpdateNotifications: "Не вдалося оновити налаштування сповіщень",
+    unableToDeleteAccount:
+      "Не вдалося видалити обліковий запис. Спробуйте ще раз.",
+    accountDeletedSuccess: "Обліковий запис успішно видалено",
+    failedToDeleteAccount: "Не вдалося видалити обліковий запис",
   },
   ru: {
     // App
@@ -821,5 +1289,160 @@ export const translations = {
       "Получать уведомления, когда кто-то принимает ваше приглашение",
     marketingEmails: "Маркетинговые письма",
     receiveMarketingEmails: "Получать письма о новых функциях",
+
+    // Onboarding - GDPR Consent
+    onboardingWelcome: "Добро пожаловать в Не празднуй один",
+    onboardingConsentIntro:
+      "Прежде чем продолжить, пожалуйста, ознакомьтесь и согласитесь с нашими Условиями использования и Политикой конфиденциальности. Это необходимо для использования платформы.",
+    termsLabel: "Условия использования",
+    termsLinkText: "Условиями использования",
+    termsAdditional:
+      ", включая правила сообщества и политику допустимого использования.",
+    privacyLabel: "Политика конфиденциальности",
+    privacyLinkText: "Политикой конфиденциальности",
+    privacyAdditional:
+      ", и я даю согласие на обработку моих персональных данных, как там описано.",
+    safetyLabel: "Правила безопасности",
+    safetyLinkText: "Правилами безопасности",
+    safetyAdditional: "при встречах с другими пользователями.",
+    marketingLabel: "Маркетинговые коммуникации",
+    marketingOptional: "(необязательно)",
+    marketingDescription:
+      "Я хочу получать периодические обновления о новых функциях, событиях сообщества и советы по празднованию. Вы можете отказаться в любое время.",
+    ageConfirmation: "Продолжая, вы подтверждаете, что вам исполнилось 18 лет.",
+    iAgreeAndContinue: "Соглашаюсь и продолжаю",
+    completeSetup: "Завершить настройку",
+
+    // Onboarding - Preferences
+    selectDates: "Выберите даты:",
+    datesSelected: "дат выбрано",
+    dateSelected: "дата выбрана",
+    hostingQuestion: "Готовы ли вы принимать гостей?",
+    guestQuestion: "Ищете ли вы хозяина?",
+
+    // Onboarding - Hosting Options
+    canHostTitle: "Да, могу принимать",
+    canHostDescription:
+      "У меня есть место и я могу принимать гостей в выбранные даты.",
+    mayHostTitle: "Возможно, смогу принимать",
+    mayHostDescription: "Пока не уверен, но возможно смогу принимать.",
+    cantHostTitle: "Нет, не могу принимать",
+    cantHostDescription: "В данный момент не планирую принимать гостей.",
+
+    // Onboarding - Guest Options
+    lookingTitle: "Да, ищу хозяина",
+    lookingDescription: "Активно ищу место для празднования.",
+    maybeGuestTitle: "Возможно",
+    maybeGuestDescription: "Пока не уверен, но возможно буду искать.",
+    notLookingTitle: "Нет, не ищу",
+    notLookingDescription: "В данный момент не ищу хозяина.",
+
+    // Onboarding - Basic Info
+    firstNameLabel: "Имя *",
+    firstNamePlaceholder: "Ваше имя",
+    firstNameRequired: "Имя обязательно",
+    lastNameLabel: "Фамилия",
+    optionalPlaceholder: "Необязательно",
+    ageLabel: "Возраст *",
+    agePlaceholder: "18+",
+    ageRequired: "Возраст обязателен",
+    ageMustBe18: "Вам должно быть 18 лет или больше",
+    cityLabel: "Город",
+
+    // Onboarding - Bio
+    bioLabel: "Расскажите о себе *",
+    bioPlaceholder:
+      "Поделитесь немного о себе, своих интересах и какой праздничный опыт вы ищете...",
+    bioMinChars: "Минимум 10 символов",
+
+    // Onboarding - Languages & Preferences
+    languagesLabel: "Языки, на которых вы говорите *",
+    languagesDescription:
+      "Выберите все языки, на которых вам комфортно общаться",
+    dietaryLabel: "Диетические предпочтения",
+    dietaryDescription:
+      "Сообщите хозяевам о ваших диетических потребностях (необязательно)",
+    vibesLabel: "Какую атмосферу вы ищете?",
+    vibesDescription:
+      "Помогите другим понять, какой тип собрания вы предпочитаете",
+
+    // Onboarding - Lifestyle
+    lifestyleLabel: "Предпочтения образа жизни",
+    lifestyleDescription: "Это помогает найти совместимых хозяев и гостей",
+    alcoholLabel: "Алкоголь",
+    alcoholDescription: "Вас устраивает алкоголь на встречах?",
+    yes: "Да",
+    no: "Нет",
+    smokingLabel: "Курение",
+    smokingDescription: "Вас устраивает курение?",
+    petsWelcomeLabel: "Животные приветствуются",
+    petsWelcomeDescription: "Вас устраивают животные на встречах?",
+    hasPetsLabel: "У меня есть животные",
+    hasPetsDescription: "Есть ли у вас животные, которые могут присутствовать?",
+
+    // Onboarding - Completion
+    allSet: "Всё готово!",
+    allSetDescription:
+      "Ваш профиль сохранён. Подтвердите свою личность, чтобы повысить доверие, или пропустите пока.",
+    verifyIdentity: "Подтвердить личность",
+    skipForNow: "Пропустить пока",
+
+    // Onboarding - Validation
+    acceptTermsRequired:
+      "Пожалуйста, согласитесь с Условиями использования и Политикой конфиденциальности",
+    selectDateRequired: "Пожалуйста, выберите хотя бы одну дату",
+    enterNameAndAge: "Пожалуйста, введите имя и возраст (должно быть 18+)",
+    bioTooShort: "Пожалуйста, напишите как минимум 10 символов в описании",
+    selectLanguageRequired: "Пожалуйста, выберите хотя бы один язык",
+
+    // Profile Action Button
+    connect: "Связаться",
+    decline: "Отклонить",
+    requestDeclined: "Запрос отклонён",
+    youDeclined: "Вы отклонили",
+    noDatesAvailable: "Нет доступных дат",
+
+    // Messages - Role Labels
+    roleHosting: "Принимает гостей",
+    roleLookingForHost: "Ищет хозяина",
+    roleHostAndGuest: "Хозяин и гость",
+
+    // Messages - Report Reasons
+    reportReasonSpam: "Спам или мошенничество",
+    reportReasonHarassment: "Преследование или травля",
+    reportReasonInappropriate: "Неприемлемый контент",
+    reportReasonFakeProfile: "Фейковый профиль",
+    reportReasonOther: "Другое",
+
+    // Photo Gallery
+    photos: "Фотографии",
+    selectImageFile: "Пожалуйста, выберите файл изображения",
+    photoUploaded: "Фото загружено",
+    failedToSavePhoto: "Не удалось сохранить фото",
+    photoRemoved: "Фото удалено",
+    failedToRemovePhoto: "Не удалось удалить фото",
+    mainPhotoUpdated: "Главное фото обновлено",
+    failedToSetMainPhoto: "Не удалось установить главное фото",
+
+    // In-App Browser Gate
+    checkingBrowser: "Проверка вашего браузера…",
+    preparingSafeSignIn: "Подготовка безопасного входа.",
+    openInBrowserTitle: "Откройте в вашем браузере",
+    openInBrowserDescription:
+      "Социальные приложения используют встроенный браузер, который может мешать безопасному входу. Откройте эту страницу в Safari/Chrome, чтобы продолжить.",
+    openInBrowserInstructions:
+      "Если кнопка не работает, нажмите меню (•••) в верхнем углу и выберите «Открыть в браузере».",
+    openInBrowserButton: "Открыть в браузере",
+    linkCopied: "Ссылка скопирована. Вставьте её в Safari/Chrome.",
+    linkCopyFailed: "Не удалось автоматически скопировать. Скопируйте вручную.",
+
+    // Settings - Edit Profile
+    editProfile: "Редактировать профиль",
+    editProfileDescription:
+      "Редактируйте информацию профиля, предпочтения и фотографии",
+    failedToUpdateNotifications: "Не удалось обновить настройки уведомлений",
+    unableToDeleteAccount: "Не удалось удалить аккаунт. Попробуйте ещё раз.",
+    accountDeletedSuccess: "Аккаунт успешно удалён",
+    failedToDeleteAccount: "Не удалось удалить аккаунт",
   },
 };

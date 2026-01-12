@@ -3,6 +3,7 @@
 import { Check, Clock, Loader2, MessageCircle, Send, X } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/contexts/locale-context";
 
 type ConnectionStatus =
   | "matched"
@@ -13,7 +14,7 @@ type ConnectionStatus =
   | "none"
   | "not_authenticated";
 
-type ProfileActionButtonProps = {
+interface ProfileActionButtonProps {
   status: ConnectionStatus | undefined;
   userId: string;
   hasAvailableDates: boolean;
@@ -21,7 +22,7 @@ type ProfileActionButtonProps = {
   onConnect: () => void;
   onAccept: () => void;
   onDecline: () => void;
-};
+}
 
 export function ProfileActionButton({
   status,
@@ -32,6 +33,8 @@ export function ProfileActionButton({
   onAccept,
   onDecline,
 }: ProfileActionButtonProps) {
+  const { t } = useLocale();
+
   if (status === "matched") {
     return (
       <Link
@@ -40,7 +43,7 @@ export function ProfileActionButton({
       >
         <Button className="w-full gap-2 bg-green-600 hover:bg-green-700">
           <MessageCircle size={18} />
-          Message
+          {t.message}
         </Button>
       </Link>
     );
@@ -50,7 +53,7 @@ export function ProfileActionButton({
     return (
       <Button className="w-full gap-2" disabled variant="secondary">
         <Clock size={18} />
-        Request Sent
+        {t.requestSent}
       </Button>
     );
   }
@@ -65,7 +68,7 @@ export function ProfileActionButton({
           variant="outline"
         >
           <X size={16} />
-          Decline
+          {t.decline}
         </Button>
         <Button
           className="flex-1 gap-1 bg-green-600 hover:bg-green-700"
@@ -77,7 +80,7 @@ export function ProfileActionButton({
           ) : (
             <>
               <Check size={16} />
-              Accept
+              {t.accept}
             </>
           )}
         </Button>
@@ -89,7 +92,7 @@ export function ProfileActionButton({
     return (
       <Button className="w-full gap-2" disabled variant="secondary">
         <X size={18} />
-        Request Declined
+        {t.requestDeclined}
       </Button>
     );
   }
@@ -98,7 +101,7 @@ export function ProfileActionButton({
     return (
       <Button className="w-full gap-2" disabled variant="secondary">
         <X size={18} />
-        You Declined
+        {t.youDeclined}
       </Button>
     );
   }
@@ -106,7 +109,7 @@ export function ProfileActionButton({
   if (!hasAvailableDates) {
     return (
       <Button className="w-full gap-2" disabled variant="secondary">
-        No dates available
+        {t.noDatesAvailable}
       </Button>
     );
   }
@@ -122,7 +125,7 @@ export function ProfileActionButton({
       ) : (
         <>
           <Send size={18} />
-          Connect
+          {t.connect}
         </>
       )}
     </Button>

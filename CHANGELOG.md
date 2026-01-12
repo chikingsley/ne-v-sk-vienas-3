@@ -5,7 +5,38 @@ All notable changes to Nešvęsk vienas will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-- --
+---
+
+## [1.2.0] - 2026-01-12
+
+### Added
+
+- **Multi-holiday database schema** - 3 new tables for supporting multiple holidays:
+  - `holidays` - Defines holiday seasons (slug, localized names, dates, status, theme)
+  - `holidayAvailability` - Per-user, per-holiday participation (hostingStatus, guestStatus, dates)
+  - `holidayNotifications` - Tracks notification delivery (registration_open, reminder, last_chance, holiday_starting)
+
+- **i18n translations** (~100 new keys per language) for:
+  - Onboarding GDPR consent (terms, privacy, safety, marketing)
+  - Onboarding preferences and form fields
+  - Profile action buttons (connect, decline, accept, etc.)
+  - Photo gallery feedback messages
+  - In-app browser gate messages
+  - Settings and edit profile labels
+
+### Changed
+
+- `app/onboarding/page.tsx` - Step0Consent now uses `useLocale()` for translations
+- `components/profile-action-button.tsx` - All button labels now use translations
+- `components/PhotoGallery.tsx` - Toast messages now use translations
+- `components/auth/in-app-browser-gate.tsx` - All UI text now uses translations
+
+### Technical
+
+- Added `holidayStatus`, `holidayNotificationType`, `notificationChannel` enums to schema
+- Added indexes for efficient holiday queries (`by_slug`, `by_status`, `by_user_holiday`, `by_role`)
+
+---
 
 ## [1.1.0] - 2025-12-21
 

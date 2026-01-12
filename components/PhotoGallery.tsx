@@ -4,17 +4,19 @@ import { useMutation, useQuery } from "convex/react";
 import { Camera, Loader2, Star, X } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
+import { useLocale } from "@/contexts/locale-context";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { uploadCompressedImage } from "@/lib/image-compression";
 
 const MAX_PHOTOS = 5;
 
-type PhotoGalleryProps = {
+interface PhotoGalleryProps {
   fallbackPhotoUrl?: string;
-};
+}
 
 export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
+  const { t } = useLocale();
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [previewUrls, setPreviewUrls] = useState<Map<number, string>>(
     new Map()
@@ -69,7 +71,7 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
     }
 
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
+      toast.error(t.selectImageFile);
       return;
     }
 
@@ -101,11 +103,10 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
         setAsMain: photos.length === 0,
       });
       clearSlotPreview(currentSlot);
-      toast.success("Photo uploaded");
+      toast.success(t.photoUploaded);
     } catch (err) {
       clearSlotPreview(currentSlot);
-      const message =
-        err instanceof Error ? err.message : "Failed to save photo";
+      const message = err instanceof Error ? err.message : t.failedToSavePhoto;
       toast.error(message);
     } finally {
       setUploadingIndex(null);
@@ -119,10 +120,10 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
   const handleRemovePhoto = async (photoUrl: string) => {
     try {
       await removeProfilePhoto({ photoUrl });
-      toast.success("Photo removed");
+      toast.success(t.photoRemoved);
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Failed to remove photo";
+        err instanceof Error ? err.message : t.failedToRemovePhoto;
       toast.error(message);
     }
   };
@@ -133,10 +134,10 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
     }
     try {
       await setMainPhoto({ photoUrl });
-      toast.success("Main photo updated");
+      toast.success(t.mainPhotoUpdated);
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Failed to set main photo";
+        err instanceof Error ? err.message : t.failedToSetMainPhoto;
       toast.error(message);
     }
   };
@@ -144,7 +145,7 @@ export function PhotoGallery({ fallbackPhotoUrl }: PhotoGalleryProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
-        <span className="font-medium text-sm">Photos</span>
+        <span className="font-medium text-sm">{t.photos}</span>
         <span className="text-muted-foreground text-sm">
           ({photos.length}/{MAX_PHOTOS})
         </span>
