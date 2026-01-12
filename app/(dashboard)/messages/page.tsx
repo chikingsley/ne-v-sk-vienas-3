@@ -47,34 +47,28 @@ const REPORT_REASONS = [
   { value: "other" as const, label: "Other" },
 ];
 
-// Role styling helpers
-function getRoleBadgeClass(role: string): string {
-  if (role === "host") {
-    return "bg-green-100 text-green-700";
-  }
-  if (role === "guest") {
-    return "bg-blue-100 text-blue-700";
-  }
-  return "bg-purple-100 text-purple-700";
-}
+// Role styling and label configuration
+const ROLE_CONFIG = {
+  host: { badgeClass: "bg-green-100 text-green-700", label: "Hosting" },
+  guest: { badgeClass: "bg-blue-100 text-blue-700", label: "Looking for host" },
+  both: { badgeClass: "bg-purple-100 text-purple-700", label: "Host & Guest" },
+} as const;
 
-function getRoleLabel(role: string): string {
-  if (role === "host") {
-    return "Hosting";
-  }
-  if (role === "guest") {
-    return "Looking for host";
-  }
-  return "Host & Guest";
-}
+const getRoleBadgeClass = (role: string): string =>
+  ROLE_CONFIG[role as keyof typeof ROLE_CONFIG]?.badgeClass ??
+  ROLE_CONFIG.both.badgeClass;
+
+const getRoleLabel = (role: string): string =>
+  ROLE_CONFIG[role as keyof typeof ROLE_CONFIG]?.label ??
+  ROLE_CONFIG.both.label;
 
 // Types
-type ProfileInfo = {
+interface ProfileInfo {
   firstName: string;
   photoUrl?: string;
   city: string;
   username?: string;
-};
+}
 
 type SidebarItem =
   | {
@@ -585,7 +579,7 @@ function EmptyState() {
 }
 
 // Archive View - displays archived conversations and blocked users
-type ArchivedItem = {
+interface ArchivedItem {
   type: "archived" | "blocked";
   oderId: Id<"users">;
   conversationId?: Id<"conversations">;
@@ -596,7 +590,7 @@ type ArchivedItem = {
     city: string;
   } | null;
   sortDate: number;
-};
+}
 
 function ArchiveView({
   items,

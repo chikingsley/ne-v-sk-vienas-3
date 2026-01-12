@@ -2,9 +2,9 @@
 
 Holiday hosting/guest matching platform for Lithuania.
 
-**Last updated**: December 21, 2025
+* *Last updated**: December 21, 2025
 
----
+- --
 
 ## Completed Features
 
@@ -61,7 +61,7 @@ Holiday hosting/guest matching platform for Lithuania.
 - [x] Denormalized unread counts on conversations for O(1) reads
 - [x] Slim profile returns from `listProfiles` (excludes large arrays)
 
----
+- --
 
 ## In Progress / Remaining
 
@@ -86,7 +86,7 @@ Holiday hosting/guest matching platform for Lithuania.
 - [ ] Save/favorite profiles
 - [ ] PWA support
 
----
+- --
 
 ## Tech Debt
 
@@ -110,29 +110,29 @@ Current lint complexity limit is 15. These are flagged but work fine:
 | `profiles.ts` filter | 17/15 | Many filter conditions - idiomatic |
 | `login-form` | 16/15 | Clean code, barely over |
 
-**Decision**: Consider raising biome complexity limit to 20 (would pass login-form & profiles.ts, still flag OnboardingPage and usePhotoUpload for future refactoring).
+* *Decision**: Consider raising biome complexity limit to 20 (would pass login-form & profiles.ts, still flag OnboardingPage and usePhotoUpload for future refactoring).
 
 ### Future Considerations
 
 - [ ] Consider Cloudflare R2 for images if scaling past bandwidth limits
 - [ ] Integrate `useOnboardingForm` hook (requires updating Step0-Step6 components)
 
----
+- --
 
 ## Environment Variables Checklist
 
-**Convex Dashboard:**
+* *Convex Dashboard:**
 - `CLERK_WEBHOOK_SECRET`
 - `CLERK_SECRET_KEY`
 - `MAILEROO_API_KEY`
 - `ADMIN_CLERK_USER_IDS` (comma-separated Clerk user IDs for admin functions)
 
-**Vercel:**
+* *Vercel:**
 - `NEXT_PUBLIC_CONVEX_URL`
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
 - `NEXT_PUBLIC_SENTRY_DSN`
 
----
+- --
 
 ## Quick Reference
 
@@ -143,7 +143,8 @@ bun dev          # Start dev server
 bun run check    # Lint + type check (ultracite + tsc)
 bun run lint     # Same as check
 bun test         # Run tests
-```
+
+```text
 
 ### Key files
 

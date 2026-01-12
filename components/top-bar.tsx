@@ -19,29 +19,18 @@ export function TopBar() {
   const totalNotifications = unreadCount + pendingInvites;
 
   // Get page title from pathname with i18n
-  const getPageTitle = () => {
-    if (pathname === "/browse") {
-      return t.navFindHosts;
-    }
-    if (pathname === "/profile") {
-      return t.navMyProfile;
-    }
-    if (pathname === "/messages") {
-      return t.navMessages;
-    }
-    if (pathname === "/settings") {
-      return t.navSettings;
-    }
-    if (pathname === "/location-picker") {
-      return t.navLocationPicker;
-    }
-    if (pathname.startsWith("/profile/") || pathname.startsWith("/people/")) {
-      return t.navProfile;
-    }
-    return "";
+  const PAGE_TITLES: Record<string, string> = {
+    "/browse": t.navFindHosts,
+    "/profile": t.navMyProfile,
+    "/messages": t.navMessages,
+    "/settings": t.navSettings,
+    "/location-picker": t.navLocationPicker,
   };
 
-  const pageTitle = getPageTitle();
+  const isProfilePage =
+    pathname.startsWith("/profile/") || pathname.startsWith("/people/");
+  const pageTitle =
+    PAGE_TITLES[pathname] ?? (isProfilePage ? t.navProfile : "");
 
   return (
     <header className="shrink-0 border-b bg-background">

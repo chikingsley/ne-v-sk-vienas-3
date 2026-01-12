@@ -8,10 +8,10 @@ import type { Id } from "@/convex/_generated/dataModel";
 import { usePhotoUpload } from "@/hooks/use-photo-upload";
 import { Button } from "./ui/button";
 
-type PhotoUploadProps = {
+interface PhotoUploadProps {
   currentPhotoUrl?: string;
   onPhotoUploaded: (url: string) => void;
-};
+}
 
 export function PhotoUpload({
   currentPhotoUrl,

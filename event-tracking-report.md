@@ -34,10 +34,10 @@ This document lists all PostHog events that have been automatically added to you
 - **sidebar_logo_clicked**: Fired when a user clicks the application logo in the sidebar to navigate to the homepage.
 - **sidebar_nav_item_clicked**: Fired when a user clicks a navigation item in the sidebar.
 
-
 ## Events still awaiting implementation
+
 - (human: you can fill these in)
----
+- --
 
 ## Next Steps
 
@@ -46,4 +46,4 @@ This document lists all PostHog events that have been automatically added to you
 3. Create insights and dashboards in PostHog
 4. Make a list of events we missed above. Knock them out yourself, or give this file to an agent.
 
-Learn more about what to measure with PostHog and why: https://posthog.com/docs/new-to-posthog/getting-hogpilled
+Learn more about what to measure with PostHog and why: [posthog.com/docs](https://posthog.com/docs/new-to-posthog/getting-hogpilled)

@@ -44,7 +44,8 @@ function TestComponent() {
     </button>
   );
 }
-```
+
+```text
 
 ## Custom span instrumentation in API calls
 
@@ -65,7 +66,8 @@ async function fetchUserData(userId) {
     },
   );
 }
-```
+
+```text
 
 # Logs
 
@@ -85,23 +87,25 @@ Initialization does not need to be repeated in other files, it only needs to hap
 import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
-  dsn: "https://d5fc64aa86917b7d110cfd8934510bb2@o4510503040253952.ingest.de.sentry.io/4510503042875472",
+  dsn: "[o4510503040253952.ingest.de.sentry.io/4510503042875472%22,](https://d5fc64aa86917b7d110cfd8934510bb2@o4510503040253952.ingest.de.sentry.io/4510503042875472",)
 
   enableLogs: true,
 });
-```
+
+```text
 
 ### Logger Integration
 
 ```javascript
 Sentry.init({
-  dsn: "https://d5fc64aa86917b7d110cfd8934510bb2@o4510503040253952.ingest.de.sentry.io/4510503042875472",
+  dsn: "[o4510503040253952.ingest.de.sentry.io/4510503042875472%22,](https://d5fc64aa86917b7d110cfd8934510bb2@o4510503040253952.ingest.de.sentry.io/4510503042875472",)
   integrations: [
     // send console.log, console.warn, and console.error calls as logs to Sentry
     Sentry.consoleLoggingIntegration({ levels: ["log", "warn", "error"] }),
   ],
 });
-```
+
+```text
 
 ## Logger Examples
 
@@ -123,4 +127,5 @@ logger.fatal("Database connection pool exhausted", {
   database: "users",
   activeConnections: 100,
 });
-```
+
+```text

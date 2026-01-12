@@ -20,12 +20,13 @@ Default to using Bun instead of Node.js.
 
 ## Testing
 
-**Convex backend tests:** Use `bun run test` which runs vitest (required for convex-test edge-runtime).
+* *Convex backend tests:** Use `bun run test` which runs vitest (required for convex-test edge-runtime).
 
 ```bash
 bun run test       # Run all tests (watch mode)
 bun run test:once  # Run once without watch
-```
+
+```text
 
 Tests are in `convex/*.test.ts`. Vitest is used because `convex-test` requires edge-runtime environment.
 
@@ -42,9 +43,10 @@ test("listProfiles returns profiles", async () => {
   const profiles = await t.query(api.profiles.listProfiles, {});
   expect(profiles).toEqual([]);
 });
-```
 
-**Frontend/unit tests:** Can use bun:test directly.
+```text
+
+* *Frontend/unit tests:** Can use bun:test directly.
 
 ```ts#index.test.ts
 import { test, expect } from "bun:test";
@@ -52,7 +54,8 @@ import { test, expect } from "bun:test";
 test("hello world", () => {
   expect(1).toBe(1);
 });
-```
+
+```text
 
 ## Frontend
 
@@ -89,7 +92,8 @@ Bun.serve({
     console: true,
   }
 })
-```
+
+```text
 
 HTML files can import .tsx, .jsx or .js files directly and Bun's bundler will transpile & bundle automatically. `<link>` tags can point to stylesheets and Bun's CSS bundler will bundle.
 
@@ -100,7 +104,8 @@ HTML files can import .tsx, .jsx or .js files directly and Bun's bundler will tr
     <script type="module" src="./frontend.tsx"></script>
   </body>
 </html>
-```
+
+```text
 
 With the following `frontend.tsx`:
 
@@ -119,12 +124,14 @@ export default function Frontend() {
 }
 
 root.render(<Frontend />);
-```
+
+```text
 
 Then, run index.ts
 
 ```sh
 bun --hot ./index.ts
-```
+
+```text
 
 For more information, read the Bun API docs in `node_modules/bun-types/docs/**.md`.

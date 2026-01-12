@@ -83,14 +83,14 @@ function getInitialStateFromProfile(profile: ProfileData) {
 type IconType = "check" | "question" | "x";
 type ColorType = "green" | "amber" | "red";
 
-type PreferenceOption = {
+interface PreferenceOption {
   id: string;
   title: string;
   description: string;
   iconType: IconType;
   colorType: ColorType;
   showDates: boolean;
-};
+}
 
 const HOSTING_OPTIONS: PreferenceOption[] = [
   {

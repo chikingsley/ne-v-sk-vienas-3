@@ -1,7 +1,7 @@
 # Welcome to your Convex functions directory!
 
 Write your Convex functions here.
-See https://docs.convex.dev/functions for more.
+See [docs.convex.dev/functions](https://docs.convex.dev/functions) for more.
 
 A query function that takes two arguments looks like:
 
@@ -20,7 +20,7 @@ export const myQueryFunction = query({
   // Function implementation.
   handler: async (ctx, args) => {
     // Read the database as many times as you need here.
-    // See https://docs.convex.dev/database/reading-data.
+    // See [docs.convex.dev/database](https://docs.convex.dev/database/reading-data.)
     const documents = await ctx.db.query("tablename").collect();
 
     // Arguments passed from the client are properties of the args object.
@@ -31,7 +31,8 @@ export const myQueryFunction = query({
     return documents;
   },
 });
-```
+
+```text
 
 Using this query function in a React component looks like:
 
@@ -40,7 +41,8 @@ const data = useQuery(api.myFunctions.myQueryFunction, {
   first: 10,
   second: "hello",
 });
-```
+
+```text
 
 A mutation function looks like:
 
@@ -60,7 +62,7 @@ export const myMutationFunction = mutation({
   handler: async (ctx, args) => {
     // Insert or modify documents in the database here.
     // Mutations can also read from the database like queries.
-    // See https://docs.convex.dev/database/writing-data.
+    // See [docs.convex.dev/database](https://docs.convex.dev/database/writing-data.)
     const message = { body: args.first, author: args.second };
     const id = await ctx.db.insert("messages", message);
 
@@ -68,7 +70,8 @@ export const myMutationFunction = mutation({
     return await ctx.db.get(id);
   },
 });
-```
+
+```text
 
 Using this mutation function in a React component looks like:
 
@@ -83,7 +86,8 @@ function handleButtonPress() {
     console.log(result),
   );
 }
-```
+
+```text
 
 Use the Convex CLI to push your functions to a deployment. See everything
 the Convex CLI can do by running `npx convex -h` in your project root

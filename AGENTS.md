@@ -6,14 +6,15 @@ This file provides context for AI agents working on the Nešvęsk vienas codebas
 
 Holiday hosting/guest matching platform for Lithuania. Connects hosts with guests for Christmas (Dec 24-26) and New Year's Eve (Dec 31) celebrations.
 
-**Tech Stack**: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, Convex (real-time database), Clerk (auth), Sentry (errors), PostHog (analytics)
+* *Tech Stack**: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, Convex (real-time database), Clerk (auth), Sentry (errors), PostHog (analytics)
 
 ## Quick Start
 
 ```bash
 bun install          # Install dependencies
 bun dev              # Start Next.js + Convex dev servers (port 7777)
-```
+
+```text
 
 ## Commands
 
@@ -29,7 +30,7 @@ bun dev              # Start Next.js + Convex dev servers (port 7777)
 
 ## Project Structure
 
-```
+```text
 app/                    # Next.js App Router
   (landing)/           # Public landing page
   (dashboard)/         # Authenticated pages (browse, messages, profile, settings)
@@ -39,36 +40,42 @@ components/            # React components
   ui/                  # shadcn/ui base components
 convex/                # Convex backend
   schema.ts            # Database schema (source of truth for data model)
-  *.ts                 # Queries, mutations, actions
-  *.test.ts            # Backend tests (use convex-test)
+  * .ts                 # Queries, mutations, actions
+  * .test.ts            # Backend tests (use convex-test)
 hooks/                 # Custom React hooks
 lib/                   # Utilities (i18n, types, helpers)
 contexts/              # React contexts
 emails/                # React Email templates
-```
+
+```text
 
 ## Coding Conventions
 
 ### Bun over Node.js
+
 - Use `bun` instead of `node`, `npm`, or `yarn`
 - Bun automatically loads `.env` files - don't use dotenv
 
 ### TypeScript
+
 - Strict mode enabled (`strict: true` in tsconfig)
 - Use proper typing, avoid `any`
 - Prefer type inference where obvious
 
 ### Linting & Formatting
+
 - Biome via Ultracite handles both linting and formatting
 - Pre-commit hooks run automatically (Husky + lint-staged)
 - Run `bun lint:fix` to auto-fix issues
 
 ### Component Patterns
+
 - Use shadcn/ui components from `components/ui/`
 - Follow existing component structure in `components/`
 - Use Tailwind CSS for styling
 
 ### Convex Backend
+
 - Schema defined in `convex/schema.ts`
 - Queries are read-only, mutations modify data
 - Actions can have side effects (API calls, etc.)
@@ -81,7 +88,8 @@ Tests use Vitest with `convex-test` for the Convex edge-runtime environment:
 ```bash
 bun test              # Watch mode
 bun test:once         # Single run
-```
+
+```text
 
 Test files are in `convex/*.test.ts`. Example:
 
@@ -96,7 +104,8 @@ test("example", async () => {
   const result = await t.query(api.profiles.listProfiles, {});
   expect(result).toEqual([]);
 });
-```
+
+```text
 
 ## Environment Variables
 
@@ -128,6 +137,7 @@ The database schema is in `convex/schema.ts`. Key tables:
 ## Key Workflows
 
 ### User Flow
+
 1. Sign up via Clerk magic link
 2. Complete onboarding (multi-step profile wizard)
 3. Browse hosts/guests by city, date, language
@@ -135,6 +145,7 @@ The database schema is in `convex/schema.ts`. Key tables:
 5. Chat when connected
 
 ### Auth
+
 - Clerk handles authentication
 - Clerk webhooks sync user data to Convex (`convex/http.ts`)
 - User deletion cascades through all related data

@@ -1,6 +1,6 @@
 # Nešvęsk vienas
 
-**"Don't celebrate alone"** - A platform connecting hosts and guests for holiday celebrations in Lithuania.
+* *"Don't celebrate alone"** - A platform connecting hosts and guests for holiday celebrations in Lithuania.
 
 ## About
 
@@ -39,13 +39,16 @@ Nešvęsk vienas helps people find companions for holiday celebrations. Hosts ca
 
 ```bash
 # Install dependencies
+
 bun install
 
 # Run development server (starts both Next.js and Convex)
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+bun dev
+
+```text
+
+Open [[localhost](http://localhost:3000)](http://localhost:3000) in your browser.
 
 ### Environment Variables
 
@@ -53,36 +56,42 @@ Create a `.env.local` file with the following:
 
 ```env
 # Convex
+
 CONVEX_DEPLOYMENT=dev:your-deployment-name
-NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
+NEXT_PUBLIC_CONVEX_URL=[your-deployment.convex.cloud](https://your-deployment.convex.cloud)
 
 # Clerk
+
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
 CLERK_SECRET_KEY=sk_test_...
-CLERK_ISSUER_DOMAIN=https://your-clerk-issuer-domain
+CLERK_ISSUER_DOMAIN=[your-clerk-issuer-domain](https://your-clerk-issuer-domain)
 
 # Maileroo (for emails)
+
 MAILEROO_API_KEY=...
-```
+
+```text
 
 Also set these in your **Convex Dashboard** (Settings → Environment Variables):
 
 ```env
   CLERK_WEBHOOK_SECRET=whsec_...   # From Clerk webhook endpoint
   CLERK_SECRET_KEY=sk_test_...     # Same as above
-  CLERK_ISSUER_DOMAIN=https://your-clerk-issuer-domain
+  CLERK_ISSUER_DOMAIN=[your-clerk-issuer-domain](https://your-clerk-issuer-domain)
   MAILEROO_API_KEY=...             # Transactional email provider
 
 # Optional admin allowlist for dev/admin Convex functions
+
 ADMIN_CLERK_USER_IDS=user_...,user_...
-```
+
+```text
 
 ### Clerk Webhook Setup
 
 To enable bi-directional sync between Clerk and Convex:
 
-1. Go to **Clerk Dashboard** → **Webhooks** → **+ Add Endpoint**
-2. Set **Endpoint URL**: `https://YOUR-DEPLOYMENT.convex.site/clerk-users-webhook`
+1. Go to **Clerk Dashboard**→**Webhooks**→**+ Add Endpoint**
+2. Set **Endpoint URL**: `[your-deployment.convex.site/clerk-users-webhook%60](https://YOUR-DEPLOYMENT.convex.site/clerk-users-webhook`)
 3. Select events: `user.created`, `user.updated`, `user.deleted`
 4. Copy the **Signing Secret** and set it as `CLERK_WEBHOOK_SECRET` in Convex
 
@@ -103,7 +112,8 @@ Run it from the Convex dashboard “Functions” panel (as an admin) with a smal
   "createMissing": false,
   "dryRun": true
 }
-```
+
+```text
 
 Then re-run with `"dryRun": false`. If your Clerk instance does not already contain those users, you can set `"createMissing": true` to create missing users in Clerk using their email address.
 
@@ -138,7 +148,8 @@ hooks/                 # Custom hooks
   use-photo-upload.ts  # Shared photo upload logic
   use-onboarding-form.ts # Onboarding form state
 lib/                   # Utilities
-```
+
+```text
 
 ## Scripts
 
@@ -152,7 +163,8 @@ bun run lint     # Ultracite + TypeScript check
 bun run check    # Same as lint
 bun lint:fix     # Fix lint issues
 bun typecheck    # TypeScript only
-```
+
+```text
 
 ## Code Quality
 
@@ -160,11 +172,14 @@ This project uses Ultracite (Biome) for linting and formatting:
 
 ```bash
 # Fix formatting and lint issues
+
 bunx ultracite fix
 
 # Check for issues
+
 bunx ultracite check
-```
+
+```text
 
 ## Documentation
 

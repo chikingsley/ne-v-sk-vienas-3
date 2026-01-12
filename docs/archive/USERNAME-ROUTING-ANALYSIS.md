@@ -29,7 +29,7 @@
 
 ### Phase 1: Database Schema Changes ⚠️ **REQUIRES MIGRATION**
 
-**File**: `convex/schema.ts`
+* *File**: `convex/schema.ts`
 
 1. Add `username` field to `profiles` table:
    ```typescript
@@ -41,14 +41,14 @@
    .index("by_username", ["username"])
    ```
 
-**Migration considerations:**
+* *Migration considerations:**
 - Existing profiles won't have usernames initially
 - Need to handle null/undefined usernames during transition
 - Can make username required later after migration
 
 ### Phase 2: Backend Functions
 
-**File**: `convex/profiles.ts`
+* *File**: `convex/profiles.ts`
 
 1. **Add query to get profile by username**:
    ```typescript
@@ -123,22 +123,22 @@
 
 ### Phase 3: Frontend Routes
 
-**New file**: `app/(dashboard)/people/[username]/page.tsx`
+* *New file**: `app/(dashboard)/people/[username]/page.tsx`
 
 - Similar to `profile/[id]/page.tsx` but uses `getProfileByUsername`
 - Handle both username and ID routes for backward compatibility
 
-**Option A: Keep both routes** (recommended for gradual migration)
+* *Option A: Keep both routes** (recommended for gradual migration)
 - `/profile/[id]` - still works for existing links
 - `/people/[username]` - new preferred route
 
-**Option B: Redirect old route to new**
+* *Option B: Redirect old route to new**
 - `/profile/[id]` → fetch profile → redirect to `/people/[username]`
 - More complex, breaks existing links temporarily
 
 ### Phase 4: Username Selection UI
 
-**File**: `app/onboarding/page.tsx` or `app/(dashboard)/settings/page.tsx`
+* *File**: `app/onboarding/page.tsx` or `app/(dashboard)/settings/page.tsx`
 
 Add username input field:
 - Real-time availability checking
@@ -148,14 +148,15 @@ Add username input field:
 
 ### Phase 5: Update All Profile Links
 
-**Files to update**:
+* *Files to update**:
 1. `components/listing-card.tsx` - change `/profile/${userId}` → `/people/${username}`
 2. `app/(dashboard)/browse/page.tsx` - update link
 3. `app/(dashboard)/profile/page.tsx` - redirect to username route
 4. `components/DevPanel.tsx` - update dev links
 5. Any other components linking to profiles
 
-**Helper function**: Create `getProfileUrl(profile)` utility:
+* *Helper function**: Create `getProfileUrl(profile)` utility:
+
 ```typescript
 export function getProfileUrl(profile: { username?: string; userId: Id<"users"> }): string {
   if (profile.username) {
@@ -164,7 +165,8 @@ export function getProfileUrl(profile: { username?: string; userId: Id<"users"> 
   // Fallback to ID route for profiles without username
   return `/profile/${profile.userId}`;
 }
-```
+
+```text
 
 ## Effort Estimate
 
@@ -176,30 +178,30 @@ export function getProfileUrl(profile: { username?: string; userId: Id<"users"> 
 | Username UI | 1-2 hours | Medium |
 | Update all links | 30-45 min | Low |
 | Testing & edge cases | 1 hour | Medium |
-| **Total** | **4-6 hours** | **Medium** |
+| **Total**|**4-6 hours**|**Medium** |
 
 ## Edge Cases to Handle
 
 1. **Existing profiles without usernames**
-   - Support both routes during transition
-   - Prompt users to set username on next login
+    - Support both routes during transition
+    - Prompt users to set username on next login
 
 2. **Username validation**
-   - Format: `^[a-z0-9-]{3,20}$`
-   - Reserved words: `admin`, `api`, `people`, `profile`, etc.
-   - Case-insensitive matching
+    - Format: `^[a-z0-9-]{3,20}$`
+    - Reserved words: `admin`, `api`, `people`, `profile`, etc.
+    - Case-insensitive matching
 
 3. **Username changes**
-   - Allow changes? (recommend: yes, but limit frequency)
-   - Update all links? (no, old links can redirect)
+    - Allow changes? (recommend: yes, but limit frequency)
+    - Update all links? (no, old links can redirect)
 
 4. **Backward compatibility**
-   - Keep `/profile/[id]` route working
-   - Redirect to username route if username exists
+    - Keep `/profile/[id]` route working
+    - Redirect to username route if username exists
 
 5. **SEO considerations**
-   - Username routes are more SEO-friendly
-   - Consider adding profile metadata
+    - Username routes are more SEO-friendly
+    - Consider adding profile metadata
 
 ## Recommended Approach
 
@@ -212,17 +214,17 @@ export function getProfileUrl(profile: { username?: string; userId: Id<"users"> 
 ## Questions to Consider
 
 1. **Should usernames be changeable?**
-   - Yes: More flexible, but breaks shareable links
-   - No: More stable, but users stuck with bad choices
+    - Yes: More flexible, but breaks shareable links
+    - No: More stable, but users stuck with bad choices
 
 2. **Should we migrate existing users?**
-   - Auto-generate from firstName? (e.g., `john-smith-123`)
-   - Require manual selection?
+    - Auto-generate from firstName? (e.g., `john-smith-123`)
+    - Require manual selection?
 
 3. **Reserved usernames?**
-   - System routes: `admin`, `api`, `people`, `profile`, `settings`, etc.
-   - Common words: `about`, `help`, `contact`, etc.
+    - System routes: `admin`, `api`, `people`, `profile`, `settings`, etc.
+    - Common words: `about`, `help`, `contact`, etc.
 
 4. **Username display?**
-   - Show `@username` in profile?
-   - Use in URLs only?
+    - Show `@username` in profile?
+    - Use in URLs only?

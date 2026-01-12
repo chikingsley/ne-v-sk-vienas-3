@@ -2,7 +2,7 @@
 
 This guide explains how to make changes to the website content, translations, and UI.
 
----
+- --
 
 ## 1. Getting Started
 
@@ -20,21 +20,23 @@ This guide explains how to make changes to the website content, translations, an
 2. Go to **File → Open Folder** and select the cloned project folder
 3. Make the window fullscreen for easier editing
 
----
+- --
 
 ## 2. Using AI to Edit
 
 ### Open the AI Terminal
 
-- Press **Command + J** (Mac) or **Ctrl + J** (Windows)
+- Press **Command + J**(Mac) or**Ctrl + J** (Windows)
 - Or click the second icon from the right in the top-right corner (opens the bottom panel)
 
 ### Update Gemini CLI (First Time Setup)
 
 In the terminal, type:
-```
+
+```text
 update gemini cli
-```
+
+```text
 
 This ensures you have the latest version.
 
@@ -42,56 +44,67 @@ This ensures you have the latest version.
 
 Type `gemini` in the terminal and press Enter. You're now ready to give editing instructions.
 
----
+- --
 
 ## 3. Common Editing Tasks
 
 ### Edit Landing Page Text
 
 Tell Gemini or Cursor:
-```
+
+```text
 Change the hero headline on the landing page to say "Celebrate Together This Season"
-```
+
+```text
 
 Or point to the file directly:
-```
+
+```text
 In src/pages/LandingPage.tsx, update the hero title to say "..."
-```
+
+```text
 
 ### Edit with a Reference Image
 
 You can share images for reference:
-```
+
+```text
 I want the landing page to look similar to this design [paste screenshot or describe]
 Make it have a warmer color scheme and add more holiday imagery
-```
+
+```text
 
 ### Update Translations
 
 All translations are in a single file: `src/lib/i18n.ts`
 
 Tell the AI:
-```
+
+```text
 Update the Lithuanian translation for "heroTitle" to say "Šventės kartu"
-```
+
+```text
 
 Or:
-```
+
+```text
 Add a new translation key called "welcomeMessage" with text in all 4 languages:
 - Lithuanian: "Sveiki atvykę"
 - English: "Welcome"
 - Ukrainian: "Ласкаво просимо"
 - Russian: "Добро пожаловать"
-```
+
+```text
 
 ### Change Colors or Styling
 
-```
+```text
 Make the primary button color more red (like #DC2626)
 Change the footer background to dark green
-```
 
----
+```text
+
+- --
 
 ## 4. Edit Text Directly (Without AI)
 
@@ -102,7 +115,8 @@ Open `src/lib/i18n.ts` to edit text directly:
 ```typescript
 heroTitle: 'This holiday season,',     // English
 heroTitle: 'Šį švenčių sezoną,',        // Lithuanian
-```
+
+```text
 
 Just change the text inside the quotes and save.
 
@@ -110,15 +124,16 @@ Just change the text inside the quotes and save.
 
 Open `src/pages/LandingPage.tsx` to edit layout and content directly.
 
----
+- --
 
 ## 5. Save Your Changes to GitHub
 
 After making edits, tell Gemini:
 
-```
+```text
 Commit my changes and push to GitHub with the message "Updated landing page text"
-```
+
+```text
 
 Or use these commands separately:
 
@@ -138,11 +153,13 @@ Or use these commands separately:
    ```
 
 If there are any errors, tell Gemini:
-```
-Fix the errors and try pushing again
-```
 
----
+```text
+Fix the errors and try pushing again
+
+```text
+
+- --
 
 ## 6. Key Files Reference
 
@@ -156,7 +173,7 @@ Fix the errors and try pushing again
 | Settings page | `src/pages/SettingsPage.tsx` |
 | Browse page | `src/pages/BrowsePage.tsx` |
 
----
+- --
 
 ## 7. Language Selector
 
@@ -169,32 +186,36 @@ It supports:
 - **RU** - Russian
 
 To add it to a page, use:
+
 ```jsx
 import { LanguageSelector } from '@/components/LanguageSelector';
 
 // In your component:
 <LanguageSelector />
-```
 
----
+```text
+
+- --
 
 ## 8. Tips
 
 - **Preview changes:** The app updates automatically when you save files (hot reload)
-- **Undo mistakes:** Press **Command + Z** to undo, or tell Gemini "undo that change"
+- **Undo mistakes:**Press**Command + Z** to undo, or tell Gemini "undo that change"
 - **Ask for help:** You can always ask Gemini "What file should I edit to change X?"
 - **See changes:** After pushing, changes go live once the site rebuilds (usually 1-2 minutes)
 
----
+- --
 
 ## 9. Troubleshooting
 
 ### "Command not found: gemini"
 
 Run in terminal:
-```
+
+```text
 update gemini cli
-```
+
+```text
 
 ### Changes not showing
 
@@ -205,11 +226,13 @@ update gemini cli
 ### Push failed
 
 Tell Gemini:
-```
-There was an error pushing. Please fix it and try again.
-```
 
----
+```text
+There was an error pushing. Please fix it and try again.
+
+```text
+
+- --
 
 ## Need Help?
 

@@ -2,10 +2,10 @@ import { fetchQuery } from "convex/nextjs";
 import type { Metadata } from "next";
 import { api } from "@/convex/_generated/api";
 
-type Props = {
+interface Props {
   params: Promise<{ username: string }>;
   children: React.ReactNode;
-};
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params;

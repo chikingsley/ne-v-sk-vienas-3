@@ -1,7 +1,7 @@
 # Nešvęsk vienas - Planning Document
 
-**Name**: Nešvęsk vienas ("Don't celebrate alone")
-**URL**: <https://v0-nesvesk-vienas-app.vercel.app>
+* *Name**: Nešvęsk vienas ("Don't celebrate alone")
+* *URL**: <https://v0-nesvesk-vienas-app.vercel.app>
 
 ## Open Questions
 
@@ -71,21 +71,22 @@ Both hosts and guests can browse and filter by:
 
 ### Matching Flow
 
-```
+```text
 1. User browses listings (hosts see guests, guests see hosts)
 
 2. Either side can initiate:
-   - Host clicks "Invite" on a guest
-   - Guest clicks "Become a guest" on a host
+    - Host clicks "Invite" on a guest
+    - Guest clicks "Become a guest" on a host
 
 3. Other party gets email notification
 
 4. They accept or decline:
-   - Accept → Both get contact details, moved to "Christmas matches" page
-   - Decline → Requester gets polite "no" email
+    - Accept → Both get contact details, moved to "Christmas matches" page
+    - Decline → Requester gets polite "no" email
 
 5. Celebrate together 🎄
-```
+
+```text
 
 ### Pages Needed
 
@@ -151,7 +152,7 @@ Users can filter listings by:
 
 ## Database Schema (Rough)
 
-```
+```text
 Users
 ├── id
 ├── email (unique, for auth)
@@ -161,7 +162,7 @@ Users
 ├── city
 ├── area (for larger cities)
 ├── age (guests) / preferredGuestAge (hosts)
-├── languages[] 
+├── languages[]
 ├── dietaryInfo
 ├── concept (hosts only): "party" | "dinner" | "hangout"
 ├── capacity (hosts only)
@@ -205,13 +206,14 @@ Reviews (post-event)
 ├── rating (1-5?)
 ├── text
 ├── createdAt
-```
+
+```text
 
 ## Legal/Safety Notes
 
 All comparable apps (TimeLeft, 222, Couchsurfing) use the same legal approach:
 
-**Terms of Service must include:**
+* *Terms of Service must include:**
 
 - Statement that you are a "platform" not a party to interactions
 - Full liability release - users release the company from claims
@@ -219,16 +221,16 @@ All comparable apps (TimeLeft, 222, Couchsurfing) use the same legal approach:
 - GDPR compliance statement (required in EU/Lithuania)
 - Right to terminate accounts, reporting mechanism
 
-**For Lithuania specifically:**
+* *For Lithuania specifically:**
 
 - GDPR compliance required from day one
 - Consider whether VšĮ (nonprofit entity) registration is needed, or if informal operation is okay for MVP
 
-**Key difference from TimeLeft/222**: Those apps use public venues as a safety layer. Private home hosting shifts more risk to users — Terms of Service language matters more.
+* *Key difference from TimeLeft/222**: Those apps use public venues as a safety layer. Private home hosting shifts more risk to users — Terms of Service language matters more.
 
 ## Comparable Apps
 
-**Most similar model (home hosting, mutual matching):**
+* *Most similar model (home hosting, mutual matching):**
 
 | App | Model | Key Difference |
 |-----|-------|----------------|
@@ -236,7 +238,7 @@ All comparable apps (TimeLeft, 222, Couchsurfing) use the same legal approach:
 | **Couchers.org** | Same as CS, free/nonprofit | Direct CS replacement |
 | **BeWelcome** | Same as CS, free/nonprofit | Smaller, open source |
 
-**Nešvęsk vienas is unique**: Combines home hosting with seasonal/holiday focus + support for Ukrainian refugees. Nobody else is doing exactly this.
+* *Nešvęsk vienas is unique**: Combines home hosting with seasonal/holiday focus + support for Ukrainian refugees. Nobody else is doing exactly this.
 
 ## Next Steps
 

@@ -32,52 +32,64 @@ A holiday hosting/guest matching platform for Lithuania. Connect hosts with gues
 
 ```bash
 # Install dependencies
+
 bun install
 
 # Set up Convex (follow prompts)
+
 bunx convex dev
-```
+
+```text
 
 ### Development
 
 ```bash
 # Run both Bun server and face service
+
 bun dev
 
 # Or run separately:
+
 bun dev:bun      # Bun server on port 3001
 bun dev:face     # Face service on port 5001
 bun dev:convex   # Convex dev server
-```
+
+```text
 
 ### Testing
 
 ```bash
 # Run Convex tests (vitest)
+
 bun test
 
 # Run once without watch
+
 bun test:run
 
 # With coverage
+
 bun test:coverage
-```
+
+```text
 
 ### Build
 
 ```bash
 bun run build
-```
+
+```text
 
 ### Production
 
 ```bash
 bun start
-```
+
+```text
 
 ## Project Structure
 
-```
+```text
 ├── src/                  # Frontend React app
 │   ├── components/       # UI components
 │   ├── pages/            # Route pages
@@ -90,16 +102,18 @@ bun start
 │   └── models/           # ONNX models
 ├── docs/                 # Documentation
 └── styles/               # Global CSS
-```
+
+```text
 
 ## Environment Variables
 
 Create `.env.local`:
 
-```
+```text
 CONVEX_DEPLOYMENT=your-deployment
 RESEND_API_KEY=your-resend-key
-```
+
+```text
 
 ## License
 

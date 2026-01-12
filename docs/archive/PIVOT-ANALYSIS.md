@@ -4,14 +4,14 @@
 
 ### What We Have Now
 
-**Current Flow:**
+* *Current Flow:**
 1. User signs up → Multi-step onboarding (3 steps: Photo/Basic Info → Bio → Languages/Dates)
 2. Pick role (Host/Guest/Both)
 3. Browse page with filters by City, Date, Language
 4. Send invitation → Accept/Decline → Match → Chat → Share contact details
 5. Events page for confirmed gatherings
 
-**Current Schema Fields (profiles):**
+* *Current Schema Fields (profiles):**
 - `role` - host/guest/both
 - `firstName`, `lastName`, `age`, `city`, `bio`
 - `photoUrl`, `photos[]` - up to 5 photos
@@ -22,14 +22,14 @@
 - Host-specific: `smokingAllowed`, `drinkingAllowed`, `petsAllowed`, `hasPets`
 - Contact (hidden): `phone`, `address`
 
-**Current Limitations:**
+* *Current Limitations:**
 - Onboarding is quick but shallow (doesn't capture hosting preferences well)
 - Role selection is binary (host/guest/both) - not like Couchers' fluidity
 - Holiday-date focus is good for niche but limits flexibility
 - No "My Home" section with detailed hosting info
 - No map view (in TODO)
 
----
+- --
 
 ## Couchers.org / Couchsurfing Model
 
@@ -72,7 +72,7 @@ Like your `user-preferences-ui` reference project:
 | **Discovery** | Filter by dates → find hosts | Browse all → filter by preferences |
 | **Events Tab** | Central feature | Could be redundant |
 
----
+- --
 
 ## Recommendation: Hybrid Approach
 
@@ -92,7 +92,7 @@ Since you're focused on **Lithuanian holidays** (niche is good!), I suggest a hy
 
 Replace the simple "I want to be a host/guest/both" with:
 
-```
+```text
 Step 1: Hosting Status
 ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
 │      ✓          │  │       ?         │  │       ✗         │
@@ -108,7 +108,8 @@ Step 2: Meetup Status (for non-hosts or additional)
 │ I'm eager to    │  │ Might meet up   │  │ Prefer not to   │
 │ meet people     │  │ depending on... │  │ meet right now  │
 └─────────────────┘  └─────────────────┘  └─────────────────┘
-```
+
+```text
 
 #### 2. **"My Home" Tab in Profile/Settings**
 
@@ -135,7 +136,8 @@ home: {
   houseRulesText: string, // Free-form house rules
   neighborhoodInfo: string,
 }
-```
+
+```text
 
 #### 3. **Browse Page Redesign**
 
@@ -152,7 +154,7 @@ Instead of being the primary flow, events become:
 - **Public holiday gatherings** - Optional: hosts can post open events
 - Could also work for "host is having a dinner party, looking for 3 guests"
 
----
+- --
 
 ## Implementation Plan
 
@@ -189,47 +191,47 @@ Instead of being the primary flow, events become:
 - [ ] Last active timestamps
 - [ ] Response rate tracking
 
----
+- --
 
 ## Questions to Decide
 
 1. **Holiday Dates vs Year-Round**
-   - Keep holiday dates as primary? (niche = good)
-   - Or expand to year-round hosting with "seasonal availability"?
+    - Keep holiday dates as primary? (niche = good)
+    - Or expand to year-round hosting with "seasonal availability"?
 
 2. **Events Feature**
-   - Keep as-is for confirmed gatherings?
-   - Add "public events" for open invitations?
-   - Or deprecate entirely?
+    - Keep as-is for confirmed gatherings?
+    - Add "public events" for open invitations?
+    - Or deprecate entirely?
 
 3. **Location Privacy**
-   - Approximate circle (like Couchers)?
-   - City-level only (current)?
-   - Street-level after match?
+    - Approximate circle (like Couchers)?
+    - City-level only (current)?
+    - Street-level after match?
 
 4. **Onboarding Depth**
-   - Quick 3-step (current) + fill "My Home" later?
-   - Or longer onboarding with all preferences upfront?
+    - Quick 3-step (current) + fill "My Home" later?
+    - Or longer onboarding with all preferences upfront?
 
----
+- --
 
 ## Reference Projects Summary
 
 ### `docs/reference-projects/user-preferences-ui`
 
-**Use for:** Preference Cards component (Hosting Status, Meetup Status)
+* *Use for:** Preference Cards component (Hosting Status, Meetup Status)
 - Beautiful card-based selection UI
 - Already styled, just needs integration
 - Icons: ✓ / ? / ✗ for clear visual hierarchy
 
 ### `docs/reference-projects/couchers-event-manager`
 
-**Use for:** Event creation modal design
+* *Use for:** Event creation modal design
 - AI-powered event description
 - Nice form layout with date/time/location
 - Could inform public events feature
 
----
+- --
 
 ## Next Steps
 

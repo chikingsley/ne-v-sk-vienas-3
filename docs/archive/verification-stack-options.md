@@ -2,7 +2,7 @@
 
 Two implementation paths for a Lithuania-based couchsurfing platform using Bun/Node.js.
 
----
+- --
 
 ## Option 1: Complete Open Source (Self-Hosted)
 
@@ -20,7 +20,7 @@ Full control, zero per-verification costs, runs on Mac or small server.
 
 ### Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                    Bun API Server (:3000)                   │
 │         Handles uploads, orchestrates microservices         │
@@ -37,22 +37,23 @@ Full control, zero per-verification costs, runs on Mac or small server.
            ▼                  ▼                  ▼
       DeepFace +           docTR            PassportEye
       ArcFace model                         + mrz lib
-```
+
+```text
 
 ### What Each Service Does
 
-**Face Service (DeepFace)**
+* *Face Service (DeepFace)**
 - Liveness detection (anti-spoofing) on selfie
 - Face extraction from ID photo
 - Face matching: selfie vs ID photo
 - Returns: `verified: bool`, `distance: float`, `is_real: bool`
 
-**OCR Service (docTR)**
+* *OCR Service (docTR)**
 - Text extraction from ID document images
 - Handles Lithuanian, English, and other EU languages
 - Returns: extracted fields as JSON
 
-**MRZ Service (PassportEye)**
+* *MRZ Service (PassportEye)**
 - Locates MRZ zone in ID/passport images
 - Parses standardized fields: name, DOB, nationality, doc number, expiry
 - Validates checksums
@@ -60,7 +61,7 @@ Full control, zero per-verification costs, runs on Mac or small server.
 
 ### Verification Flow
 
-```
+```text
 1. User uploads: ID photo + selfie
                     │
 2. Bun validates file types/sizes
@@ -80,11 +81,13 @@ Full control, zero per-verification costs, runs on Mac or small server.
            └─────────────────┘
                     │
 6. Return combined result + store verification record
-```
+
+```text
 
 ### Key Code Snippets
 
-**Face Service (Python/Flask)**
+* *Face Service (Python/Flask)**
+
 ```python
 from deepface import DeepFace
 
@@ -101,9 +104,11 @@ def verify_faces():
         "distance": result["distance"],
         "threshold": result["threshold"]
     })
-```
 
-**MRZ Service (Python)**
+```text
+
+* *MRZ Service (Python)**
+
 ```python
 from passporteye import read_mrz
 
@@ -113,20 +118,22 @@ def parse_mrz():
     if mrz is None:
         return jsonify({"error": "No MRZ found"}), 400
     return jsonify(mrz.to_dict())
-```
 
-**Bun Orchestration**
+```text
+
+* *Bun Orchestration**
+
 ```typescript
 const verifyUser = async (idPhoto: File, selfie: File) => {
   // 1. Extract MRZ data
-  const mrzData = await fetch('http://localhost:5003/parse-mrz', {
+  const mrzData = await fetch('[localhost/parse-mrz',](http://localhost:5003/parse-mrz',) {
     method: 'POST',
     body: formData
   }).then(r => r.json());
 
   // 2. Verify face + liveness
-  const faceResult = await fetch('http://localhost:5001/verify', {
-    method: 'POST', 
+  const faceResult = await fetch('[localhost/verify',](http://localhost:5001/verify',) {
+    method: 'POST',
     body: formData
   }).then(r => r.json());
 
@@ -136,7 +143,8 @@ const verifyUser = async (idPhoto: File, selfie: File) => {
     confidence: 1 - faceResult.distance
   };
 };
-```
+
+```text
 
 ### Hardware Requirements
 
@@ -154,7 +162,7 @@ const verifyUser = async (idPhoto: File, selfie: File) => {
 | No vendor lock-in | You handle edge cases |
 | Works offline | No government database checks |
 
----
+- --
 
 ## Option 2: Hybrid with Persona Free Tier
 
@@ -170,7 +178,7 @@ Leverage Persona's **500 free verifications/month for 12 months**, then $1/verif
 
 ### Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                    Bun API Server (:3000)                   │
 │              User auth, verification status                 │
@@ -187,11 +195,12 @@ Leverage Persona's **500 free verifications/month for 12 months**, then $1/verif
 │   • Fraud signals                                           │
 │   • Lithuania ID support ✓                                  │
 └─────────────────────────────────────────────────────────────┘
-```
+
+```text
 
 ### Verification Flow
 
-```
+```text
 1. User clicks "Verify Identity" in your app
                     │
 2. Bun creates Persona inquiry via API
@@ -204,7 +213,8 @@ Leverage Persona's **500 free verifications/month for 12 months**, then $1/verif
 5. Bun receives webhook → updates user verification status
                     │
 6. User sees "Verified ✓" badge on profile
-```
+
+```text
 
 ### What Persona Handles
 
@@ -217,10 +227,11 @@ Leverage Persona's **500 free verifications/month for 12 months**, then $1/verif
 
 ### Key Code Snippets
 
-**Create Verification Inquiry (Bun)**
+* *Create Verification Inquiry (Bun)**
+
 ```typescript
 const createVerification = async (userId: string) => {
-  const response = await fetch('https://api.withpersona.com/api/v1/inquiries', {
+  const response = await fetch('[api.withpersona.com/api](https://api.withpersona.com/api/v1/inquiries',) {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${PERSONA_API_KEY}`,
@@ -240,9 +251,11 @@ const createVerification = async (userId: string) => {
   return inquiry.data.attributes['hosted-flow-url'];
   // Redirect user to this URL
 };
-```
 
-**Handle Webhook (Bun)**
+```text
+
+* *Handle Webhook (Bun)**
+
 ```typescript
 app.post('/webhooks/persona', async (req) => {
   const event = req.body;
@@ -257,7 +270,8 @@ app.post('/webhooks/persona', async (req) => {
     });
   }
 });
-```
+
+```text
 
 ### Pricing
 
@@ -277,7 +291,7 @@ app.post('/webhooks/persona', async (req) => {
 | Zero infrastructure | Less customization |
 | Handles fraud detection | Monthly minimum after Y1 |
 
----
+- --
 
 ## Recommendation
 
@@ -289,9 +303,9 @@ app.post('/webhooks/persona', async (req) => {
 | Maximum data control required | **Open Source** |
 | Need government database checks | **Persona** (or Veriff/iDenfy) |
 
-**Suggested path**: Start with Persona free tier to validate your platform. Build the open-source stack in parallel as a fallback. Once you exceed 500/month or need more control, you have both options ready.
+* *Suggested path**: Start with Persona free tier to validate your platform. Build the open-source stack in parallel as a fallback. Once you exceed 500/month or need more control, you have both options ready.
 
----
+- --
 
 ## Quick Reference: Services Comparison
 

@@ -4,7 +4,7 @@
 
 Convex supports point-in-time queries, mutations and actions (see [HTTP client](/api/classes/browser.ConvexHttpClient.md)) and those plus query subscriptions (see [ConvexClient](/api/classes/browser.ConvexClient.md)) in Bun.
 
-```
+```text
 import { ConvexHttpClient, ConvexClient } from "convex/browser";
 import { api } from "./convex/_generated/api.js";
 
@@ -22,7 +22,8 @@ const unsubscribe = client.onUpdate(api.messages.list, {}, (messages) =>
 await Bun.sleep(1000);
 client.mutate(api.messages.send, {}, { body: "hello!", author: "me" });
 await Bun.sleep(1000);
-```
+
+```text
 
 ## Using Convex with Bun without codegen[​](#using-convex-with-bun-without-codegen "Direct link to Using Convex with Bun without codegen")
 

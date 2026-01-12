@@ -5,7 +5,7 @@ All notable changes to Nešvęsk vienas will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
----
+- --
 
 ## [1.1.0] - 2025-12-21
 
@@ -40,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `backfillUnreadCounts` now uses `internalMutation` for dashboard execution
 - Slim profile types in `listing-card.tsx` and `unified-profile-card.tsx`
 
----
+- --
 
 ## [1.0.0] - 2025-12-11
 
@@ -87,7 +87,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sentry error monitoring
 - Migrated to `proxy.ts` (Next.js 16 convention)
 
----
+- --
 
 ## [0.3.0] - 2024-12-08
 
@@ -121,7 +121,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `@clerk/backend` for Clerk API calls
 - Convex environment variables: `CLERK_WEBHOOK_SECRET`, `CLERK_SECRET_KEY`
 
----
+- --
 
 ## [0.2.0] - 2024-12-07
 
@@ -147,7 +147,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - YuNet face detection: 227KB, ~4ms inference
 - Python 3.12 + FastAPI + ONNX Runtime backend
 
----
+- --
 
 ## [0.1.0] - 2024-12-03
 
@@ -177,7 +177,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Protected routes with auth guards
 - HMR in development mode
 
----
+- --
 
 ## Version History
 
