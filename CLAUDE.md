@@ -1,3 +1,10 @@
+## Development Philosophy
+
+- **No quick fixes** - Always build the proper long-term solution, not short-term hacks
+- **Infrastructure over patches** - If something will need to change again later, build the system to handle it
+- **Think multi-holiday** - This platform will support multiple holidays (Easter, Christmas, Midsummer, etc.) - design features to work across all of them
+
+---
 
 Default to using Bun instead of Node.js.
 
