@@ -384,6 +384,7 @@ export default defineSchema({
   // ============================================
 
   // Holidays - defines each holiday season (Christmas 2025, Easter 2026, etc.)
+  // This table is essential for multi-holiday support
   holidays: defineTable({
     // Identity
     slug: v.string(), // "christmas-2025", "easter-2026" - URL-safe unique identifier
